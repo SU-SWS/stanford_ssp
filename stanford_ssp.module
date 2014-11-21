@@ -1,0 +1,63 @@
+<?php
+/**
+ * @file
+ * Code for the Stanford SimpleSAML PHP module.
+ */
+
+/**
+ * Implements hook_block_info().
+ */
+
+function stanford_ssp_block_info() {
+  $blocks['stanford_ssp_login_block'] = array(
+    'info'       => t('SimpleSAML PHP Authentication'),
+    'status'     => 1,
+    'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+    'pages'      => "user\nuser/*",
+    'weight'     => 0,
+    'region'     => 'sidebar_first',
+    'cache'      => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_configure().
+ */
+
+function stanford_ssp_block_configure($delta = '') {
+  $form = array();
+  switch ($delta) {
+    case 'stanford_ssp_login_block':
+      $form['stanford_ssp_link_text'] = array(
+      '#type'          => 'textfield',
+      '#title'         => t('Text of the SimpleSAML PHP login link'),
+      '#require'       => TRUE,
+      '#size'          => 60,
+      '#description'   => t('Here you can replace the text of the SimpleSAML PHP link.'),
+      '#default_value' => variable_get('stanford_ssp_link_text', 'SUNetID Login'),
+    );
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+
+function stanford_ssp_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'stanford_ssp_login_block':
+	  // only show block for anonymous users
+	  if (user_is_logged_in()) { return $block; }
+      $block = array(
+        'subject' => t('SUNetID Login'),
+        'content' => l('SUNetID Login', 'user'),
+      );
+      break;
+  }
+  return $block;
+}
+
