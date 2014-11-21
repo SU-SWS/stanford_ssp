@@ -1,0 +1,20 @@
+<?php
+/**
+ * @file
+ * Schema definitions. Install/update/uninstall hooks.
+ */
+/**
+ * Implements hook_install().
+ */
+function stanford_ssp_install() {
+  variable_set('simplesamlphp_auth_installdir', '/opt/simplesamlphp');
+  variable_set('simplesamlphp_auth_registerusers', 1);
+  variable_set('simplesamlphp_auth_authsource', 'default-sp');
+  variable_set('simplesamlphp_auth_mailattr', 'mail');
+  variable_set('simplesamlphp_auth_user_name', 'displayName');
+  variable_set('simplesamlphp_auth_unique_id', 'eduPersonPrincipalName');
+  variable_set('simplesamlphp_auth_roleevaleverytime', 0);
+  variable_set('simplesamlphp_auth_rolepopulation', '3:groups,=,sites_admin');
+  variable_set('simplesamlphp_auth_activate', 1);
+}
+
