@@ -15,7 +15,7 @@ function stanford_ssp_block_info() {
     'visibility' => BLOCK_VISIBILITY_NOTLISTED,
     'pages'      => "user\nuser/*",
     'weight'     => 0,
-    'region'     => 'sidebar_first',
+    'region'     => '',
     'cache'      => DRUPAL_NO_CACHE,
   );
   return $blocks;
