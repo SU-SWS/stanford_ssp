@@ -10,7 +10,7 @@
 
 function stanford_ssp_block_info() {
   $blocks['stanford_ssp_login_block'] = array(
-    'info'       => t('SimpleSAML PHP Authentication'),
+    'info'       => t('Stanford SimpleSAML PHP Authentication'),
     'status'     => 1,
     'visibility' => BLOCK_VISIBILITY_NOTLISTED,
     'pages'      => "user\nuser/*",
@@ -50,12 +50,15 @@ function stanford_ssp_block_view($delta = '') {
   $block = array();
   switch ($delta) {
     case 'stanford_ssp_login_block':
-	  // only show block for anonymous users
-	  if (user_is_logged_in()) { return $block; }
+      $stanford_ssp_link_text = variable_get('stanford_ssp_link_text', 'SUNetID Login');
       $block = array(
         'subject' => t('SUNetID Login'),
-        'content' => l('SUNetID Login', 'user'),
+        'content' => l($stanford_ssp_link_text, 'saml_login'),
       );
+      // only show block for anonymous users
+      if (user_is_logged_in()) {
+        return $block;
+      }
       break;
   }
   return $block;
