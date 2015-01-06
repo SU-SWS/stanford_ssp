@@ -14,7 +14,8 @@ function stanford_ssp_install() {
   variable_set('simplesamlphp_auth_user_name', 'displayName');
   variable_set('simplesamlphp_auth_unique_id', 'eduPersonPrincipalName');
   variable_set('simplesamlphp_auth_roleevaleverytime', 0);
-  variable_set('simplesamlphp_auth_rolepopulation', '3:groups,=,sites_admin');
+  // do not map roles. Keeping the code only so that we hang onto the variable name if we want it later.
+  // variable_set('simplesamlphp_auth_rolepopulation', '3:groups,=,sites_admin');
   variable_set('simplesamlphp_auth_activate', 1);
 }
 
