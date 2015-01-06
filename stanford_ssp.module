@@ -64,3 +64,38 @@ function stanford_ssp_block_view($delta = '') {
   return $block;
 }
 
+/**
+ * Implements hook_menu().
+ */
+
+function stanford_ssp_menu() {
+  $items = array();
+
+  $items['stanford_ssp/403'] = array(
+    'page callback' => 'stanford_ssp_error_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+}
+
+/**
+ * Handle 403 errors by redirecting users to saml_login for login.
+ *
+ * If, however, they are already logged in and don't have access
+ * (for instance, a normal user requesting /admin), then display
+ * a normal error message.
+ */
+
+function stanford_ssp_error_page() {
+  global $user;
+  // If logged in.
+  if ($user->uid) {
+    return MENU_ACCESS_DENIED;
+  }
+  // If not logged in
+  else {
+    // Redirect to login
+    drupal_goto('saml_login');
+  }
+
+}
