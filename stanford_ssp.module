@@ -91,6 +91,8 @@ function stanford_ssp_menu() {
 function stanford_ssp_error_page() {
   global $user;
   // If logged in.
+  $user_print = print_r($user);
+  watchdog('stanford_ssp', $user_print);
   if ($user->uid) {
     return MENU_ACCESS_DENIED;
   }
