@@ -73,7 +73,7 @@ function stanford_ssp_menu() {
 
   $items['stanford_ssp/403'] = array(
     'page callback' => 'stanford_ssp_error_page',
-    'access callback' => TRUE,
+    'access callback' => 'stanford_ssp_access_check',
     'type' => MENU_CALLBACK,
   );
 
@@ -89,17 +89,20 @@ function stanford_ssp_menu() {
  */
 
 function stanford_ssp_error_page() {
-  global $user;
-  // If logged in.
-  $user_print = print_r($user);
-  watchdog('stanford_ssp', $user_print);
-  if ($user->uid) {
-    return MENU_ACCESS_DENIED;
-  }
-  // If not logged in
-  else {
-    // Redirect to login
-    drupal_goto('saml_login');
-  }
+  // Figure out where the user is trying to go before redirecting him.
+  $dest = drupal_get_destination();
+  // We have to unset $_GET['destination'] here, otherwise drupal_goto() will ignore the $path argument.
+  // See https://api.drupal.org/api/drupal/includes!common.inc/function/drupal_goto/7.
+  unset($_GET['destination']);
+  // Redirect the user to saml_login, then send him on his way.
+  drupal_goto('saml_login', array('query' => $dest));
+}
 
+function stanford_ssp_access_check() {
+  if (user_is_anonymous()) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
 }
