@@ -115,13 +115,23 @@ function stanford_ssp_access_check() {
  */
 function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
   $entitlement = check_plain($entitlement);
-  $role_object = user_role_load_by_name($role);
-  $rid = $role_object->rid;
   // look up rid
-  // look up current role mapping, if any
-  $role_mapping = variable_get('simplesamlphp_auth_rolepopulation');
-  // Add our mapping
-  $role_mapping .= $rid . ":eduPersonEntitlement,=," . $entitlement;
-  // Save our mapping
-  variable_set('simplesamlphp_auth_rolepopulation', $role_mapping);
+  $role_object = user_role_load_by_name($role);
+  if (!$role_object) {
+    drupal_set_message(t('No role exists with the name "@role"', array('@role' => $role)), 'error');
+  }
+  else {
+    $rid = $role_object->rid;
+    // look up current role mapping, if any
+    $role_mapping = variable_get('simplesamlphp_auth_rolepopulation');
+    if (!empty($role_mapping)) {
+      $role_mapping .= "|";
+    }
+    // Add our mapping
+    $role_mapping .= $rid . ":eduPersonEntitlement,=," . $entitlement;
+    // Save our mapping
+    variable_set('simplesamlphp_auth_rolepopulation', $role_mapping);
+    drupal_set_message(t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role)));
+    watchdog('stanford_ssp', t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role)));
+  }
 }
