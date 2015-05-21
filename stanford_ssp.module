@@ -106,3 +106,22 @@ function stanford_ssp_access_check() {
     return FALSE;
   }
 }
+
+/**
+ * @param string $entitlement A value in eduPersonEntitlement, e.g., anchorage_support
+ * @param string $role The name of the role
+ *
+ * Map an entitlement to a role.
+ */
+function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
+  $entitlement = check_plain($entitlement);
+  $role_object = user_role_load_by_name($role);
+  $rid = $role_object->rid;
+  // look up rid
+  // look up current role mapping, if any
+  $role_mapping = variable_get('simplesamlphp_auth_rolepopulation');
+  // Add our mapping
+  $role_mapping .= $rid . ":eduPersonEntitlement,=," . $entitlement;
+  // Save our mapping
+  variable_set('simplesamlphp_auth_rolepopulation', $role_mapping);
+}
