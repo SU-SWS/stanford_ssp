@@ -106,73 +106,7 @@ function stanford_ssp_error_page() {
  * Implements hook_form_FORM_ID_alter().
  */
 function stanford_ssp_form_simplesamlphp_auth_settings_alter(&$form, &$form_state, $form_id) {
-  $form['simplesamlphp_auth_grp_user']['#collapsible'] = TRUE;
-  $form['simplesamlphp_auth_grp_user']['#collapsed'] = TRUE;
-  $table = array();
-  $submitted = !empty($form_state['post']);
-
-  $result = db_query('SELECT rid, name FROM {role} WHERE rid > 2');
-  while ($role = $result->fetchObject()) {
-    $roles[$role->rid] = $role->name;
-  }
-
-  $form['new_rid'] = array(
-    '#name' => 'new_rid',
-    '#type' => 'select',
-    '#options' => $roles,
-  );
-
-  $form['new_group'] = array(
-    '#name' => 'new_group',
-    '#type' => 'textfield',
-    '#default_value' => '',
-  );
-
-  $form['new_submit'] = array(
-    '#name' => 'new_submit',
-    '#type' => 'submit',
-    '#value' => t('Add Mapping'),
-  );
-
-  if (!$submitted) {
-    $table[] = array(drupal_render($form['new_rid']), drupal_render($form['new_group']), drupal_render($form['new_submit']));
-  }
-  else {
-    // Keep the UI consistent.
-    $form['new_rid']['#prefix'] = '<table><tr class="odd"><td>';
-    $form['new_rid']['#suffix'] = '</td><td>';
-    $form['new_group']['#suffix'] = '</td><td>';
-    $form['new_submit']['#suffix'] = '</td><td>';
-    $form['cancel'] = array(
-      '#type' => 'markup',
-      '#value' => l(t('Cancel'), 'admin/config/webauth/mappings'),
-      '#suffix' => '</td></tr></table>',
-    );
-  }
-
-  $result = db_query("SELECT wr.warid, r.name, wr.wa_group as `group` FROM {webauth_roles} wr INNER JOIN {role} r ON wr.rid = r.rid WHERE r.rid > 2");
-  while ($group = $result->fetchObject()) {
-    $button_id = 'remove_warid_' . $group->warid;
-    $form[$button_id] = array(
-      '#name' => $button_id,
-      '#type' => 'submit',
-      '#value' => t('Remove Mapping'),
-    );
-    $row = array($group->name, $group->group, drupal_render($form[$button_id]));
-    $table[] = $row;
-  }
-  $header = array(
-    t('Drupal Role'),
-    t('Workgroup (e.g. stanford:staff)'),
-    t('Action')
-  );
-  $form['output'] = array(
-    '#markup' => theme('table', array(
-      'header' => $header,
-      'rows' => $table,
-    )),
-  );
-
-  dpm($form);
+//  $form['simplesamlphp_auth_grp_user']['#collapsible'] = TRUE;
+//  $form['simplesamlphp_auth_grp_user']['#collapsed'] = TRUE;
 
 }
