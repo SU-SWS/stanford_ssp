@@ -1,0 +1,6 @@
+Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
+-------------------------------------------
+
+Stanford SimpleSAML PHP 7.x-1.0-alpha1, 2015-05-26
+--------------------------------------------------
+Initial alpha release
