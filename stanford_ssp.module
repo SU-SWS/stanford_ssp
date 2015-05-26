@@ -76,6 +76,19 @@ function stanford_ssp_menu() {
     'access callback' => 'stanford_ssp_access_check',
     'type' => MENU_CALLBACK,
   );
+  $items['admin/config/people/simplesamlphp_auth/config'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'SimpleSAML PHP Configuration',
+    'weight' => -1,
+  );
+  $items['admin/config/people/simplesamlphp_auth/mappings'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('stanford_ssp_mapping_form'),
+    'access arguments' =>  array('administer users'),
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Role Mappings',
+    'weight' => 0,
+  );
 
   return $items;
 }
@@ -98,6 +111,9 @@ function stanford_ssp_error_page() {
   drupal_goto('saml_login', array('query' => $dest));
 }
 
+/**
+ * @return bool TRUE if the user is anonymous, FALSE if they are not.
+ */
 function stanford_ssp_access_check() {
   if (user_is_anonymous()) {
     return TRUE;
@@ -107,6 +123,53 @@ function stanford_ssp_access_check() {
   }
 }
 
+/**
+ *
+ * Implements hook_form().
+ *
+ * Configuration form for the SimpleSAML PHP role mapping.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function stanford_ssp_mapping_form($form, &$form_state) {
+  $roles = user_roles(TRUE);
+  $roles = array_combine($roles, $roles);
+  $form['mappings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Role Mappings'),
+    '#description' => t('Map a SimpleSAML PHP entitlement to a Drupal role.'),
+  );
+  $form['mappings']['entitlement'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Entitlement'),
+    '#required' => TRUE,
+  );
+  $form['mappings']['role'] = array(
+    '#type' => 'select',
+    '#title' => t('Drupal Role'),
+    '#required' => TRUE,
+    '#options' => $roles,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add Role Mapping'),
+  );
+  return $form;
+}
+
+/**
+ *
+ * Implements hook_form_submit().
+ *
+ * @param $form
+ * @param $form_state
+ */
+function stanford_ssp_mapping_form_submit($form, &$form_state) {
+  $entitlement = $form_state['values']['entitlement'];
+  $role = $form_state['values']['role'];
+  stanford_ssp_map_entitlement_to_role($entitlement, $role);
+}
 /**
  * @param string $entitlement A value in eduPersonEntitlement, e.g., anchorage_support
  * @param string $role The name of the role
@@ -131,7 +194,8 @@ function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
     $role_mapping .= $rid . ":eduPersonEntitlement,=," . $entitlement;
     // Save our mapping
     variable_set('simplesamlphp_auth_rolepopulation', $role_mapping);
-    drupal_set_message(t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role)));
-    watchdog('stanford_ssp', t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role)));
+    $message = t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role));
+    drupal_set_message($message);
+    watchdog('stanford_ssp', $message);
   }
 }
