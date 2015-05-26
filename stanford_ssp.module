@@ -73,7 +73,7 @@ function stanford_ssp_menu() {
 
   $items['stanford_ssp/403'] = array(
     'page callback' => 'stanford_ssp_error_page',
-    'access callback' => TRUE,
+    'access callback' => 'stanford_ssp_access_check',
     'type' => MENU_CALLBACK,
   );
 
@@ -89,17 +89,51 @@ function stanford_ssp_menu() {
  */
 
 function stanford_ssp_error_page() {
-  global $user;
-  // If logged in.
-  if ($user->uid) {
-    return MENU_ACCESS_DENIED;
-  }
-  // If not logged in
-  else {
-    // Redirect to login
-    drupal_goto('saml_login');
-  }
+  // Figure out where the user is trying to go before redirecting him.
+  $dest = drupal_get_destination();
+  // We have to unset $_GET['destination'] here, otherwise drupal_goto() will ignore the $path argument.
+  // See https://api.drupal.org/api/drupal/includes!common.inc/function/drupal_goto/7.
+  unset($_GET['destination']);
+  // Redirect the user to saml_login, then send him on his way.
+  drupal_goto('saml_login', array('query' => $dest));
+}
 
+function stanford_ssp_access_check() {
+  if (user_is_anonymous()) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * @param string $entitlement A value in eduPersonEntitlement, e.g., anchorage_support
+ * @param string $role The name of the role
+ *
+ * Map an entitlement to a role.
+ */
+function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
+  $entitlement = check_plain($entitlement);
+  // look up rid
+  $role_object = user_role_load_by_name($role);
+  if (!$role_object) {
+    drupal_set_message(t('No role exists with the name "@role"', array('@role' => $role)), 'error');
+  }
+  else {
+    $rid = $role_object->rid;
+    // look up current role mapping, if any
+    $role_mapping = variable_get('simplesamlphp_auth_rolepopulation');
+    if (!empty($role_mapping)) {
+      $role_mapping .= "|";
+    }
+    // Add our mapping
+    $role_mapping .= $rid . ":eduPersonEntitlement,=," . $entitlement;
+    // Save our mapping
+    variable_set('simplesamlphp_auth_rolepopulation', $role_mapping);
+    drupal_set_message(t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role)));
+    watchdog('stanford_ssp', t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role)));
+  }
 }
 
 /**
