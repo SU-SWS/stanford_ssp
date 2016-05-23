@@ -243,10 +243,10 @@ function stanford_ssp_webform_login($variables) {
       $login = url('saml_login', array('query' => drupal_get_destination()));
       $register = url('user/register', array('query' => drupal_get_destination()));
       if (variable_get('user_register', 1) == 0) {
-        $message = t('You must <a href="!login">login</a> to view this form.', array('!login' => $login));
+        $message = t('You must <a href="!login">log in with your SUNetID</a> to view this form.', array('!login' => $login));
       }
       else {
-        $message = t('You must <a href="!login">login</a> or <a href="!register">register</a> to view this form.', array('!login' => $login, '!register' => $register));
+        $message = t('You must <a href="!login">log in with your SUNetID</a> or <a href="!register">register</a> to view this form.', array('!login' => $login, '!register' => $register));
       }
     }
     else {
