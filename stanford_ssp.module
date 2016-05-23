@@ -290,3 +290,4 @@ function stanford_ssp_webform_login($variables) {
     drupal_set_message($message, $type, FALSE);
   }
 }
+
