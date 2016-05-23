@@ -199,3 +199,95 @@ function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
     watchdog('stanford_ssp', $message);
   }
 }
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function stanford_ssp_theme_registry_alter(&$theme_registry) {
+  $theme_registry['webform_view_messages']['function'] = 'stanford_ssp_webform_login';
+}
+
+/**
+ * Overrides theme_webform_view_messages().
+ * Send user to saml_login instead of user/login if he doesn't have access to the form.
+ */
+function stanford_ssp_webform_login($variables) {
+  global $user;
+
+  $node = $variables['node'];
+  $page = $variables['page'];
+  $submission_count = $variables['submission_count'];
+  $user_limit_exceeded = $variables['user_limit_exceeded'];
+  $total_limit_exceeded = $variables['total_limit_exceeded'];
+  $allowed_roles = $variables['allowed_roles'];
+  $closed = $variables['closed'];
+  $cached = $variables['cached'];
+
+  $type = 'warning';
+
+  if ($closed) {
+    $message = t('Submissions for this form are closed.');
+  }
+  elseif ($node->webform['confidential'] && user_is_logged_in()) {
+    $message = t('This form is confidential. You much <a href="!url">Log out</a> to submit it.',
+      array('!url' => url('/user/logout', array('query' => array('destination' => request_uri())))));
+  }
+  // If open and not allowed to submit the form, give an explanation.
+  elseif (array_search(TRUE, $allowed_roles) === FALSE && $user->uid != 1) {
+    if (empty($allowed_roles)) {
+      // No roles are allowed to submit the form.
+      $message = t('Submissions for this form are closed.');
+    }
+    elseif ($user->uid == 0) {
+      // The user is anonymous, so (at least) needs to log in to view the form.
+      $login = url('saml_login', array('query' => drupal_get_destination()));
+      $register = url('user/register', array('query' => drupal_get_destination()));
+      if (variable_get('user_register', 1) == 0) {
+        $message = t('You must <a href="!login">log in with your SUNetID</a> to view this form.', array('!login' => $login));
+      }
+      else {
+        $message = t('You must <a href="!login">log in with your SUNetID</a> or <a href="!register">register</a> to view this form.', array('!login' => $login, '!register' => $register));
+      }
+    }
+    else {
+      // The user must be some other role to submit.
+      $message = t('You do not have permission to view this form.');
+      $type = 'error';
+    }
+  }
+
+  // If the user has exceeded the limit of submissions, explain the limit.
+  elseif ($user_limit_exceeded && !$cached) {
+    if ($node->webform['submit_interval'] == -1 && $node->webform['submit_limit'] > 1) {
+      $message = t('You have submitted this form the maximum number of times (@count).', array('@count' => $node->webform['submit_limit']));
+    }
+    elseif ($node->webform['submit_interval'] == -1 && $node->webform['submit_limit'] == 1) {
+      $message = t('You have already submitted this form.');
+    }
+    else {
+      $message = t('You may not submit another entry at this time.');
+    }
+  }
+  elseif ($total_limit_exceeded && !$cached) {
+    if ($node->webform['total_submit_interval'] == -1 && $node->webform['total_submit_limit'] > 1) {
+      $message = t('This form has received the maximum number of entries.');
+    }
+    else {
+      $message = t('You may not submit another entry at this time.');
+    }
+  }
+
+  // If the user has submitted before, give them a link to their submissions.
+  if ($submission_count > 0 && $node->webform['submit_notice'] == 1 && !$cached) {
+    if (empty($message)) {
+      $message = t('You have already submitted this form.');
+      $type = 'status';
+    }
+    $message .= ' ' . t('<a href="!url">View your previous submissions</a>.', array('!url' => url('node/' . $node->nid . '/submissions')));
+  }
+
+  if ($page && isset($message)) {
+    drupal_set_message($message, $type, FALSE);
+  }
+}
+
