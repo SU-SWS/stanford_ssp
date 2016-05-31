@@ -1,0 +1,39 @@
+<?php
+/**
+ * @file
+ * Code for the Stanford Jumpstart Login feature.
+ */
+
+include_once 'stanford_saml_block.features.inc';
+
+/**
+ * Implements hook_form_FORMID_alter().
+ *
+ * @param  [type] &$form       [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function stanford_saml_block_form_user_login_alter(&$form, &$form_state) {
+
+  $form['saml_auth'] = array(
+    '#type' => 'fieldset',
+    '#title' => "SUNet Login",
+    '#weight' => -10,
+  );
+
+  $form['saml_auth']['saml_link'] = array(
+    '#prefix' => "<p>",
+    '#markup' => l(t("Log in with your SUNet ID »"), "saml_login"),
+    '#suffix' => "</p>",
+  );
+
+  $form['drupal_auth'] = array(
+    '#type' => 'fieldset',
+    '#title' => "Drupal Login",
+    '#weight' => 0,
+  );
+
+  // Remove the Federated login link.
+  unset($form["links"]);
+
+}
