@@ -5,3 +5,4 @@ version = 7.x-1.0-dev
 package = Stanford
 project status url = https://github.com/SU-SWS/stanford_ssp
 dependencies[] = simplesamlphp_auth (>= 7.x-3.x)
+configure = admin/config/stanford/stanford_ssp
