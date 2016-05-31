@@ -12,9 +12,11 @@ function stanford_ssp_menu() {
   $items = array();
 
   $items['admin/config/stanford/stanford_ssp'] = array(
-    'page callback' => 'stanford_ssp_configuration',
+    'title' => "Stanford SSO (SAML)",
+    'description' => "Stanford Single Sign On (SAML) configuration settings.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("stanford_ssp_configuration_form"),
     'access arguments' => array('administer stanford_ssp'),
-    'type' => MENU_CALLBACK,
   );
 
   // $items['stanford_ssp/403'] = array(
@@ -52,6 +54,158 @@ function stanford_ssp_permission() {
 }
 
 /**
+ * The main landing page for the configuration form.
+ * @param  [type] $form        [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function stanford_ssp_configuration_form($form = array(), &$form_state) {
+
+  $form['togglers'] = array(
+    '#title' => t('General Configuration'),
+    '#type' => 'fieldset',
+    '#collapsed' => FALSE,
+    '#collapsible' => FALSE,
+    '#description' => t('General settings for the use of this module.'),
+  );
+
+  // Enables / Disables user authentication by simplesamlphp.
+  $form['togglers']['simplesamlphp_auth_activate'] = array(
+    '#type' => 'switch',
+    '#title' => t('Enable authentication by SSO'),
+    '#description' => t("Enabling before configuring the module could lock you out of your website."),
+    '#default_value' => variable_get('simplesamlphp_auth_activate', FALSE),
+  );
+
+  // Enables / Disables user authentication by simplesamlphp.
+  $form['togglers']['stanford_ssp_local_activate'] = array(
+    '#type' => 'switch',
+    '#title' => t('Enable authentication by local Drupal accounts'),
+    '#description' => t("Enable to allow users to log in with local Drupal accounts."),
+    '#default_value' => variable_get('stanford_ssp_local_activate', TRUE),
+  );
+
+  $form['togglers']['simplesamlphp_auth_registerusers'] = array(
+    '#type' => 'switch',
+    '#title' => t('Register users (i.e., auto-provisioning)'),
+    '#default_value' => variable_get('simplesamlphp_auth_registerusers', TRUE),
+    '#description' => t("Determines wether or not the module should automatically create/register new Drupal accounts for users that authenticate using SimpleSAMLphp. Unless you've done some custom work to provision Drupal accounts with the necessary authmap entries you will want this checked. NOTE: If unchecked each user must already have been provisioned a Drupal account with an appropriate entry in the authmap table before logging in. Otherwise they will receive a notice and be denied access. Be aware that simply creating a Drupal account will not create the necessary entry in the authmap table."),
+  );
+
+  // Enables automatic login when hitting a 403.
+  $form['togglers']['stanford_ssp_automagic_login'] = array(
+    '#type' => 'switch',
+    '#title' => t('Enable automatic login'),
+    '#description' => t("Try to authenticate the user if they are presented with a 403 access denied response."),
+    '#default_value' => variable_get('stanford_ssp_automagic_login', TRUE),
+  );
+
+  $form['togglers']['stanford_ssp_force_https'] = array(
+    '#type' => 'switch',
+    '#title' => t('Force users to log in with HTTPS.'),
+    '#default_value' => variable_get('stanford_ssp_force_https', FALSE),
+    '#description' => t("Should be enabled on production websites."),
+  );
+
+  $form['togglers']['stanford_ssp_prevent_cache'] = array(
+    '#type' => 'switch',
+    '#title' => t('Prevent the browser from caching pages for authenticated users.'),
+    '#default_value' => variable_get('stanford_ssp_prevent_cache', FALSE),
+    '#description' => t("Pages for logged in users can be dynamic and if the browser caches them, there could be stale information displayed."),
+  );
+
+  return system_settings_form($form);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
  * Handle 403 errors by redirecting users to saml_login for login.
  *
  * If, however, they are already logged in and don't have access
@@ -67,18 +221,6 @@ function stanford_ssp_permission() {
 //   // Redirect the user to saml_login, then send him on his way.
 //   drupal_goto('saml_login', array('query' => $dest));
 // }
-
-/**
- * @return bool TRUE if the user is anonymous, FALSE if they are not.
- */
-function stanford_ssp_access_check() {
-  if (user_is_anonymous()) {
-    return TRUE;
-  }
-  else {
-    return FALSE;
-  }
-}
 
 /**
  *
