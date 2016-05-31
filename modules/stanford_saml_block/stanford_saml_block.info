@@ -2,12 +2,13 @@ name = Stanford SAML Login Block
 description = Places the SUNetID Login block
 core = 7.x
 package = Anchorage
-version = 7.x-1.x
+version = 7.x-1.0-dev
 dependencies[] = block
 dependencies[] = context
 dependencies[] = ctools
 dependencies[] = features
 dependencies[] = stanford_ssp
+dependencies[] = simplesamlphp_auth (>= 7.x-3.x)
 features[context][] = stanford_simplesamlphp_login
 features[ctools][] = context:context:3
 features[features_api][] = api:2

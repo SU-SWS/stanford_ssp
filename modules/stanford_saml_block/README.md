@@ -1,10 +1,10 @@
-#[Stanford SAML Block](https://github.com/SU-SWS/anchorage_helper)
+#[Stanford SAML Block](https://github.com/SU-SWS/stanford_ssp)
 ##### Version: 7.x-1.x
 
 Maintainers: [jbickar](https://github.com/jbickar), [sherakama](https://github.com/sherakama)
 [Changelog.txt](CHANGELOG.txt)
 
-This module places the saml login block where it should be using context.
+This module places the saml login block where it should be using context. Also, alters the user login form at /user.
 
 Installation
 ---

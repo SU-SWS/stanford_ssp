@@ -34,6 +34,8 @@ function stanford_saml_block_form_user_login_alter(&$form, &$form_state) {
   );
 
   // Remove the Federated login link.
-  unset($form["links"]);
+  if (isset($form["links"])) {
+    unset($form["links"]);
+  }
 
 }
