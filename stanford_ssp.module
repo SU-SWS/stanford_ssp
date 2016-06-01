@@ -19,20 +19,31 @@ function stanford_ssp_menu() {
     'access arguments' => array('administer stanford_ssp'),
   );
 
+  $items['admin/config/stanford/stanford_ssp/settings'] = array(
+    'title' => "Stanford SSO (SAML)",
+    'description' => "Stanford Single Sign On (SAML) configuration settings.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("stanford_ssp_configuration_form"),
+    'access arguments' => array('administer stanford_ssp'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
   $items['admin/config/stanford/stanford_ssp/authorizations'] = array(
-    'title' => "Stanford SSO Authorizations",
+    'title' => "Authorizations",
     'description' => "Configure authorization dynamics.",
     'page callback' => 'drupal_get_form',
     'page arguments' => array("stanford_ssp_authorizations_form"),
     'access arguments' => array('administer stanford_ssp'),
+    'type' => MENU_LOCAL_TASK,
   );
 
   $items['admin/config/stanford/stanford_ssp/role-mappings'] = array(
-    'title' => "Stanford SSO Role Mappings",
+    'title' => "Role Mappings",
     'description' => "Configure role assignments for authenticated users.",
     'page callback' => 'drupal_get_form',
     'page arguments' => array("stanford_ssp_role_mappings_form"),
     'access arguments' => array('administer stanford_ssp'),
+    'type' => MENU_LOCAL_TASK,
   );
 
   // $items['admin/config/people/simplesamlphp_auth/config'] = array(
@@ -349,10 +360,11 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     '#type' => 'radios',
     '#title' => 'Action to perform on successful authentication with SUNet ID',
     '#options' => $options,
+    '#default_value' => variable_get("stanford_ssp_auth_role_map", 'none'),
   );
 
 
-  return $form;
+  return system_settings_form($form);
 }
 
 
