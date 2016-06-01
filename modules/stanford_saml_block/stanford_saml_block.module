@@ -10,8 +10,8 @@ include_once 'stanford_saml_block.features.inc';
  * Implements hook_block_info().
  */
 
-function stanford_saml_block_info() {
-  $blocks['stanford_ssp_login_block'] = array(
+function stanford_saml_block_block_info() {
+  $blocks['stanford_saml_block_login_block'] = array(
     'info'       => t('Stanford SimpleSAML PHP Authentication'),
     'status'     => 1,
     'visibility' => BLOCK_VISIBILITY_NOTLISTED,
@@ -28,10 +28,10 @@ function stanford_saml_block_info() {
  * Implements hook_block_configure().
  */
 
-function stanford_saml_block_configure($delta = '') {
+function stanford_saml_block_block_configure($delta = '') {
   $form = array();
   switch ($delta) {
-    case 'stanford_ssp_login_block':
+    case 'stanford_saml_block_login_block':
       $form['stanford_ssp_link_text'] = array(
       '#type'          => 'textfield',
       '#title'         => t('Text of the SimpleSAML PHP login link'),
@@ -48,11 +48,11 @@ function stanford_saml_block_configure($delta = '') {
  * Implements hook_block_view().
  */
 
-function stanford_saml_block_view($delta = '') {
+function stanford_saml_block_block_view($delta = '') {
   $block = array();
   switch ($delta) {
-    case 'stanford_ssp_login_block':
-      // only show block for anonymous users
+    case 'stanford_saml_block_login_block':
+      // Only show block for anonymous users.
       if (user_is_logged_in()) {
         return $block;
       }

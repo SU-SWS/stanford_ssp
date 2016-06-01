@@ -26,9 +26,9 @@ function stanford_saml_block_context_default_contexts() {
   $context->reactions = array(
     'block' => array(
       'blocks' => array(
-        'stanford_ssp-stanford_ssp_login_block' => array(
-          'module' => 'stanford_ssp',
-          'delta' => 'stanford_ssp_login_block',
+        'stanford_saml_block-stanford_saml_block_login_block' => array(
+          'module' => 'stanford_saml_block',
+          'delta' => 'stanford_saml_block_login_block',
           'region' => 'global_header',
           'weight' => '-10',
         ),
@@ -39,8 +39,8 @@ function stanford_saml_block_context_default_contexts() {
 
   // Translatables
   // Included for use with string extractors like potx.
-  t('Sitewide');
   t('Simplesamlphp Login Block');
+  t('Sitewide');
   $export['stanford_simplesamlphp_login'] = $context;
 
   return $export;

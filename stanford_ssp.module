@@ -12,7 +12,7 @@ function stanford_ssp_menu() {
   $items = array();
 
   $items['admin/config/stanford/stanford_ssp'] = array(
-    'title' => "General Configuration",
+    'title' => "Stanford SSO (SAML)",
     'description' => "Stanford Single Sign On (SAML) configuration settings.",
     'page callback' => 'drupal_get_form',
     'page arguments' => array("stanford_ssp_configuration_form"),
@@ -25,7 +25,14 @@ function stanford_ssp_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array("stanford_ssp_authorizations_form"),
     'access arguments' => array('administer stanford_ssp'),
-    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/config/stanford/stanford_ssp/role-mappings'] = array(
+    'title' => "Stanford SSO Role Mappings",
+    'description' => "Configure role assignments for authenticated users.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("stanford_ssp_role_mappings_form"),
+    'access arguments' => array('administer stanford_ssp'),
   );
 
   // $items['admin/config/people/simplesamlphp_auth/config'] = array(
@@ -271,7 +278,7 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
 
   $form['saml-config']['stanford_ssp_auth_restrictions'] = array(
     '#type' => 'radios',
-    '#title' => t('SAML Authorization restrictions.'),
+    '#title' => t('SAML Authorization Restrictions.'),
     '#default_value' => variable_get('stanford_ssp_auth_restrictions', 'any'),
     '#options' => $options,
   );
@@ -309,7 +316,7 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
     '#size' => 7,
     '#options' => $roles,
     '#multiple' => TRUE,
-    '#title' => t('Which ROLES should be allowed to login with local accounts?'),
+    '#title' => t('Which roles should be allowed to login with local accounts?'),
     '#default_value' => variable_get('simplesamlphp_auth_allowdefaultloginroles', array()),
     '#description' => t('Roles that should be allowed to login without simpleSAMLphp. Examples are dev/admin roles or guest roles.'),
   );
@@ -324,8 +331,29 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
   return system_settings_form($form);
 }
 
+/**
+ * Role mapping form for mapping a role to an authenticated user.
+ * @param  [type] $form        [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function stanford_ssp_role_mappings_form($form, &$form_state) {
+
+  $options = array(
+    'none' => t("Do not adjust roles. Allow local administration of roles only."),
+    'merge' => t("Merge role mapping assignments with current account roles."),
+    'reassign' => t("Re-evaluate roles on every log in."),
+  );
+
+  $form['stanford_ssp_auth_role_map'] = array(
+    '#type' => 'radios',
+    '#title' => 'Action to perform on successful authentication with SUNet ID',
+    '#options' => $options,
+  );
 
 
+  return $form;
+}
 
 
 
