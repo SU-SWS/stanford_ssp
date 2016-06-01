@@ -65,38 +65,3 @@ function stanford_saml_block_block_view($delta = '') {
   }
   return $block;
 }
-
-
-/**
- * Implements hook_form_FORMID_alter().
- *
- * @param  [type] &$form       [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
- */
-function stanford_saml_block_form_user_login_alter(&$form, &$form_state) {
-
-  $form['saml_auth'] = array(
-    '#type' => 'fieldset',
-    '#title' => "SUNet Login",
-    '#weight' => -10,
-  );
-
-  $form['saml_auth']['saml_link'] = array(
-    '#prefix' => "<p>",
-    '#markup' => l(t("Log in with your SUNet ID »"), "saml_login"),
-    '#suffix' => "</p>",
-  );
-
-  $form['drupal_auth'] = array(
-    '#type' => 'fieldset',
-    '#title' => "Drupal Login",
-    '#weight' => 0,
-  );
-
-  // Remove the Federated login link.
-  if (isset($form["links"])) {
-    unset($form["links"]);
-  }
-
-}

@@ -46,6 +46,24 @@ function stanford_ssp_menu() {
     'type' => MENU_LOCAL_TASK,
   );
 
+  $items['admin/config/stanford/stanford_ssp/login-block-forms'] = array(
+    'title' => "Login Block & Forms",
+    'description' => "Configure role assignments for authenticated users.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("stanford_ssp_login_block_forms_form"),
+    'access arguments' => array('administer stanford_ssp'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/config/stanford/stanford_ssp/add-sso-user'] = array(
+    'title' => "Add SSO User",
+    'description' => "Create a new user through the SSO.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("stanford_ssp_add_sso_user"),
+    'access arguments' => array('administer stanford_ssp'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
   // $items['admin/config/people/simplesamlphp_auth/config'] = array(
   //   'type' => MENU_DEFAULT_LOCAL_TASK,
   //   'title' => 'SimpleSAML PHP Configuration',
@@ -166,7 +184,7 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
   // ------------------------------------------------------------------
 
   // Auto create an account for users on auth.
-  $form['user-config'] ['simplesamlphp_auth_registerusers'] = array(
+  $form['user-config']['simplesamlphp_auth_registerusers'] = array(
     '#type' => 'switch',
     '#title' => t('Register users (i.e., auto-provisioning)'),
     '#default_value' => variable_get('simplesamlphp_auth_registerusers', TRUE),
@@ -181,7 +199,7 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
   );
 
   // Prevent the default cache for auth users.
-  $form['user-config'] ['stanford_ssp_prevent_cache'] = array(
+  $form['user-config']['stanford_ssp_prevent_cache'] = array(
     '#type' => 'switch',
     '#title' => t('Prevent the browser from caching pages for authenticated users.'),
     '#default_value' => variable_get('stanford_ssp_prevent_cache', FALSE),
@@ -363,8 +381,164 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     '#default_value' => variable_get("stanford_ssp_auth_role_map", 'none'),
   );
 
+  // ROLE MAPPING FORM.
+
+  $table = array();
+  $submitted = !empty($form_state['post']);
+  $roles = user_roles(TRUE);
+
+  $form['new_rid'] = array(
+    '#name' => 'new_rid',
+    '#type' => 'select',
+    '#options' => $roles,
+  );
+
+  $form['new_group'] = array(
+    '#name' => 'new_group',
+    '#type' => 'textfield',
+    '#default_value' => '',
+  );
+
+  $form['new_submit'] = array(
+    '#name' => 'new_submit',
+    '#type' => 'submit',
+    '#value' => t('Add Mapping'),
+  );
+
+  if (!$submitted) {
+    $table[] = array(drupal_render($form['new_rid']), drupal_render($form['new_group']), drupal_render($form['new_submit']));
+  }
+  else {
+    // Keep the UI consistent.
+    $form['new_rid']['#prefix'] = '<table><tr class="odd"><td>';
+    $form['new_rid']['#suffix'] = '</td><td>';
+    $form['new_group']['#suffix'] = '</td><td>';
+    $form['new_submit']['#suffix'] = '</td><td>';
+    $form['cancel'] = array(
+      '#type' => 'markup',
+      '#value' => l(t('Cancel'), 'admin/config/webauth/mappings'),
+      '#suffix' => '</td></tr></table>',
+    );
+  }
+  $header = array(
+    t('Drupal Role'),
+    t('Workgroup (e.g. stanford:staff)'),
+    t('Action')
+  );
+  $form['add_roles'] = array(
+    '#markup' => theme('table', array(
+      'header' => $header,
+      'rows' => $table,
+    )),
+  );
+
+  //$result = db_query("SELECT wr.warid, r.name, wr.wa_group as `group` FROM {webauth_roles} wr INNER JOIN {role} r ON wr.rid = r.rid WHERE r.rid > 2");
+  // while ($group = $result->fetchObject()) {
+  //   $button_id = 'remove_warid_' . $group->warid;
+  //   $form[$button_id] = array(
+  //     '#name' => $button_id,
+  //     '#type' => 'submit',
+  //     '#value' => t('Remove Mapping'),
+  //   );
+  //   $row = array($group->name, $group->group, drupal_render($form[$button_id]));
+  //   $table[] = $row;
+  // }
+
+
+  // END ROLE MAPPING FORM.
 
   return system_settings_form($form);
+}
+
+
+/**
+ * The login block and forms form form.
+ * @param  [type] $form        [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function stanford_ssp_login_block_forms_form($form, &$form_state) {
+
+  $form['stanford_ssp_show_local_login'] = array(
+    '#type' => 'switch',
+    '#title' => t('Enable local login form on user page'),
+    '#default_value' => variable_get('stanford_ssp_show_local_login', TRUE),
+    '#description' => t("Turn on to show the local Drupal account login option on the user page."),
+  );
+
+  $form['stanford_ssp_show_sso_login'] = array(
+    '#type' => 'switch',
+    '#title' => t('Enable SSO login link on user page'),
+    '#default_value' => variable_get('stanford_ssp_show_sso_login', TRUE),
+    '#description' => t("Turn on to show the SSO (SAML) login link on the user page."),
+  );
+
+  $form['stanford_ssp_sso_link_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SSO (SAML) login link text?'),
+    '#default_value' => variable_get('stanford_ssp_sso_link_text', t("Log in with your SUNet ID »")),
+    '#description' => t('Override the link text for the SSO login on the user page.'),
+  );
+
+
+  return system_settings_form($form);
+}
+
+
+/**
+ * Add a new SSO user account.
+ * @param  [type] $form        [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function stanford_ssp_add_sso_user($form, &$form_state) {
+
+  $form['sunetid'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SUNetID'),
+    '#description' => t('Enter the SUNetID of the user you wish to add.'),
+    '#required' => TRUE,
+  );
+
+  $form['name']  = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#description' => t('If you wish to specify the user\'s preferred name (instead of sunetid@stanford.edu), enter it here.'),
+  );
+
+  $form['email']  = array(
+    '#type' => 'textfield',
+    '#title' => t('Email Address'),
+    '#description' => t('If you wish to specify an alternate email address (instead of sunetid@stanford.edu), enter it here.'),
+  );
+
+  $roles = user_roles(TRUE);
+  $form["roles"] = array(
+    '#title' => "Roles",
+    '#description' => t("Add roles to the new user account."),
+    '#type' => 'select',
+    '#options' => $roles,
+    '#default_value' => array(1),
+    '#multiple' => TRUE,
+    '#size' => 7,
+  );
+
+  $form['pass'] = array(
+    '#type' => 'password_confirm',
+    '#size' => 25,
+  );
+
+  $form['notify'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Notify user of new account'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add SSO User'),
+  );
+
+  return $form;
 }
 
 
@@ -406,13 +580,41 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
 
 
 
+/**
+ * Implements hook_form_FORMID_alter().
+ *
+ * @param  [type] &$form       [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
 
+  $form['saml_auth'] = array(
+    '#type' => 'fieldset',
+    '#title' => "SUNet Login",
+    '#weight' => -10,
+  );
 
+  $link_text = variable_get("stanford_ssp_sso_link_text", t("Log in with your SUNet ID »"));
 
+  $form['saml_auth']['saml_link'] = array(
+    '#prefix' => "<p>",
+    '#markup' => l($link_text, "saml_login"),
+    '#suffix' => "</p>",
+  );
 
+  $form['drupal_auth'] = array(
+    '#type' => 'fieldset',
+    '#title' => "Drupal Login",
+    '#weight' => 0,
+  );
 
+  // Remove the Federated login link.
+  if (isset($form["links"])) {
+    unset($form["links"]);
+  }
 
-
+}
 
 
 
