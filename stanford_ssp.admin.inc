@@ -149,7 +149,7 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
   $form['saml-config']['simplesamlphp_auth_user_name'] = array(
     '#type' => 'textfield',
     '#title' => t("Which attribute from simpleSAMLphp should be used as user's name"),
-    '#default_value' => variable_get('simplesamlphp_auth_user_name', 'eduPersonPrincipalName'),
+    '#default_value' => variable_get('simplesamlphp_auth_user_name', 'displayName'),
     '#description' => t('Example: <i>eduPersonPrincipalName</i> or <i>displayName</i><br />If the attribute is multivalued, the first value will be used.'),
     '#required' => TRUE,
   );

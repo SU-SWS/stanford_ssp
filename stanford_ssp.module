@@ -122,14 +122,22 @@ function stanford_ssp_init() {
   // Check to force https for authenticated users.
   stanford_ssp_force_https();
 
-  // Check for redirect cookie.
-  if (isset($_COOKIE['stanford_ssp_redirect_on_login'])) {
-    $path = $_COOKIE['stanford_ssp_redirect_on_login'];
-    unset($_COOKIE['stanford_ssp_redirect_on_login']);
-    setcookie("stanford_ssp_redirect_on_login", "", -1, "/", $_SERVER['HTTP_HOST']);
-    drupal_goto(check_plain($path));
+  // Check for cache setting:
+  if (variable_get("stanford_ssp_prevent_cache", FALSE)) {
+    header("Cache-Control: no-store, no-cache, must-revalidate");
   }
 
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function stanford_ssp_user_login() {
+   // Redirect the user if setting available.
+   $stanford_ssp_redirect_on_login = variable_get("stanford_ssp_redirect_on_login", FALSE);
+   if (!empty($stanford_ssp_redirect_on_login)) {
+    drupal_goto($stanford_ssp_redirect_on_login);
+   }
 }
 
 /**
@@ -141,12 +149,6 @@ function stanford_ssp_sso_auth() {
 
   // Check to force https for authenticated users.
   stanford_ssp_force_https();
-
-  // Before going away lets set up a redirect cookie.
-  $stanford_ssp_redirect_on_login = variable_get("stanford_ssp_redirect_on_login", FALSE);
-  if (!empty($stanford_ssp_redirect_on_login)) {
-    setcookie("stanford_ssp_redirect_on_login", $stanford_ssp_redirect_on_login, time() + (60 * 3), "/", $_SERVER['HTTP_HOST']);
-  }
 
   // A way in to simplesaml.
   module_load_include("inc", "simplesamlphp_auth", "simplesamlphp_auth.pages");
@@ -193,6 +195,9 @@ function stanford_ssp_force_https() {
  * @return [type]              [description]
  */
 function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
+
+  // Check for https forcing:
+  stanford_ssp_force_https();
 
   // Remove the Federated login link because it is ugly.
   if (isset($form["links"])) {
