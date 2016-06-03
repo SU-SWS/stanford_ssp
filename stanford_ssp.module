@@ -21,6 +21,13 @@ function stanford_ssp_menu() {
     'access callback' => "user_is_anonymous",
   );
 
+  $items['sso/denied-test'] = array(
+    'title' => "Always denied",
+    'description' => "Authentication endpoint test.",
+    'page callback' => 'stanford_ssp_sso_auth',
+    'access callback' => FALSE,
+  );
+
   // Configuration Forms
   // -------------------
 
@@ -163,42 +170,27 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
     unset($form['actions']);
   }
 
+  // If nothing available print out a message.
   if (!$show_local && !$show_sso) {
     $form["nothingtoseehere"]["#markup"] = "<h3>No login options available.</h3>";
   }
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/**
+ * [stanford_ssp_page_build description]
+ * @param  [type] &$page [description]
+ * @return [type]        [description]
+ */
+function stanford_ssp_page_build(&$page) {
+  $headers = drupal_get_http_header();
+  if (isset($headers["status"]) && $headers["status"] == "403 Forbidden" && user_is_anonymous()) {
+    if (variable_get("stanford_ssp_automagic_login", FALSE)) {
+      unset($_GET['destination']);
+      drupal_goto("sso/login");
+    }
+  }
+}
 
 
 
