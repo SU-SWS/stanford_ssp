@@ -106,19 +106,64 @@ function stanford_ssp_permission() {
 }
 
 /**
+ * Implements hook_init().
+ *
+ * Tried to use hook boot but too few api functions were available.
+ */
+function stanford_ssp_init() {
+
+  // If the user is anonymous then end the journey.
+  // We don't worry about those suckers.
+  $anon = user_is_anonymous();
+  if ($anon) {
+    return;
+  }
+
+  // Check to force https for authenticated users.
+  stanford_ssp_force_https();
+}
+
+/**
  * Authentication Endpoint.
  * @return [type] [description]
  */
 function stanford_ssp_sso_auth() {
   $output = array();
 
+  // Check to force https for authenticated users.
+  stanford_ssp_force_https();
+
   // A way in to simplesaml.
   module_load_include("inc", "simplesamlphp_auth", "simplesamlphp_auth.pages");
   simplesamlphp_auth_loginpage();
 
-
-
   return $output;
+}
+
+/**
+ * Checks to ensure user is on https and will force redirect if setting is enabled.
+ *
+ * @return [type] [description]
+ */
+function stanford_ssp_force_https() {
+
+  global $is_https;
+  // If is https then just return as we need not proceed any further.
+  if ($is_https) {
+    return;
+  }
+
+  // Check if setting is on. If not then end.
+  $force = variable_get("stanford_ssp_force_https", FALSE);
+  if (!$force) {
+    return;
+  }
+
+  // Frce a redirect to https.
+  $redirect_url = "https://" . check_plain($_SERVER['HTTP_HOST']) . check_plain($_SERVER['REQUEST_URI']);
+  header("Location: " . $redirect_url);
+  drupal_exit();
+
 }
 
 /**
