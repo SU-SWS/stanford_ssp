@@ -121,6 +121,15 @@ function stanford_ssp_init() {
 
   // Check to force https for authenticated users.
   stanford_ssp_force_https();
+
+  // Check for redirect cookie.
+  if (isset($_COOKIE['stanford_ssp_redirect_on_login'])) {
+    $path = $_COOKIE['stanford_ssp_redirect_on_login'];
+    unset($_COOKIE['stanford_ssp_redirect_on_login']);
+    setcookie("stanford_ssp_redirect_on_login", "", -1, "/", $_SERVER['HTTP_HOST']);
+    drupal_goto(check_plain($path));
+  }
+
 }
 
 /**
@@ -132,6 +141,12 @@ function stanford_ssp_sso_auth() {
 
   // Check to force https for authenticated users.
   stanford_ssp_force_https();
+
+  // Before going away lets set up a redirect cookie.
+  $stanford_ssp_redirect_on_login = variable_get("stanford_ssp_redirect_on_login", FALSE);
+  if (!empty($stanford_ssp_redirect_on_login)) {
+    setcookie("stanford_ssp_redirect_on_login", $stanford_ssp_redirect_on_login, time() + (60 * 3), "/", $_SERVER['HTTP_HOST']);
+  }
 
   // A way in to simplesaml.
   module_load_include("inc", "simplesamlphp_auth", "simplesamlphp_auth.pages");
@@ -148,8 +163,12 @@ function stanford_ssp_sso_auth() {
 function stanford_ssp_force_https() {
 
   global $is_https;
-  // If is https then just return as we need not proceed any further.
+  // If is https force secure cookies. Mmmmm cookies.
   if ($is_https) {
+    // Mandate secure cookies for sessions.
+    ini_set('session.cookie_secure', 1);
+    // Session cookies should be deleted when the browser session ends.
+    ini_set('session.cookie_lifetime', 0);
     return;
   }
 
@@ -159,7 +178,7 @@ function stanford_ssp_force_https() {
     return;
   }
 
-  // Frce a redirect to https.
+  // Force a redirect to https.
   $redirect_url = "https://" . check_plain($_SERVER['HTTP_HOST']) . check_plain($_SERVER['REQUEST_URI']);
   header("Location: " . $redirect_url);
   drupal_exit();
