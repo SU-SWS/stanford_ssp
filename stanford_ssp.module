@@ -320,7 +320,7 @@ function stanford_ssp_user_insert(&$edit, $account, $category) {
   if (!_simplesaml_auth_autoload()) {
     return;
   }
-  
+
   // Get the users attributes.
   module_load_include("inc", "simplesamlphp_auth", "simplesamlphp_auth");
   $attributes = simplesamlphp_auth_get_attributes();
@@ -342,6 +342,68 @@ function stanford_ssp_user_delete($account) {
   db_delete('stanford_ssp_sunetid')
     ->condition('uid', $account->uid)
     ->execute();
+}
+
+/**
+ * Implements hook_simplesamlphp_auth_allow_login.
+ *
+ * @param array $attributes
+ *   SAML Attributes.
+ *
+ * @return bool
+ *   True if ok. False is not allowed to log in.
+ */
+function stanford_ssp_simplesamlphp_auth_allow_login($attributes) {
+
+  // Is the user allowed to log in?
+  $isok = TRUE;
+
+  // If the checks are off then just let it pass.
+  if (variable_get("stanford_ssp_auth_restrictions", "allow") !== "restrict") {
+    return $isok;
+  }
+
+  $sunets = variable_get("stanford_ssp_auth_restriction_sunet", FALSE);
+  $groups = variable_get("stanford_ssp_auth_restriction_group", FALSE);
+
+  // First check list of sunets.
+  if (!empty($sunets)) {
+    $sunets = explode(",", $sunets);
+    $sunets = array_map("trim", $sunets);
+    $isok = stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets($sunets, $attributes);
+  }
+
+  // If the sunets are ok we should check the groups.
+  if (!empty($groups) && $isok) {
+    $groups = explode(",", $groups);
+    $groups = array_map("trim", $groups);
+    $isok = stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $attributes);
+  }
+
+  // Return true or false.
+  return $isok;
+}
+
+/**
+ * Validates a list of sunets against the user that is trying to log in.
+ * @param  [type] $sunets     [description]
+ * @param  [type] $attributes [description]
+ * @return [type]             [description]
+ */
+function stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets($sunets, $attributes) {
+  $sunetid = array_pop($attributes['uid']);
+  return in_array($sunetid, $sunets);
+}
+
+/**
+ * [stanford_ssp_simplesamlphp_auth_allow_login_validate_groups description]
+ * @param  [type] $groups     [description]
+ * @param  [type] $attributes [description]
+ * @return [type]             [description]
+ */
+function stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $attributes) {
+  $samlgroups = $attributes['urn:mace:stanford.edu:directory:suPerson:suPrivilegeGroup'];
+  return (count(array_intersect($groups, $samlgroups)) > 0);
 }
 
 /**
