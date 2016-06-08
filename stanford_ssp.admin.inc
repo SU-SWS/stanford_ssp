@@ -296,15 +296,18 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
   $table = array();
   $submitted = !empty($form_state['post']);
   $roles = user_roles(TRUE);
+  // Remove authenticated user has this will be defaulted to true.
+  unset($roles[2]);
 
-  $form['new_rid'] = array(
-    '#name' => 'new_rid',
+
+  $form['role_id'] = array(
+    '#name' => 'role_id',
     '#type' => 'select',
     '#options' => $roles,
   );
 
-  $form['new_group'] = array(
-    '#name' => 'new_group',
+  $form['entitlement'] = array(
+    '#name' => 'entitlement',
     '#type' => 'textfield',
     '#default_value' => '',
   );
@@ -315,26 +318,41 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     '#value' => t('Add Mapping'),
   );
 
-  if (!$submitted) {
-    $table[] = array(drupal_render($form['new_rid']), drupal_render($form['new_group']), drupal_render($form['new_submit']));
-  }
-  else {
-    // Keep the UI consistent.
-    $form['new_rid']['#prefix'] = '<table><tr class="odd"><td>';
-    $form['new_rid']['#suffix'] = '</td><td>';
-    $form['new_group']['#suffix'] = '</td><td>';
-    $form['new_submit']['#suffix'] = '</td><td>';
-    $form['cancel'] = array(
-      '#type' => 'markup',
-      '#value' => l(t('Cancel'), 'admin/config/webauth/mappings'),
-      '#suffix' => '</td></tr></table>',
-    );
-  }
+  $table[] = array(drupal_render($form['role_id']), drupal_render($form['entitlement']), drupal_render($form['new_submit']));
+
   $header = array(
     t('Drupal Role'),
-    t('Workgroup (e.g. stanford:staff)'),
+    t('Workgroup (e.g. anchorage_humanbiology-admins)'),
     t('Action')
   );
+
+  $rolemaps = variable_get("simplesamlphp_auth_rolepopulation", array());
+  $xp = explode("|", $rolemaps);
+
+  foreach ($xp as $index => $rule) {
+    $button_id = 'remove_warid_' . $index;
+    $form[$button_id] = array(
+      '#name' => $button_id,
+      '#type' => 'submit',
+      '#value' => t('Remove Mapping'),
+      '#submit' => array('stanford_ssp_remove_waird'),
+    );
+
+    // Special hidden element.
+    $form[$button_id . "_value"] = array(
+      '#type' => 'value',
+      '#value' => $index,
+    );
+
+    // $rule = rid:expression.
+    $bits = explode(':', $rule, 2);
+    $role = user_role_load($bits[0]);
+    $eval = str_getcsv($bits[1]);
+
+    $row = array($role->name, $eval[2], drupal_render($form[$button_id]));
+    $table[] = $row;
+  }
+
   $form['add_roles'] = array(
     '#markup' => theme('table', array(
       'header' => $header,
@@ -342,21 +360,8 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     )),
   );
 
-  //$result = db_query("SELECT wr.warid, r.name, wr.wa_group as `group` FROM {webauth_roles} wr INNER JOIN {role} r ON wr.rid = r.rid WHERE r.rid > 2");
-  // while ($group = $result->fetchObject()) {
-  //   $button_id = 'remove_warid_' . $group->warid;
-  //   $form[$button_id] = array(
-  //     '#name' => $button_id,
-  //     '#type' => 'submit',
-  //     '#value' => t('Remove Mapping'),
-  //   );
-  //   $row = array($group->name, $group->group, drupal_render($form[$button_id]));
-  //   $table[] = $row;
-  // }
-
-
   // END ROLE MAPPING FORM.
-
+  $form["#submit"][] = "stanford_ssp_role_mappings_form_submit";
   return system_settings_form($form);
 }
 
@@ -423,20 +428,28 @@ function stanford_ssp_add_sso_user($form, &$form_state) {
   );
 
   $roles = user_roles(TRUE);
-  $form["roles"] = array(
-    '#title' => "Roles",
-    '#description' => t("Add roles to the new user account."),
-    '#type' => 'select',
-    '#options' => $roles,
-    '#default_value' => array(1),
-    '#multiple' => TRUE,
-    '#size' => 7,
-  );
+  // Remove authenticated user has this will be defaulted to true.
+  unset($roles[2]);
 
-  $form['pass'] = array(
-    '#type' => 'password_confirm',
-    '#size' => 25,
-  );
+  // Only show the option if there is an option.
+  if (!empty($roles)) {
+    $form["roles"] = array(
+      '#title' => "Roles",
+      '#description' => t("Add roles to the new user account."),
+      '#type' => 'select',
+      '#options' => $roles,
+      '#default_value' => array(1),
+      '#multiple' => TRUE,
+      '#size' => 7,
+    );
+  }
+
+  if (variable_get("simplesamlphp_auth_allowsetdrupalpwd", FALSE)) {
+    $form['pass'] = array(
+      '#type' => 'password_confirm',
+      '#size' => 25,
+    );
+  }
 
   $form['notify'] = array(
     '#type' => 'checkbox',
@@ -450,4 +463,227 @@ function stanford_ssp_add_sso_user($form, &$form_state) {
 
   return $form;
 }
+
+/**
+ * ***************************************************************
+ * VALIDATE FUNCTIONS
+ * ***************************************************************
+ */
+
+/**
+ * Validation function for Add WebAuth User form
+ */
+function stanford_ssp_add_sso_user_validate($form, &$form_state) {
+
+  $sunet = strtolower(trim(check_plain($form_state['values']['sunetid'])));
+
+  // Make sure there isn't an entry in the authmap table.
+  // Authmap entries use the SUNetID@stanford.edu format.
+  $authname = $sunet . '@stanford.edu';
+
+  // user_get_authmaps returns 0 if there are no authmaps,
+  // or a keyed array if there are authmap entries.
+  $authmaps = user_get_authmaps($authname);
+
+  if ((($authmaps) !== 0) && ($authmaps['authname_simplesamlphp_auth'] == $authname)) {
+    form_set_error('sunetid', 'Could not create user. Authname ' . $authname . ' already exists. Has the user already been created with a different username but the same SUNetID?');
+  }
+
+  // If no name is specified, use the default name (sunetid + @stanford.edu).
+  $name = trim(check_plain($form_state['values']['name']));
+  if (empty($name)) {
+    $name  = $authname;
+  }
+
+  // Check that there is no user with the same name.
+  if (user_load_by_name($name)) {
+    form_set_error('name', 'Could not create user. Username ' . $name . ' already exists.');
+  }
+
+  // If no email was specified, we'll use the default (sunetid + @stanford.edu).
+  $default_email = $sunet . '@stanford.edu';
+  $email = strtolower(trim($form_state['values']['email']));
+
+  if (!empty($email) && !valid_email_address($email)) {
+    form_set_error('email', t('The e-mail address %email is not valid.', array('%email' => $email)));
+  }
+
+  if (empty($email)) {
+    $email = $default_email;
+  }
+
+  // Check that there is no user with the same email
+  // Drupal will let us create the user with a duplicate email, but
+  // the user will run into issues when making changes to their profile.
+  if (user_load_by_mail($email)) {
+    form_set_error('email', 'Could not create user. Email ' . $email . ' already in use.');
+  }
+
+}
+
+
+
+/**
+ * ***************************************************************
+ * SUBMIT FUNCTIONS
+ * ***************************************************************
+ */
+
+/**
+ * Submit handler for stanford_ssp_add_sso_user form.
+ * @param  [type] &$form       [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
+
+  // Sunet.
+  $sunet = strtolower(trim(check_plain($form_state['values']['sunetid'])));
+  $authname = $sunet . '@stanford.edu';
+
+  // If no name is specified, use the default name (sunetid + @stanford.edu).
+  $name = trim(check_plain($form_state['values']['name']));
+  if (empty($name)) {
+    $name  = $authname;
+  }
+
+  // Email and default.
+  $default_email = $sunet . '@stanford.edu';
+  $email = strtolower(trim($form_state['values']['email']));
+  if (empty($email)) {
+    $email = $default_email;
+  }
+
+  $account = new stdClass();
+  $account->is_new = TRUE;
+  $account->name = $name;
+  $account->pass = user_password();
+  $account->mail = $email;
+  $account->init = $sunet . '@stanford.edu';
+  $account->status = TRUE;
+  $roles = array(
+    DRUPAL_AUTHENTICATED_RID => TRUE
+  );
+
+  // Merge in roles from config form.
+  $config_roles = array_keys($form_state["values"]["roles"]);
+  foreach ($config_roles as $rid) {
+    $roles[$rid] = TRUE;
+  }
+
+  $account->roles = $roles;
+  $account->timezone = variable_get('date_default_timezone', date_default_timezone_get());
+  $account = user_save($account);
+
+  // Account was not created.
+  if (!isset($account->uid)) {
+    drupal_set_message("User account creation went wrong. Please try again.", "error");
+    return;
+  }
+
+  // Add an authmap to the authmap table.
+  user_set_authmaps($account, array('authname_simplesamlphp_auth' => $authname));
+  watchdog('Stanford SSP', 'Created user: %user', array('%user' => $name));
+  $message = t('Successfully created SAML account for %user', array('%user' => $name));
+  drupal_set_message($message);
+
+  // Was the notify checkbox checked?
+  if ($form_state["values"]["notify"] && $account) {
+    _user_mail_notify('status_activated', $account);
+    drupal_set_message("Email sent to user", "status");
+  }
+
+  // Save the sunetid to the db.
+  $record = array(
+    'sunet' => $sunet,
+    'uid' => $account->uid,
+  );
+  drupal_write_record("stanford_ssp_sunetid", $record);
+}
+
+
+/**
+ *
+ * Implements hook_form_submit().
+ *
+ * @param $form
+ * @param $form_state
+ */
+function stanford_ssp_role_mappings_form_submit($form, &$form_state) {
+
+  $entitlement = $form_state['values']['entitlement'];
+  $role = $form_state['values']['role_id'];
+
+  // The silly save button could trigger this if there is not a value.
+  if (!empty($entitlement) && !empty($role)) {
+    stanford_ssp_map_entitlement_to_role($entitlement, $role);
+  }
+
+}
+
+/**
+ * Maps an entitlement to a role.
+ *
+ * @param string $entitlement
+ *   A value in eduPersonEntitlement, e.g., anchorage_support
+ * @param mixed $role
+ *   Either the role id or a name.
+ *
+ * Map an entitlement to a role.
+ */
+function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
+  $entitlement = check_plain($entitlement);
+  // look up rid.
+
+  $role_object = FALSE;
+  if (is_numeric($role)) {
+    $role_object = user_role_load($role);
+  }
+  else if (is_scalar($role)) {
+    $role_object = user_role_load_by_name($role);
+  }
+
+  if (!$role_object) {
+    drupal_set_message(t('No role exists with the name "@role"', array('@role' => $role)), 'error');
+  }
+  else {
+    $rid = $role_object->rid;
+    // Look up current role mapping, if any.
+    $role_mapping = variable_get('simplesamlphp_auth_rolepopulation');
+    if (!empty($role_mapping)) {
+      $role_mapping .= "|";
+    }
+    // Add our mapping.
+    $role_mapping .= $rid . ":eduPersonEntitlement,=," . $entitlement;
+    // Save our mapping.
+    variable_set('simplesamlphp_auth_rolepopulation', $role_mapping);
+    $message = t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role_object->name));
+    drupal_set_message($message);
+    watchdog('stanford_ssp', $message);
+  }
+}
+
+/**
+ * @param $form
+ * @param $form_state
+ */
+function stanford_ssp_remove_waird($form, &$form_state) {
+  $trigger = $form_state["triggering_element"]['#name'];
+  $index = $form_state['values'][$trigger . "_value"];
+  $rolemaps = variable_get("simplesamlphp_auth_rolepopulation", array());
+  $xp = explode("|", $rolemaps);
+  if (isset($xp[$index])) {
+    unset($xp[$index]);
+  }
+  $imp = implode("|", $xp);
+  variable_set("simplesamlphp_auth_rolepopulation", $imp);
+  drupal_set_message("Role mapping was removed");
+}
+
+/**
+ * *****************************************************************
+ * HELPER / UTIL
+ * *****************************************************************
+ */
+
 
