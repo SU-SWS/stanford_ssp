@@ -423,20 +423,28 @@ function stanford_ssp_add_sso_user($form, &$form_state) {
   );
 
   $roles = user_roles(TRUE);
-  $form["roles"] = array(
-    '#title' => "Roles",
-    '#description' => t("Add roles to the new user account."),
-    '#type' => 'select',
-    '#options' => $roles,
-    '#default_value' => array(1),
-    '#multiple' => TRUE,
-    '#size' => 7,
-  );
+  // Remove authenticated user has this will be defaulted to true.
+  unset($roles[2]);
 
-  $form['pass'] = array(
-    '#type' => 'password_confirm',
-    '#size' => 25,
-  );
+  // Only show the option if there is an option.
+  if (!empty($roles)) {
+    $form["roles"] = array(
+      '#title' => "Roles",
+      '#description' => t("Add roles to the new user account."),
+      '#type' => 'select',
+      '#options' => $roles,
+      '#default_value' => array(1),
+      '#multiple' => TRUE,
+      '#size' => 7,
+    );
+  }
+
+  if (variable_get("simplesamlphp_auth_allowsetdrupalpwd", FALSE)) {
+    $form['pass'] = array(
+      '#type' => 'password_confirm',
+      '#size' => 25,
+    );
+  }
 
   $form['notify'] = array(
     '#type' => 'checkbox',
@@ -450,4 +458,142 @@ function stanford_ssp_add_sso_user($form, &$form_state) {
 
   return $form;
 }
+
+/**
+ * ***************************************************************
+ * VALIDATE FUNCTIONS
+ * ***************************************************************
+ */
+
+/**
+ * Validation function for Add WebAuth User form
+ */
+function stanford_ssp_add_sso_user_validate($form, &$form_state) {
+
+  $sunet = strtolower(trim(check_plain($form_state['values']['sunetid'])));
+
+  // Make sure there isn't an entry in the authmap table.
+  // Authmap entries use the SUNetID@stanford.edu format.
+  $authname = $sunet . '@stanford.edu';
+
+  // user_get_authmaps returns 0 if there are no authmaps,
+  // or a keyed array if there are authmap entries.
+  $authmaps = user_get_authmaps($authname);
+
+  if ((($authmaps) !== 0) && ($authmaps['authname_simplesamlphp_auth'] == $authname)) {
+    form_set_error('sunetid', 'Could not create user. Authname ' . $authname . ' already exists. Has the user already been created with a different username but the same SUNetID?');
+  }
+
+  // If no name is specified, use the default name (sunetid + @stanford.edu).
+  $name = trim(check_plain($form_state['values']['name']));
+  if (empty($name)) {
+    $name  = $authname;
+  }
+
+  // Check that there is no user with the same name.
+  if (user_load_by_name($name)) {
+    form_set_error('name', 'Could not create user. Username ' . $name . ' already exists.');
+  }
+
+  // If no email was specified, we'll use the default (sunetid + @stanford.edu).
+  $default_email = $sunet . '@stanford.edu';
+  $email = strtolower(trim($form_state['values']['email']));
+
+  if (!empty($email) && !valid_email_address($email)) {
+    form_set_error('email', t('The e-mail address %email is not valid.', array('%email' => $email)));
+  }
+
+  if (empty($email)) {
+    $email = $default_email;
+  }
+
+  // Check that there is no user with the same email
+  // Drupal will let us create the user with a duplicate email, but
+  // the user will run into issues when making changes to their profile.
+  if (user_load_by_mail($email)) {
+    form_set_error('email', 'Could not create user. Email ' . $email . ' already in use.');
+  }
+
+}
+
+
+
+/**
+ * ***************************************************************
+ * SUBMIT FUNCTIONS
+ * ***************************************************************
+ */
+
+/**
+ * Submit handler for stanford_ssp_add_sso_user form.
+ * @param  [type] &$form       [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
+
+  // Sunet.
+  $sunet = strtolower(trim(check_plain($form_state['values']['sunetid'])));
+  $authname = $sunet . '@stanford.edu';
+
+  // If no name is specified, use the default name (sunetid + @stanford.edu).
+  $name = trim(check_plain($form_state['values']['name']));
+  if (empty($name)) {
+    $name  = $authname;
+  }
+
+  // Email and default.
+  $default_email = $sunet . '@stanford.edu';
+  $email = strtolower(trim($form_state['values']['email']));
+  if (empty($email)) {
+    $email = $default_email;
+  }
+
+  $account = new stdClass();
+  $account->is_new = TRUE;
+  $account->name = $name;
+  $account->pass = user_password();
+  $account->mail = $email;
+  $account->init = $sunet . '@stanford.edu';
+  $account->status = TRUE;
+  $roles = array(
+    DRUPAL_AUTHENTICATED_RID => TRUE
+  );
+
+  // Merge in roles from config form.
+  $config_roles = array_keys($form_state["values"]["roles"]);
+  foreach ($config_roles as $rid) {
+    $roles[$rid] = TRUE;
+  }
+
+  $account->roles = $roles;
+  $account->timezone = variable_get('date_default_timezone', date_default_timezone_get());
+  $account = user_save($account);
+
+  // Account was not created.
+  if (!isset($account->uid)) {
+    drupal_set_message("User account creation went wrong. Please try again.", "error");
+    return;
+  }
+
+  user_set_authmaps($account, array('authname_simplesamlphp_auth' => $authname));
+  watchdog('Stanford SSP', 'Created user: %user', array('%user' => $name));
+  $message = t('Successfully created SAML account for %user', array('%user' => $name));
+  drupal_set_message($message);
+
+  // Was the notify checkbox checked?
+  if ($form_state["values"]["notify"] && $account) {
+    _user_mail_notify('status_activated', $account);
+    drupal_set_message("Email sent to user", "status");
+  }
+
+}
+
+
+/**
+ * *****************************************************************
+ * HELPER / UTIL
+ * *****************************************************************
+ */
+
 

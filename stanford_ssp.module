@@ -133,11 +133,11 @@ function stanford_ssp_init() {
  * Implements hook_user_login().
  */
 function stanford_ssp_user_login() {
-   // Redirect the user if setting available.
-   $stanford_ssp_redirect_on_login = variable_get("stanford_ssp_redirect_on_login", FALSE);
-   if (!empty($stanford_ssp_redirect_on_login)) {
-    drupal_goto($stanford_ssp_redirect_on_login);
-   }
+  // Redirect the user if setting available.
+  $redir = variable_get("stanford_ssp_redirect_on_login", FALSE);
+  if (!empty($redir)) {
+    drupal_goto($redir);
+  }
 }
 
 /**
@@ -247,7 +247,7 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
 }
 
 /**
- * [stanford_ssp_page_build description]
+ * Handles 403 page errors and provided the automagic redirection to SAML login.
  * @param  [type] &$page [description]
  * @return [type]        [description]
  */
@@ -262,25 +262,87 @@ function stanford_ssp_page_build(&$page) {
 }
 
 
+/**
+ * Provide a different lookup mechanism other than by user name.
+ * Needs a patch from https://www.drupal.org/node/2635152 in order for this
+ * hook to exist. Without this hook, only username works for lookup.
+ *
+ * @param  [type] $ext_user                            [description]
+ * @param  [type] $_simplesamlphp_auth_saml_attributes [description]
+ * @param  [type] $auth_field                          [description]
+ *
+ */
+function stanford_ssp_saml_ext_user_alter(&$ext_user, $_simplesamlphp_auth_saml_attributes, $auth_field) {
 
+  // If a user has already been found we don't need to provide any extra work.
+  if ($ext_user) {
+    return;
+  }
 
+  // Doh, username not found. Try email.
+  $mail = $_simplesamlphp_auth_saml_attributes[variable_get("simplesamlphp_auth_mailattr", "mail")];
+  $ext_user = user_load_by_mail($mail);
+
+  // If still no user try sunet id.
+  if (!$ext_user) {
+    $sunet = $_simplesamlphp_auth_saml_attributes["uid"];
+    if (is_array($sunet)) {
+      $sunet = array_pop($sunet);
+    }
+    $ext_user = stanford_ssp_user_load_by_sunetid($sunet);
+  }
+
+}
 
 /**
- * Handle 403 errors by redirecting users to saml_login for login.
- *
- * If, however, they are already logged in and don't have access
- * (for instance, a normal user requesting /admin), then display
- * a normal error message.
+ * Loads a user by sunet id.
+ * @return [type] [description]
  */
-// function stanford_ssp_error_page() {
-//   // Figure out where the user is trying to go before redirecting him.
-//   $dest = drupal_get_destination();
-//   // We have to unset $_GET['destination'] here, otherwise drupal_goto() will ignore the $path argument.
-//   // See https://api.drupal.org/api/drupal/includes!common.inc/function/drupal_goto/7.
-//   unset($_GET['destination']);
-//   // Redirect the user to saml_login, then send him on his way.
-//   drupal_goto('saml_login', array('query' => $dest));
-// }
+function stanford_ssp_user_load_by_sunetid($sunetid) {
+  $uid = db_select("stanford_ssp_sunetid", "sss")
+        ->fields("sss", array("uid"))
+        ->condition("sunet", check_plain($sunetid))
+        ->execute()
+        ->fetchField();
+
+  if (is_numeric($uid)) {
+    return user_load($uid);
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_user_insert().
+ */
+function stanford_ssp_user_insert(&$edit, $account, $category) {
+
+  if (!_simplesaml_auth_autoload()) {
+    return;
+  }
+  
+  // Get the users attributes.
+  module_load_include("inc", "simplesamlphp_auth", "simplesamlphp_auth");
+  $attributes = simplesamlphp_auth_get_attributes();
+
+  if (!empty($attributes)) {
+    $record = array(
+      'sunet' => array_pop($attributes['uid']),
+      'uid' => $account->uid,
+    );
+    drupal_write_record("stanford_ssp_sunetid", $record);
+  }
+}
+
+/**
+ * Implements hook_user_delete().
+ */
+function stanford_ssp_user_delete($account) {
+  // Remove tracking from the schema.
+  db_delete('stanford_ssp_sunetid')
+    ->condition('uid', $account->uid)
+    ->execute();
+}
 
 /**
  *
