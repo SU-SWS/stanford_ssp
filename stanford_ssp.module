@@ -411,16 +411,48 @@ function stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $a
  * @param  [type] $roles [description]
  * @return [type]        [description]
  */
-function stanford_ssp_simplesamlphp_auth_user_roles_alter($roles) {
+function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
   global $_simplesamlphp_auth_as;
-  global $_simplesamlphp_auth_saml_attributes;
-  global $user;
 
   // No authenticated user to work on. Go to bed.
   if (!$_simplesamlphp_auth_as->isAuthenticated()) {
     return;
   }
 
-  
+  // Action to perform when evaluating roles.
+  $operation = variable_get("stanford_ssp_auth_role_map", "none");
+
+  // If the action to do is none then we can end this function.
+  if ($operation == "none") {
+    return;
+  }
+
+  // What roles are matchy pants.
+  $roles = _simplesamlphp_auth_rolepopulation(variable_get('simplesamlphp_auth_rolepopulation', ''));
+  $user_roles = user_roles();
+  $userinfo = FALSE;
+  $values = array_intersect_key($user_roles, $roles);
+
+  // Do the op.
+  switch ($operation) {
+
+    // Much like simplesamlphp_auths re-assign roles option this will replace
+    // all of the users roles with the ones that were matched in the mapping.
+    case 'reassign':
+      $userinfo = array('roles' => $values);
+      break;
+
+    // Unline implesamlphp_auths re-assign roles option this will only add/grant
+    // additional roles to the user.
+    case 'merge':
+      $values = $user->roles + $values;
+      $userinfo = array('roles' => $values);
+      break;
+  }
+
+  // Only save if we have something to save.
+  if (!empty($userinfo)) {
+    $user = user_save($user, $userinfo);
+  }
 
 }

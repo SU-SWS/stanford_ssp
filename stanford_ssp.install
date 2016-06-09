@@ -15,6 +15,7 @@ function stanford_ssp_install() {
   variable_set('simplesamlphp_auth_unique_id', 'eduPersonPrincipalName');
   variable_set('simplesamlphp_auth_roleevaleverytime', 0);
   variable_set('simplesamlphp_auth_activate', 1);
+  variable_set("stanford_ssp_auth_role_map", "merge");
 }
 
 /**
