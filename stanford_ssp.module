@@ -402,7 +402,7 @@ function stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets($sunets, $a
  * @return [type]             [description]
  */
 function stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $attributes) {
-  $samlgroups = $attributes['urn:mace:stanford.edu:directory:suPerson:suPrivilegeGroup'];
+  $samlgroups = $attributes['eduPersonEntitlement'];
   return (count(array_intersect($groups, $samlgroups)) > 0);
 }
 
@@ -484,12 +484,6 @@ function stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $a
 //   }
 // }
 
-/**
- * Implements hook_theme_registry_alter().
- */
-// function stanford_ssp_theme_registry_alter(&$theme_registry) {
-//   $theme_registry['webform_view_messages']['function'] = 'stanford_ssp_webform_login';
-// }
 
 /**
  * Overrides theme_webform_view_messages().

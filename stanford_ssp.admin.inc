@@ -296,15 +296,18 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
   $table = array();
   $submitted = !empty($form_state['post']);
   $roles = user_roles(TRUE);
+  // Remove authenticated user has this will be defaulted to true.
+  unset($roles[2]);
 
-  $form['new_rid'] = array(
-    '#name' => 'new_rid',
+
+  $form['role_id'] = array(
+    '#name' => 'role_id',
     '#type' => 'select',
     '#options' => $roles,
   );
 
-  $form['new_group'] = array(
-    '#name' => 'new_group',
+  $form['entitlement'] = array(
+    '#name' => 'entitlement',
     '#type' => 'textfield',
     '#default_value' => '',
   );
@@ -315,26 +318,41 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     '#value' => t('Add Mapping'),
   );
 
-  if (!$submitted) {
-    $table[] = array(drupal_render($form['new_rid']), drupal_render($form['new_group']), drupal_render($form['new_submit']));
-  }
-  else {
-    // Keep the UI consistent.
-    $form['new_rid']['#prefix'] = '<table><tr class="odd"><td>';
-    $form['new_rid']['#suffix'] = '</td><td>';
-    $form['new_group']['#suffix'] = '</td><td>';
-    $form['new_submit']['#suffix'] = '</td><td>';
-    $form['cancel'] = array(
-      '#type' => 'markup',
-      '#value' => l(t('Cancel'), 'admin/config/webauth/mappings'),
-      '#suffix' => '</td></tr></table>',
-    );
-  }
+  $table[] = array(drupal_render($form['role_id']), drupal_render($form['entitlement']), drupal_render($form['new_submit']));
+
   $header = array(
     t('Drupal Role'),
-    t('Workgroup (e.g. stanford:staff)'),
+    t('Workgroup (e.g. anchorage_humanbiology-admins)'),
     t('Action')
   );
+
+  $rolemaps = variable_get("simplesamlphp_auth_rolepopulation", array());
+  $xp = explode("|", $rolemaps);
+
+  foreach ($xp as $index => $rule) {
+    $button_id = 'remove_warid_' . $index;
+    $form[$button_id] = array(
+      '#name' => $button_id,
+      '#type' => 'submit',
+      '#value' => t('Remove Mapping'),
+      '#submit' => array('stanford_ssp_remove_waird'),
+    );
+
+    // Special hidden element.
+    $form[$button_id . "_value"] = array(
+      '#type' => 'value',
+      '#value' => $index,
+    );
+
+    // $rule = rid:expression.
+    $bits = explode(':', $rule, 2);
+    $role = user_role_load($bits[0]);
+    $eval = str_getcsv($bits[1]);
+
+    $row = array($role->name, $eval[2], drupal_render($form[$button_id]));
+    $table[] = $row;
+  }
+
   $form['add_roles'] = array(
     '#markup' => theme('table', array(
       'header' => $header,
@@ -342,21 +360,8 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     )),
   );
 
-  //$result = db_query("SELECT wr.warid, r.name, wr.wa_group as `group` FROM {webauth_roles} wr INNER JOIN {role} r ON wr.rid = r.rid WHERE r.rid > 2");
-  // while ($group = $result->fetchObject()) {
-  //   $button_id = 'remove_warid_' . $group->warid;
-  //   $form[$button_id] = array(
-  //     '#name' => $button_id,
-  //     '#type' => 'submit',
-  //     '#value' => t('Remove Mapping'),
-  //   );
-  //   $row = array($group->name, $group->group, drupal_render($form[$button_id]));
-  //   $table[] = $row;
-  // }
-
-
   // END ROLE MAPPING FORM.
-
+  $form["#submit"][] = "stanford_ssp_role_mappings_form_submit";
   return system_settings_form($form);
 }
 
@@ -589,6 +594,78 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
 
 }
 
+
+/**
+ *
+ * Implements hook_form_submit().
+ *
+ * @param $form
+ * @param $form_state
+ */
+function stanford_ssp_role_mappings_form_submit($form, &$form_state) {
+  $entitlement = $form_state['values']['entitlement'];
+  $role = $form_state['values']['role_id'];
+  stanford_ssp_map_entitlement_to_role($entitlement, $role);
+}
+
+/**
+ * Maps an entitlement to a role.
+ *
+ * @param string $entitlement
+ *   A value in eduPersonEntitlement, e.g., anchorage_support
+ * @param mixed $role
+ *   Either the role id or a name.
+ *
+ * Map an entitlement to a role.
+ */
+function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
+  $entitlement = check_plain($entitlement);
+  // look up rid.
+
+  $role_object = FALSE;
+  if (is_numeric($role)) {
+    $role_object = user_role_load($role);
+  }
+  else if (is_scalar($role)) {
+    $role_object = user_role_load_by_name($role);
+  }
+
+  if (!$role_object) {
+    drupal_set_message(t('No role exists with the name "@role"', array('@role' => $role)), 'error');
+  }
+  else {
+    $rid = $role_object->rid;
+    // Look up current role mapping, if any.
+    $role_mapping = variable_get('simplesamlphp_auth_rolepopulation');
+    if (!empty($role_mapping)) {
+      $role_mapping .= "|";
+    }
+    // Add our mapping.
+    $role_mapping .= $rid . ":eduPersonEntitlement,=," . $entitlement;
+    // Save our mapping.
+    variable_set('simplesamlphp_auth_rolepopulation', $role_mapping);
+    $message = t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role_object->name));
+    drupal_set_message($message);
+    watchdog('stanford_ssp', $message);
+  }
+}
+
+/**
+ * @param $form
+ * @param $form_state
+ */
+function stanford_ssp_remove_waird($form, &$form_state) {
+  $trigger = $form_state["triggering_element"]['#name'];
+  $index = $form_state['values'][$trigger . "_value"];
+  $rolemaps = variable_get("simplesamlphp_auth_rolepopulation", array());
+  $xp = explode("|", $rolemaps);
+  if (isset($xp[$index])) {
+    unset($xp[$index]);
+  }
+  $imp = implode("|", $xp);
+  variable_set("simplesamlphp_auth_rolepopulation", $imp);
+  drupal_set_message("Role mapping was removed");
+}
 
 /**
  * *****************************************************************
