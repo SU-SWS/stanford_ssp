@@ -405,3 +405,22 @@ function stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $a
   $samlgroups = $attributes['eduPersonEntitlement'];
   return (count(array_intersect($groups, $samlgroups)) > 0);
 }
+
+/**
+ * Implements simplesamlphp_auth_user_roles_alter()
+ * @param  [type] $roles [description]
+ * @return [type]        [description]
+ */
+function stanford_ssp_simplesamlphp_auth_user_roles_alter($roles) {
+  global $_simplesamlphp_auth_as;
+  global $_simplesamlphp_auth_saml_attributes;
+  global $user;
+
+  // No authenticated user to work on. Go to bed.
+  if (!$_simplesamlphp_auth_as->isAuthenticated()) {
+    return;
+  }
+
+  
+
+}
