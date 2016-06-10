@@ -601,7 +601,6 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
   drupal_write_record("stanford_ssp_sunetid", $record);
 }
 
-
 /**
  *
  * Implements hook_form_submit().
