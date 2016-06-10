@@ -7,22 +7,56 @@
  * Implements hook_install().
  */
 function stanford_ssp_install() {
+  variable_set('simplesamlphp_auth_activate', TRUE);
+  variable_set('simplesamlphp_auth_allowdefaultlogin', TRUE);
+  variable_set('stanford_ssp_automagic_login', TRUE);
+  variable_set('stanford_ssp_force_https', FALSE);
+  variable_set('stanford_ssp_redirect_on_login', FALSE);
+  variable_set('simplesamlphp_auth_registerusers', TRUE);
+  variable_set('simplesamlphp_auth_autoenablesaml', TRUE);
+  variable_set('stanford_ssp_prevent_cache', FALSE);
+  variable_set('simplesamlphp_auth_allowsetdrupalpwd', FALSE);
   variable_set('simplesamlphp_auth_installdir', '/opt/simplesamlphp');
-  variable_set('simplesamlphp_auth_registerusers', 1);
   variable_set('simplesamlphp_auth_authsource', 'default-sp');
-  variable_set('simplesamlphp_auth_mailattr', 'mail');
   variable_set('simplesamlphp_auth_user_name', 'displayName');
-  variable_set('simplesamlphp_auth_unique_id', 'eduPersonPrincipalName');
-  variable_set('simplesamlphp_auth_roleevaleverytime', 0);
-  variable_set('simplesamlphp_auth_activate', 1);
-  variable_set("stanford_ssp_auth_role_map", "merge");
+  variable_set('simplesamlphp_auth_unique_id', 'uid');
+  variable_set('simplesamlphp_auth_mailattr', 'mail');
+  variable_set('stanford_ssp_auth_restrictions', 'any');
+  variable_set('stanford_ssp_auth_restriction_sunet', '');
+  variable_set('stanford_ssp_auth_restriction_group', '');
+  variable_set('stanford_ssp_auth_role_map', 'merge');
+  variable_set('stanford_ssp_show_local_login', TRUE);
+  variable_set('stanford_ssp_show_sso_login', TRUE);
+
 }
 
 /**
  * Implements hook_uninstall().
  */
 function stanford_ssp_uninstall() {
-
+  variable_del('simplesamlphp_auth_activate');
+  variable_del('simplesamlphp_auth_allowdefaultlogin');
+  variable_del('stanford_ssp_automagic_login');
+  variable_del('stanford_ssp_force_https');
+  variable_del('stanford_ssp_redirect_on_login');
+  variable_del('simplesamlphp_auth_registerusers');
+  variable_del('simplesamlphp_auth_autoenablesaml');
+  variable_del('stanford_ssp_prevent_cache');
+  variable_del('simplesamlphp_auth_allowsetdrupalpwd');
+  variable_del('simplesamlphp_auth_installdir');
+  variable_del('simplesamlphp_auth_authsource');
+  variable_del('simplesamlphp_auth_user_name');
+  variable_del('simplesamlphp_auth_unique_id');
+  variable_del('simplesamlphp_auth_mailattr');
+  variable_del('stanford_ssp_auth_restrictions');
+  variable_del('stanford_ssp_auth_restriction_sunet', '');
+  variable_del('stanford_ssp_auth_restriction_group');
+  variable_del('simplesamlphp_auth_allowdefaultloginroles');
+  variable_del('simplesamlphp_auth_allowdefaultloginusers');
+  variable_del('stanford_ssp_auth_role_map');
+  variable_del('stanford_ssp_show_local_login');
+  variable_del('stanford_ssp_show_sso_login');
+  variable_del('stanford_ssp_sso_link_text');
 }
 
 /**
