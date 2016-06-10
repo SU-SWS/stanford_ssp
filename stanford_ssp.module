@@ -94,6 +94,30 @@ function stanford_ssp_menu() {
 }
 
 /**
+ * Implements hook_menu_alter().
+ */
+function stanford_ssp_menu_alter(&$items) {
+  // Disable the simplesamlphp_auth settings pages because we override everything.
+  $items['admin/config/people/simplesamlphp_auth']['access callback'] = 'stanford_ssp_user_one_access_only';
+  $items['admin/config/people/simplesamlphp_auth/basic']['access callback'] = 'stanford_ssp_user_one_access_only';
+  $items['admin/config/people/simplesamlphp_auth/sync']['access callback'] = 'stanford_ssp_user_one_access_only';
+  $items['admin/config/people/simplesamlphp_auth/local']['access callback'] = 'stanford_ssp_user_one_access_only';
+}
+
+/**
+ * Allow access for user 1 only.
+ * @return bool
+ *   True if user 1 is logged in.
+ */
+function stanford_ssp_user_one_access_only() {
+  global $user;
+  if (isset($user->uid) && $user->uid == 1) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
  * Implements hook_permission().
  */
 function stanford_ssp_permission() {
