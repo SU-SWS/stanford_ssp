@@ -8,7 +8,7 @@ dependencies[] = context
 dependencies[] = ctools
 dependencies[] = features
 dependencies[] = stanford_ssp
-dependencies[] = simplesamlphp_auth (>= 7.x-3.x)
+dependencies[] = simplesamlphp_auth
 features[context][] = stanford_simplesamlphp_login
 features[ctools][] = context:context:3
 features[features_api][] = api:2
