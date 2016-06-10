@@ -24,7 +24,7 @@ function stanford_ssp_install() {
   variable_set('stanford_ssp_auth_restrictions', 'any');
   variable_set('stanford_ssp_auth_restriction_sunet', '');
   variable_set('stanford_ssp_auth_restriction_group', '');
-  variable_set('stanford_ssp_auth_role_map', 'merge');
+  variable_set('stanford_ssp_auth_role_map', 'grant');
   variable_set('stanford_ssp_show_local_login', TRUE);
   variable_set('stanford_ssp_show_sso_login', TRUE);
 
@@ -39,11 +39,11 @@ function stanford_ssp_install() {
   foreach ($roles as $role) {
     $role_exists = (bool) db_query("SELECT COUNT(*) FROM {role} WHERE name = :name", array(':name' => $role))->fetchField();
     if (!$role_exists) {
-      $id = db_insert('role')
+      db_insert('role')
         ->fields(array(
           'name' => $role,
         ))
-      ->execute();
+        ->execute();
       drupal_set_message(st('Added Role @role', array('@role' => $role)));
     }
   }
@@ -77,6 +77,7 @@ function stanford_ssp_uninstall() {
   variable_del('stanford_ssp_show_local_login');
   variable_del('stanford_ssp_show_sso_login');
   variable_del('stanford_ssp_sso_link_text');
+  variable_del('stanford_ssp_debug');
 }
 
 /**
@@ -116,4 +117,11 @@ function stanford_ssp_schema() {
     'primary key' => array('sunet'),
   );
   return $schema;
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function stanford_ssp_update_7200(&$sandbox) {
+  drupal_install_schema("stanford_ssp");
 }

@@ -26,7 +26,7 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('General Configuration'),
     '#collapsible' => TRUE,
-    '#description' => t('Here you can configure the general settings for the use of this module.'),
+    '#description' => "<h4>" . t('Here you can configure the general settings for the use of this module. Please read the descriptions of each option carefully as it is possible to lock yourself out of this website if improperly configured.') . "</h4>",
     '#group' => 'togglers',
   );
 
@@ -55,7 +55,7 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
   $form['general-config']['simplesamlphp_auth_activate'] = array(
     '#type' => 'switch',
     '#title' => t('Enable authentication by SSO'),
-    '#description' => t("Enabling before configuring the module could lock you out of your website."),
+    '#description' => t("Turn on to allow users to sign in to this website using single sign on. <br />Warning: Enabling before configuring this module could lock you out of your website."),
     '#default_value' => variable_get('simplesamlphp_auth_activate', FALSE),
   );
 
@@ -64,14 +64,14 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
     '#type' => 'switch',
     '#title' => t('Allow authentication with local Drupal accounts'),
     '#default_value' => variable_get('simplesamlphp_auth_allowdefaultlogin', TRUE),
-    '#description' => t('Check this box if you want to let people log in with local Drupal accounts (without using simpleSAMLphp). If you want to restrict this privilege to certain users you can enter the Drupal user IDs in the authorizations tab.'),
+    '#description' => t('Turn on if you want to let people log in with local Drupal accounts (Not SSO).'),
   );
 
   // Enables automatic login when hitting a 403.
   $form['general-config']['stanford_ssp_automagic_login'] = array(
     '#type' => 'switch',
     '#title' => t('Enable automatic login'),
-    '#description' => t("Try to authenticate the user if they are presented with a 403 access denied response."),
+    '#description' => t("Try to automatically authenticate the user if they are presented with a (403) access denied page."),
     '#default_value' => variable_get('stanford_ssp_automagic_login', TRUE),
   );
 
@@ -80,14 +80,14 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
     '#type' => 'switch',
     '#title' => t('Force users to log in with HTTPS.'),
     '#default_value' => variable_get('stanford_ssp_force_https', FALSE),
-    '#description' => t("Should be enabled on production websites."),
+    '#description' => t("Enforce that authentication and authenticated transactions happen over HTTPS. This should be enabled on production websites."),
   );
 
   $form['general-config'] ['stanford_ssp_redirect_on_login'] = array(
     '#type' => 'textfield',
-    '#title' => t('Redirect all users on successfull login to this url.'),
+    '#title' => t('Redirect all users on successful login to this url.'),
     '#default_value' => variable_get('stanford_ssp_redirect_on_login', FALSE),
-    '#description' => t("Force the redirect of all users to a specific url no matter where they logged in from."),
+    '#description' => t("Force the redirect of all users to a specific url no matter where they logged in from. This should be entered as a relative url. eg: admin/config/stanford"),
   );
 
   // User Config
@@ -98,13 +98,13 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
     '#type' => 'switch',
     '#title' => t('Register users (i.e., auto-provisioning)'),
     '#default_value' => variable_get('simplesamlphp_auth_registerusers', TRUE),
-    '#description' => t("Determines wether or not the module should automatically create/register new Drupal accounts for users that authenticate using SimpleSAMLphp. Unless you've done some custom work to provision Drupal accounts with the necessary authmap entries you will want this checked. NOTE: If unchecked each user must already have been provisioned a Drupal account with an appropriate entry in the authmap table before logging in. Otherwise they will receive a notice and be denied access. Be aware that simply creating a Drupal account will not create the necessary entry in the authmap table."),
+    '#description' => t("Automatically create an account for a new user on successful log in. Without this enabled only those with user accounts already created in this website can log in."),
   );
 
   // Connect existing user accounts.
   $form['user-config']['simplesamlphp_auth_autoenablesaml'] = array(
     '#type' => 'switch',
-    '#title' => t('Automatically enable SAML authentication for existing users upon successful login'),
+    '#title' => t('Automatically enable SSO authentication for existing users upon successful login. This will update existing accounts to be able to authenticate with SSO.'),
     '#default_value' => variable_get('simplesamlphp_auth_autoenablesaml', FALSE),
   );
 
@@ -119,9 +119,9 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
   // Allow for both local passwords and SAML based auth.
   $form['user-config']['simplesamlphp_auth_allowsetdrupalpwd'] = array(
     '#type' => 'switch',
-    '#title' => t('Allow SAML users to set Drupal passwords.'),
+    '#title' => t('Allow SSO users to set Drupal passwords.'),
     '#default_value' => variable_get('simplesamlphp_auth_allowsetdrupalpwd', FALSE),
-    '#description' => t('Set this to ON if you want to let people set passwords for their local Drupal accounts. This will allow users to log in using either SAML or a local Drupal account. Disabling this removes the password change fields from the user profile form.<br/>NOTE: In order for them to login using their local Drupal password you must allow local logins with the settings below.'),
+    '#description' => t('Set this to ON if you want to let users set passwords for their local Drupal accounts. This will allow users to log in using either SSO or a local Drupal account password. Disabling this removes the password change fields from the user profile form.'),
     '#states' => array(
       'enabled' => array(
         ':input[name="simplesamlphp_auth_allowdefaultlogin"]' => array('checked' => TRUE),
@@ -134,21 +134,21 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
 
   $form['saml-config']['simplesamlphp_auth_installdir'] = array(
     '#type' => 'textfield',
-    '#title' => t('Installation directory (default: /usr/share/simplesamlphp)'),
+    '#title' => t('Installation directory'),
     '#default_value' => variable_get('simplesamlphp_auth_installdir', '/usr/share/simplesamlphp'),
-    '#description' => t('The base directory of simpleSAMLphp. Absolute path with no trailing slash.'),
+    '#description' => t('The base directory of simpleSAMLphp. Absolute path with no trailing slash. default: /usr/share/simplesamlphp'),
   );
 
   $form['saml-config']['simplesamlphp_auth_authsource'] = array(
     '#type' => 'textfield',
-    '#title' => t('Authenticaton source for this SP (default: default-sp)'),
+    '#title' => t('Authenticaton source for this service provider'),
     '#default_value' => variable_get('simplesamlphp_auth_authsource', 'default-sp'),
-    '#description' => t('The name of the source to use from /usr/share/simplesamlphp/config/authsources.php'),
+    '#description' => t('The name of the source to use from //config/authsources.php. default: default-sp'),
   );
 
   $form['saml-config']['simplesamlphp_auth_user_name'] = array(
     '#type' => 'textfield',
-    '#title' => t("Which attribute from simpleSAMLphp should be used as user's name"),
+    '#title' => t("Which attribute should be used as user's name"),
     '#default_value' => variable_get('simplesamlphp_auth_user_name', 'displayName'),
     '#description' => t('Example: <i>eduPersonPrincipalName</i> or <i>displayName</i><br />If the attribute is multivalued, the first value will be used.'),
     '#required' => TRUE,
@@ -156,7 +156,7 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
 
   $form['saml-config']['simplesamlphp_auth_unique_id'] = array(
     '#type' => 'textfield',
-    '#title' => t('Which attribute from simpleSAMLphp should be used as unique identifier for the user'),
+    '#title' => t('Which attribute should be used as unique identifier for the user'),
     '#default_value' => variable_get('simplesamlphp_auth_unique_id', 'eduPersonPrincipalName'),
     '#description' => t('Example: <i>eduPersonPrincipalName</i> or <i>eduPersonTargetedID</i><br />If the attribute is multivalued, the first value will be used.'),
     '#required' => TRUE,
@@ -181,7 +181,6 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
  */
 function stanford_ssp_authorizations_form($form, &$form_state) {
 
-
   // Vertical Tab container.
   $form['togglers'] = array(
     '#type' => 'vertical_tabs',
@@ -194,7 +193,7 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
   // Tab for the general options.
   $form['saml-config'] = array(
     '#type' => 'fieldset',
-    '#title' => t('SAML Accounts'),
+    '#title' => t('SSO Accounts'),
     '#collapsible' => TRUE,
     '#group' => 'togglers',
   );
@@ -207,17 +206,17 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
     '#group' => 'togglers',
   );
 
-  // SAML AUTH CONFIG
+  // SSO AUTH CONFIG
   // -------------------------------------------------------------------
 
   $options = array(
-    'any' => t("Allow any valid SUNet user."),
+    'any' => t("Allow any valid SSO (SUNet) user."),
     'restrict' => t("Restrict access to specific users and groups."),
   );
 
   $form['saml-config']['stanford_ssp_auth_restrictions'] = array(
     '#type' => 'radios',
-    '#title' => t('SAML Authorization Restrictions.'),
+    '#title' => t('SSO Authorization Restrictions.'),
     '#default_value' => variable_get('stanford_ssp_auth_restrictions', 'any'),
     '#options' => $options,
   );
@@ -257,14 +256,14 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
     '#multiple' => TRUE,
     '#title' => t('Which roles should be allowed to login with local accounts?'),
     '#default_value' => variable_get('simplesamlphp_auth_allowdefaultloginroles', array()),
-    '#description' => t('Roles that should be allowed to login without simpleSAMLphp. Examples are dev/admin roles or guest roles.'),
+    '#description' => t('Roles that should be allowed to login without SSO. Examples are dev/admin roles.'),
   );
 
   $form['local-config']['simplesamlphp_auth_allowdefaultloginusers'] = array(
     '#type' => 'textfield',
     '#title' => t('Which users should be allowed to login with local accounts?'),
     '#default_value' => variable_get('simplesamlphp_auth_allowdefaultloginusers', ''),
-    '#description' => t('Example: <i>1,2,3</i><br />A comma-separated list of user IDs that should be allowed to login without simpleSAMLphp. If left blank, all local accounts can login.'),
+    '#description' => t('Example: <i>1,2,3</i><br />A comma-separated list of user IDs that should be allowed to login without SSO. If left blank, all local accounts can login.'),
   );
 
   return system_settings_form($form);
@@ -280,8 +279,8 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
 
   $options = array(
     'none' => t("Do not adjust roles. Allow local administration of roles only."),
-    'merge' => t("Merge role mapping assignments with current account roles."),
-    'reassign' => t("Re-evaluate roles on every log in."),
+    'grant' => t("Grant new roles only. Will only add roles based on role assignments."),
+    'reassign' => t("Re-evaluate roles on every log in. This will grant and remove roles."),
   );
 
   $form['stanford_ssp_auth_role_map'] = array(
@@ -326,38 +325,51 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     t('Action')
   );
 
-  $rolemaps = variable_get("simplesamlphp_auth_rolepopulation", array());
-  $xp = explode("|", $rolemaps);
+  $rolemaps = variable_get("simplesamlphp_auth_rolepopulation", "");
+  if (!empty($rolemaps)) {
+    $xp = explode("|", $rolemaps);
+    foreach ($xp as $index => $rule) {
+      $button_id = 'remove_warid_' . $index;
+      $form[$button_id] = array(
+        '#name' => $button_id,
+        '#type' => 'submit',
+        '#value' => t('Remove Mapping'),
+        '#submit' => array('stanford_ssp_remove_waird'),
+      );
 
-  foreach ($xp as $index => $rule) {
-    $button_id = 'remove_warid_' . $index;
-    $form[$button_id] = array(
-      '#name' => $button_id,
-      '#type' => 'submit',
-      '#value' => t('Remove Mapping'),
-      '#submit' => array('stanford_ssp_remove_waird'),
-    );
+      // Special hidden element.
+      $form[$button_id . "_value"] = array(
+        '#type' => 'value',
+        '#value' => $index,
+      );
 
-    // Special hidden element.
-    $form[$button_id . "_value"] = array(
-      '#type' => 'value',
-      '#value' => $index,
-    );
+      // $rule = rid:expression.
+      $bits = explode(':', $rule, 2);
+      $role = user_role_load($bits[0]);
+      $eval = str_getcsv($bits[1]);
 
-    // $rule = rid:expression.
-    $bits = explode(':', $rule, 2);
-    $role = user_role_load($bits[0]);
-    $eval = str_getcsv($bits[1]);
-
-    $row = array($role->name, $eval[2], drupal_render($form[$button_id]));
-    $table[] = $row;
+      $row = array($role->name, $eval[2], drupal_render($form[$button_id]));
+      $table[] = $row;
+    }
   }
 
   $form['add_roles'] = array(
     '#markup' => theme('table', array(
       'header' => $header,
       'rows' => $table,
+      'attributes' => array(
+        "class" => array(
+          'add-roles-table',
+        ),
+      ),
     )),
+    // Unfortunately states don't work here so we added a bit of JS to account
+    // for the loss.
+    '#attached' => array(
+      'js' => array(
+        drupal_get_path('module', 'stanford_ssp') . '/js/stanford_ssp.js',
+      ),
+    ),
   );
 
   // END ROLE MAPPING FORM.
@@ -376,23 +388,23 @@ function stanford_ssp_login_block_forms_form($form, &$form_state) {
 
   $form['stanford_ssp_show_local_login'] = array(
     '#type' => 'switch',
-    '#title' => t('Enable local login form on user page'),
+    '#title' => t('Show the local login form on the user page'),
     '#default_value' => variable_get('stanford_ssp_show_local_login', TRUE),
-    '#description' => t("Turn on to show the local Drupal account login option on the user page."),
+    '#description' => t("Turn on to show the local Drupal account login option on the !link.", array("!link" => l("user page", "user"))),
   );
 
   $form['stanford_ssp_show_sso_login'] = array(
     '#type' => 'switch',
-    '#title' => t('Enable SSO login link on user page'),
+    '#title' => t('Show the SSO login link on user page'),
     '#default_value' => variable_get('stanford_ssp_show_sso_login', TRUE),
-    '#description' => t("Turn on to show the SSO (SAML) login link on the user page."),
+    '#description' => t("Turn on to show the SSO login link on the !link.", array("!link" => l("user page", "user"))),
   );
 
   $form['stanford_ssp_sso_link_text'] = array(
     '#type' => 'textfield',
-    '#title' => t('SSO (SAML) login link text?'),
+    '#title' => t('SSO login link text'),
     '#default_value' => variable_get('stanford_ssp_sso_link_text', t("Log in with your SUNet ID »")),
-    '#description' => t('Override the link text for the SSO login on the user page.'),
+    '#description' => t("Override the link text for the SSO login link on the !link.", array("!link" => l("user page", "user"))),
   );
 
 
@@ -471,6 +483,20 @@ function stanford_ssp_add_sso_user($form, &$form_state) {
  */
 
 /**
+ * Validation function for stanford_ssp_configuration_form().
+ */
+function stanford_ssp_configuration_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+
+  // Prevent both ssp and local login options from being disabled.
+  if ($values["simplesamlphp_auth_activate"] === 0 && $values["simplesamlphp_auth_allowdefaultlogin"] === 0) {
+    form_set_error('simplesamlphp_auth_allowdefaultlogin');
+    form_set_error('simplesamlphp_auth_activate', "Both SSO and Local log in cannot be disabled or you will lock yourself out of your site. Please enable one.");
+  }
+
+}
+
+/**
  * Validation function for Add WebAuth User form
  */
 function stanford_ssp_add_sso_user_validate($form, &$form_state) {
@@ -485,7 +511,7 @@ function stanford_ssp_add_sso_user_validate($form, &$form_state) {
   // or a keyed array if there are authmap entries.
   $authmaps = user_get_authmaps($authname);
 
-  if ((($authmaps) !== 0) && ($authmaps['authname_simplesamlphp_auth'] == $authname)) {
+  if ((($authmaps) !== 0) && isset($authmaps['authname_simplesamlphp_auth']) && ($authmaps['authname_simplesamlphp_auth'] == $authname)) {
     form_set_error('sunetid', 'Could not create user. Authname ' . $authname . ' already exists. Has the user already been created with a different username but the same SUNetID?');
   }
 
@@ -519,8 +545,22 @@ function stanford_ssp_add_sso_user_validate($form, &$form_state) {
     form_set_error('email', 'Could not create user. Email ' . $email . ' already in use.');
   }
 
+  // Check that the sunet doesn't already exist.
+  $suuser = stanford_ssp_user_load_by_sunetid($sunet);
+  if ($suuser) {
+    form_set_error("sunetid", "A user with that sunetid already exists.");
+  }
+
 }
 
+/**
+ * Validation hook for stanford_ssp_authorizations_form.
+ */
+function stanford_ssp_authorizations_form_validate(&$form, &$form_state) {
+  $values = $form_state["values"];
+  $workgroups = stanford_ssp_format_entitlement($values['stanford_ssp_auth_restriction_group']);
+  form_set_value($form['saml-config']['stanford_ssp_auth_restriction_group'], $workgroups, $form_state);
+}
 
 
 /**
@@ -565,7 +605,7 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
     DRUPAL_AUTHENTICATED_RID => TRUE
   );
 
-  // Merge in roles from config form.
+  // Add in roles from config form.
   $config_roles = array_keys($form_state["values"]["roles"]);
   foreach ($config_roles as $rid) {
     $roles[$rid] = TRUE;
@@ -584,7 +624,7 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
   // Add an authmap to the authmap table.
   user_set_authmaps($account, array('authname_simplesamlphp_auth' => $authname));
   watchdog('Stanford SSP', 'Created user: %user', array('%user' => $name));
-  $message = t('Successfully created SAML account for %user', array('%user' => $name));
+  $message = t('Successfully created SSO account for %user', array('%user' => $name));
   drupal_set_message($message);
 
   // Was the notify checkbox checked?
@@ -598,6 +638,7 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
     'sunet' => $sunet,
     'uid' => $account->uid,
   );
+  
   drupal_write_record("stanford_ssp_sunetid", $record);
 }
 
@@ -613,6 +654,8 @@ function stanford_ssp_role_mappings_form_submit($form, &$form_state) {
   $entitlement = $form_state['values']['entitlement'];
   $role = $form_state['values']['role_id'];
 
+  $entitlement = stanford_ssp_format_entitlement($entitlement);
+
   // The silly save button could trigger this if there is not a value.
   if (!empty($entitlement) && !empty($role)) {
     stanford_ssp_map_entitlement_to_role($entitlement, $role);
@@ -624,21 +667,19 @@ function stanford_ssp_role_mappings_form_submit($form, &$form_state) {
  * Maps an entitlement to a role.
  *
  * @param string $entitlement
- *   A value in eduPersonEntitlement, e.g., anchorage_support
+ *   A value in eduPersonEntitlement, e.g., anchorage_support.
  * @param mixed $role
  *   Either the role id or a name.
- *
- * Map an entitlement to a role.
  */
 function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
   $entitlement = check_plain($entitlement);
-  // look up rid.
+  // Look up rid.
 
   $role_object = FALSE;
   if (is_numeric($role)) {
     $role_object = user_role_load($role);
   }
-  else if (is_scalar($role)) {
+  elseif (is_scalar($role)) {
     $role_object = user_role_load_by_name($role);
   }
 

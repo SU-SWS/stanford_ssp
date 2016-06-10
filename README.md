@@ -1,5 +1,5 @@
 #[Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
-##### Version: 7.x-1.x
+##### Version: 7.x-2.x
 
 Maintainers: [jbickar](https://github.com/jbickar), [sherakama](https://github.com/sherakama)
 
@@ -19,10 +19,7 @@ Installation
 
 Install this module like any other module. [See Drupal Documentation](https://drupal.org/documentation/install/modules-themes/modules-7)
 
-Download and install the simplesamlphp_auth contrib module and add the following patches:
-  * https://www.drupal.org/files/issues/init-logout-notice-2717473-5.patch
-  * https://www.drupal.org/files/issues/cookie-message-alert.patch
-  * https://www.drupal.org/files/issues/allow-modules-to-load-ext-user-2635152-8.patch
+Download and install the simplesamlphp_auth contrib module and add the patches this module needs by running the drush.make file included with this module.
 
 ##TODO: Note about SAML and SIMPLESAML
 

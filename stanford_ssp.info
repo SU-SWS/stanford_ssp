@@ -1,9 +1,9 @@
 name = Stanford SimpleSAML PHP
 description = Configures SimpleSAML PHP auth to work in Stanford web environment
 core = 7.x
-version = 7.x-1.0-dev
+version = 7.x-2.0-dev
 package = Stanford
 project status url = https://github.com/SU-SWS/stanford_ssp
-dependencies[] = simplesamlphp_auth (>= 7.x-3.x)
+dependencies[] = simplesamlphp_auth
 dependencies[] = switch
 configure = admin/config/stanford/stanford_ssp
