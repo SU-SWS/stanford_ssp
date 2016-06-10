@@ -581,6 +581,7 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
     return;
   }
 
+  // Add an authmap to the authmap table.
   user_set_authmaps($account, array('authname_simplesamlphp_auth' => $authname));
   watchdog('Stanford SSP', 'Created user: %user', array('%user' => $name));
   $message = t('Successfully created SAML account for %user', array('%user' => $name));
@@ -592,6 +593,12 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
     drupal_set_message("Email sent to user", "status");
   }
 
+  // Save the sunetid to the db.
+  $record = array(
+    'sunet' => $sunet,
+    'uid' => $account->uid,
+  );
+  drupal_write_record("stanford_ssp_sunetid", $record);
 }
 
 

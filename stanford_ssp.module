@@ -212,65 +212,6 @@ function stanford_ssp_force_https() {
 }
 
 /**
- * Implements hook_form_FORMID_alter().
- *
- * @param  [type] &$form       [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
- */
-function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
-
-  // Check for https forcing:
-  stanford_ssp_force_https();
-
-  // Remove the Federated login link because it is ugly.
-  if (isset($form["links"])) {
-    unset($form["links"]);
-  }
-
-  $show_sso = variable_get("stanford_ssp_show_sso_login", TRUE);
-  $show_local = variable_get("stanford_ssp_show_local_login", TRUE);
-
-  // Display (or not) the login link for SSO (SAML).
-  if ($show_sso) {
-    $form['saml_auth'] = array(
-      '#type' => 'fieldset',
-      '#title' => "SUNet Login",
-      '#weight' => -10,
-    );
-    $link_text = variable_get("stanford_ssp_sso_link_text", t("Log in with your SUNet ID »"));
-    $form['saml_auth']['saml_link'] = array(
-      '#prefix' => "<p>",
-      '#markup' => l($link_text, "sso/login"),
-      '#suffix' => "</p>",
-    );
-  }
-
-  // If local logen form is enabled add a fieldset to title it.
-  if ($show_local) {
-    // Add the fieldset for the Drupal login form.
-    $form['drupal_auth'] = array(
-      '#type' => 'fieldset',
-      '#title' => "Drupal Login",
-      '#weight' => 0,
-    );
-  }
-
-  // If not showing local we need to unset the login form items.
-  if (!$show_local) {
-    unset($form['name']);
-    unset($form['pass']);
-    unset($form['actions']);
-  }
-
-  // If nothing available print out a message.
-  if (!$show_local && !$show_sso) {
-    $form["nothingtoseehere"]["#markup"] = "<h3>No login options available.</h3>";
-  }
-
-}
-
-/**
  * Handles 403 page errors and provided the automagic redirection to SAML login.
  * @param  [type] &$page [description]
  * @return [type]        [description]
@@ -334,6 +275,26 @@ function stanford_ssp_user_load_by_sunetid($sunetid) {
   }
 
   return FALSE;
+}
+
+/**
+ * Returns the sunet id of a user by their Drupal uid.
+ *
+ * @param  int $uid
+ *   Drupal user account id
+ *
+ * @return mixed
+ *   string if valid account found.
+ *   False if none.
+ */
+function stanford_ssp_get_sunetid_by_uid($uid) {
+  $uid = (int) $uid;
+  $r = db_select("stanford_ssp_sunetid", "sss")
+    ->fields("sss", array("sunet"))
+    ->condition("uid", $uid)
+    ->execute()
+    ->fetchObject();
+  return (isset($r->sunet)) ? $r->sunet : FALSE;
 }
 
 /**
@@ -474,9 +435,107 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
       break;
   }
 
-  // Only save if we have something to save.
-  if (!empty($userinfo)) {
-    $user = user_save($user, $userinfo);
+  // Always add the SSO User role if it exists.
+  $sso_user_role = user_role_load_by_name("SSO User");
+  if ($sso_user_role) {
+    $userinfo['roles'][$sso_user_role->rid] = $sso_user_role->name;
+  }
+
+  // Save the new roles.
+  $user = user_save($user, $userinfo);
+
+}
+
+/**
+ * *****************************************
+ * FORM ALTERS
+ * *****************************************
+ */
+
+/**
+ * User account form.
+ * @param  [type] &$form       [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function stanford_ssp_form_user_profile_form_alter(&$form, &$form_state) {
+
+  // Remove enable this user as saml checkbox.
+  unset($form["saml"]);
+
+  // Check for editing a user. If we don't have a user we can end.
+  $account = isset($form["#user"]) ? $form["#user"] : FALSE;
+  if (!$account) {
+    return;
+  }
+
+  // Check to see if user is a SAML user.
+  $sunet = stanford_ssp_get_sunetid_by_uid($account->uid);
+  if (!$sunet) {
+    return;
+  }
+
+  // If a saml user check to see if they can use the password fields.
+  if (!variable_get("simplesamlphp_auth_allowsetdrupalpwd", FALSE)) {
+    $form["account"]['pass']['#access'] = FALSE;
+  }
+
+}
+/**
+ * Implements hook_form_FORMID_alter().
+ *
+ * @param  [type] &$form       [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
+
+  // Check for https forcing:
+  stanford_ssp_force_https();
+
+  // Remove the Federated login link because it is ugly.
+  if (isset($form["links"])) {
+    unset($form["links"]);
+  }
+
+  $show_sso = variable_get("stanford_ssp_show_sso_login", TRUE);
+  $show_local = variable_get("stanford_ssp_show_local_login", TRUE);
+
+  // Display (or not) the login link for SSO (SAML).
+  if ($show_sso) {
+    $form['saml_auth'] = array(
+      '#type' => 'fieldset',
+      '#title' => "SUNet Login",
+      '#weight' => -10,
+    );
+    $link_text = variable_get("stanford_ssp_sso_link_text", t("Log in with your SUNet ID »"));
+    $form['saml_auth']['saml_link'] = array(
+      '#prefix' => "<p>",
+      '#markup' => l($link_text, "sso/login"),
+      '#suffix' => "</p>",
+    );
+  }
+
+  // If local logen form is enabled add a fieldset to title it.
+  if ($show_local) {
+    // Add the fieldset for the Drupal login form.
+    $form['drupal_auth'] = array(
+      '#type' => 'fieldset',
+      '#title' => "Drupal Login",
+      '#weight' => 0,
+    );
+  }
+
+  // If not showing local we need to unset the login form items.
+  if (!$show_local) {
+    unset($form['name']);
+    unset($form['pass']);
+    unset($form['actions']);
+  }
+
+  // If nothing available print out a message.
+  if (!$show_local && !$show_sso) {
+    $form["nothingtoseehere"]["#markup"] = "<h3>No login options available.</h3>";
   }
 
 }
