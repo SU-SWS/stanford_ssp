@@ -117,3 +117,10 @@ function stanford_ssp_schema() {
   );
   return $schema;
 }
+
+/**
+ * Implements hook_update_N().
+ */
+function stanford_ssp_update_7200(&$sandbox) {
+  drupal_install_schema("stanford_ssp");
+}
