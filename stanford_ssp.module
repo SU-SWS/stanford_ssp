@@ -413,6 +413,9 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
   // Action to perform when evaluating roles.
   $operation = variable_get("stanford_ssp_auth_role_map", "none");
 
+  // We ALWAYS want to map eduPersonAffiliation to roles.
+  stanford_ssp_auth_role_map_person_affiliation($user);
+
   // If the action to do is none then we can end this function.
   if ($operation == "none") {
     return;
@@ -449,6 +452,52 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
 
   // Save the new roles.
   $user = user_save($user, $userinfo);
+
+}
+
+/**
+ * Maps the affiliations to the user roles.
+ * @param  [type] $user [description]
+ * @param  [type] $saml [description]
+ * @return [type]       [description]
+ */
+function stanford_ssp_auth_role_map_person_affiliation($user) {
+  $roles = user_roles();
+  $attributes = simplesamlphp_auth_get_attributes();
+  $affiliations = $attributes['eduPersonAffiliation'];
+
+  // Role mapping array goes as such:
+  // regex => role name.
+  $maps = array(
+    '/faculty/i' => 'Stanford Faculty',
+    '/staff/i' => 'Stanford Staff',
+    '/postdoc/i' => 'Stanford Student',
+    '/student/i' => 'Stanford Student',
+    // '/member/' => 'SSO User',
+    // '/affiliate/' => 'SSO User',
+  );
+
+  // Loop through the expressions looking for matches in the maps array.
+  $matches = array();
+  foreach ($maps as $expression => $role_name) {
+    $has_matches = preg_grep($expression, $affiliations);
+
+    // If any of the affiliations match the pattern add it to the matches array
+    // keying by id so that we don't get duplicates.
+    if (count($has_matches)) {
+      // Check to see if the role exist. It may have been deleted.
+      $role = user_role_load_by_name($role_name);
+      if ($role) {
+        $matches[$role->rid] = $role->name;
+      }
+    }
+
+  }
+
+  // If anything was matched save the user.
+  if (count($matches)) {
+    $user = user_save($user, array('roles' => $matches));
+  }
 
 }
 
