@@ -85,7 +85,7 @@ function stanford_ssp_configuration_form($form = array(), &$form_state) {
 
   $form['general-config'] ['stanford_ssp_redirect_on_login'] = array(
     '#type' => 'textfield',
-    '#title' => t('Redirect all users on successfull login to this url.'),
+    '#title' => t('Redirect all users on successful login to this url.'),
     '#default_value' => variable_get('stanford_ssp_redirect_on_login', FALSE),
     '#description' => t("Force the redirect of all users to a specific url no matter where they logged in from."),
   );
