@@ -412,6 +412,11 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
     return;
   }
 
+  // Debug.
+  if (variable_get("stanford_ssp_debug", FALSE)) {
+    watchdog("stanford_ssp", "Auth roles alter attributes: %attr", array("%attr" => serialize($_simplesamlphp_auth_as)), WATCHDOG_DEBUG);
+  }
+
   // What roles are matchy pants.
   $roles = _simplesamlphp_auth_rolepopulation(variable_get('simplesamlphp_auth_rolepopulation', ''));
   $user_roles = user_roles();
