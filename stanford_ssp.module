@@ -244,6 +244,12 @@ function stanford_ssp_saml_ext_user_alter(&$ext_user, $_simplesamlphp_auth_saml_
     return;
   }
 
+    // Debug.
+  if (variable_get("stanford_ssp_debug", FALSE)) {
+    watchdog("stanford_ssp", "stanford_ssp_saml_ext_user_alter: %attr", array("%attr" => serialize($_simplesamlphp_auth_as)), WATCHDOG_DEBUG);
+  }
+
+
   // Doh, username not found. Try email.
   $mail = $_simplesamlphp_auth_saml_attributes[variable_get("simplesamlphp_auth_mailattr", "mail")];
   $ext_user = user_load_by_mail($mail);
@@ -410,11 +416,6 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
   // If the action to do is none then we can end this function.
   if ($operation == "none") {
     return;
-  }
-
-  // Debug.
-  if (variable_get("stanford_ssp_debug", FALSE)) {
-    watchdog("stanford_ssp", "Auth roles alter attributes: %attr", array("%attr" => serialize($_simplesamlphp_auth_as)), WATCHDOG_DEBUG);
   }
 
   // What roles are matchy pants.
