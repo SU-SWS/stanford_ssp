@@ -457,9 +457,9 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
 
 /**
  * Maps the affiliations to the user roles.
- * @param  [type] $user [description]
- * @param  [type] $saml [description]
- * @return [type]       [description]
+ * @param object $user
+ *   The user to check the attributes on. Probably should be the currently
+ *   logged in user as the attributes come from that user anyhow.
  */
 function stanford_ssp_auth_role_map_person_affiliation($user) {
   $roles = user_roles();
