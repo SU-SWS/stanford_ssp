@@ -280,8 +280,8 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
 
   $options = array(
     'none' => t("Do not adjust roles. Allow local administration of roles only."),
-    'merge' => t("Merge role mapping assignments with current account roles."),
-    'reassign' => t("Re-evaluate roles on every log in."),
+    'grant' => t("Grant new roles only. Will only add roles based on role assignments."),
+    'reassign' => t("Re-evaluate roles on every log in. This will grant and remove roles."),
   );
 
   $form['stanford_ssp_auth_role_map'] = array(
@@ -326,31 +326,32 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     t('Action')
   );
 
-  $rolemaps = variable_get("simplesamlphp_auth_rolepopulation", array());
-  $xp = explode("|", $rolemaps);
+  $rolemaps = variable_get("simplesamlphp_auth_rolepopulation", "");
+  if (!empty($rolemaps)) {
+    $xp = explode("|", $rolemaps);
+    foreach ($xp as $index => $rule) {
+      $button_id = 'remove_warid_' . $index;
+      $form[$button_id] = array(
+        '#name' => $button_id,
+        '#type' => 'submit',
+        '#value' => t('Remove Mapping'),
+        '#submit' => array('stanford_ssp_remove_waird'),
+      );
 
-  foreach ($xp as $index => $rule) {
-    $button_id = 'remove_warid_' . $index;
-    $form[$button_id] = array(
-      '#name' => $button_id,
-      '#type' => 'submit',
-      '#value' => t('Remove Mapping'),
-      '#submit' => array('stanford_ssp_remove_waird'),
-    );
+      // Special hidden element.
+      $form[$button_id . "_value"] = array(
+        '#type' => 'value',
+        '#value' => $index,
+      );
 
-    // Special hidden element.
-    $form[$button_id . "_value"] = array(
-      '#type' => 'value',
-      '#value' => $index,
-    );
+      // $rule = rid:expression.
+      $bits = explode(':', $rule, 2);
+      $role = user_role_load($bits[0]);
+      $eval = str_getcsv($bits[1]);
 
-    // $rule = rid:expression.
-    $bits = explode(':', $rule, 2);
-    $role = user_role_load($bits[0]);
-    $eval = str_getcsv($bits[1]);
-
-    $row = array($role->name, $eval[2], drupal_render($form[$button_id]));
-    $table[] = $row;
+      $row = array($role->name, $eval[2], drupal_render($form[$button_id]));
+      $table[] = $row;
+    }
   }
 
   $form['add_roles'] = array(
@@ -485,7 +486,7 @@ function stanford_ssp_add_sso_user_validate($form, &$form_state) {
   // or a keyed array if there are authmap entries.
   $authmaps = user_get_authmaps($authname);
 
-  if ((($authmaps) !== 0) && ($authmaps['authname_simplesamlphp_auth'] == $authname)) {
+  if ((($authmaps) !== 0) && isset($authmaps['authname_simplesamlphp_auth']) && ($authmaps['authname_simplesamlphp_auth'] == $authname)) {
     form_set_error('sunetid', 'Could not create user. Authname ' . $authname . ' already exists. Has the user already been created with a different username but the same SUNetID?');
   }
 
@@ -517,6 +518,12 @@ function stanford_ssp_add_sso_user_validate($form, &$form_state) {
   // the user will run into issues when making changes to their profile.
   if (user_load_by_mail($email)) {
     form_set_error('email', 'Could not create user. Email ' . $email . ' already in use.');
+  }
+
+  // Check that the sunet doesn't already exist.
+  $suuser = stanford_ssp_user_load_by_sunetid($sunet);
+  if ($suuser) {
+    form_set_error("sunetid", "A user with that sunetid already exists.");
   }
 
 }
@@ -565,7 +572,7 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
     DRUPAL_AUTHENTICATED_RID => TRUE
   );
 
-  // Merge in roles from config form.
+  // Add in roles from config form.
   $config_roles = array_keys($form_state["values"]["roles"]);
   foreach ($config_roles as $rid) {
     $roles[$rid] = TRUE;

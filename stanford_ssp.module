@@ -438,7 +438,7 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
 
     // Unline implesamlphp_auths re-assign roles option this will only add/grant
     // additional roles to the user.
-    case 'merge':
+    case 'grant':
       $values = $user->roles + $values;
       $userinfo = array('roles' => $values);
       break;
