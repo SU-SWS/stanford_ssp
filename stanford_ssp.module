@@ -594,3 +594,20 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
   }
 
 }
+
+/**
+ * Formats workgroup entitlment.
+ *
+ * Eg: anchorage:humanbiology-admins to anchorage_humanbiology-admins.
+ *
+ * @param string $entitlement
+ *   Eg: anchorage:humanbiology-admins.
+ *
+ * @return string
+ *   eg: anchorage_humanbiology-admins
+ */
+function stanford_ssp_format_entitlement($entitlement) {
+  $entitlement = strtolower($entitlement);
+  $entitlement = str_replace(":", "_", $entitlement);
+  return $entitlement;
+}

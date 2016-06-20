@@ -620,6 +620,8 @@ function stanford_ssp_role_mappings_form_submit($form, &$form_state) {
   $entitlement = $form_state['values']['entitlement'];
   $role = $form_state['values']['role_id'];
 
+  $entitlement = stanford_ssp_format_entitlement($entitlement);
+
   // The silly save button could trigger this if there is not a value.
   if (!empty($entitlement) && !empty($role)) {
     stanford_ssp_map_entitlement_to_role($entitlement, $role);
