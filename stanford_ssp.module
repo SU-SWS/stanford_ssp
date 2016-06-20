@@ -32,8 +32,8 @@ function stanford_ssp_menu() {
   // -------------------
 
   $items['admin/config/stanford/stanford_ssp'] = array(
-    'title' => "Stanford SSO (SAML)",
-    'description' => "Stanford Single Sign On (SAML) configuration settings.",
+    'title' => "Stanford SSO",
+    'description' => "Stanford Single Sign On configuration settings.",
     'page callback' => 'drupal_get_form',
     'page arguments' => array("stanford_ssp_configuration_form"),
     'access arguments' => array('administer stanford_ssp'),
@@ -41,8 +41,8 @@ function stanford_ssp_menu() {
   );
 
   $items['admin/config/stanford/stanford_ssp/settings'] = array(
-    'title' => "Stanford SSO (SAML)",
-    'description' => "Stanford Single Sign On (SAML) configuration settings.",
+    'title' => "Stanford SSO",
+    'description' => "Stanford Single Sign On configuration settings.",
     'page callback' => 'drupal_get_form',
     'page arguments' => array("stanford_ssp_configuration_form"),
     'access arguments' => array('administer stanford_ssp'),
