@@ -358,7 +358,19 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     '#markup' => theme('table', array(
       'header' => $header,
       'rows' => $table,
+      'attributes' => array(
+        "class" => array(
+          'add-roles-table',
+        ),
+      ),
     )),
+    // Unfortunately states don't work here so we added a bit of JS to account
+    // for the loss.
+    '#attached' => array(
+      'js' => array(
+        drupal_get_path('module', 'stanford_ssp') . '/js/stanford_ssp.js',
+      ),
+    ),
   );
 
   // END ROLE MAPPING FORM.
@@ -633,21 +645,19 @@ function stanford_ssp_role_mappings_form_submit($form, &$form_state) {
  * Maps an entitlement to a role.
  *
  * @param string $entitlement
- *   A value in eduPersonEntitlement, e.g., anchorage_support
+ *   A value in eduPersonEntitlement, e.g., anchorage_support.
  * @param mixed $role
  *   Either the role id or a name.
- *
- * Map an entitlement to a role.
  */
 function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
   $entitlement = check_plain($entitlement);
-  // look up rid.
+  // Look up rid.
 
   $role_object = FALSE;
   if (is_numeric($role)) {
     $role_object = user_role_load($role);
   }
-  else if (is_scalar($role)) {
+  elseif (is_scalar($role)) {
     $role_object = user_role_load_by_name($role);
   }
 
