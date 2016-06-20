@@ -256,14 +256,14 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
     '#multiple' => TRUE,
     '#title' => t('Which roles should be allowed to login with local accounts?'),
     '#default_value' => variable_get('simplesamlphp_auth_allowdefaultloginroles', array()),
-    '#description' => t('Roles that should be allowed to login without simpleSAMLphp. Examples are dev/admin roles or guest roles.'),
+    '#description' => t('Roles that should be allowed to login without SSO. Examples are dev/admin roles.'),
   );
 
   $form['local-config']['simplesamlphp_auth_allowdefaultloginusers'] = array(
     '#type' => 'textfield',
     '#title' => t('Which users should be allowed to login with local accounts?'),
     '#default_value' => variable_get('simplesamlphp_auth_allowdefaultloginusers', ''),
-    '#description' => t('Example: <i>1,2,3</i><br />A comma-separated list of user IDs that should be allowed to login without simpleSAMLphp. If left blank, all local accounts can login.'),
+    '#description' => t('Example: <i>1,2,3</i><br />A comma-separated list of user IDs that should be allowed to login without SSO. If left blank, all local accounts can login.'),
   );
 
   return system_settings_form($form);
