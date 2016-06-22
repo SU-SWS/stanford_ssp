@@ -429,13 +429,13 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
   // Action to perform when evaluating roles.
   $operation = variable_get("stanford_ssp_auth_role_map", "none");
 
-  // We ALWAYS want to map eduPersonAffiliation to roles.
-  stanford_ssp_auth_role_map_person_affiliation($user);
-
   // If the action to do is none then we can end this function.
   if ($operation == "none") {
     return;
   }
+
+  // We want to map eduPersonAffiliation to roles when not none.
+  stanford_ssp_auth_role_map_person_affiliation($user);
 
   // What roles are matchy pants.
   $roles = _simplesamlphp_auth_rolepopulation(variable_get('simplesamlphp_auth_rolepopulation', ''));
