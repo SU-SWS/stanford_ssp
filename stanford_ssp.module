@@ -166,7 +166,14 @@ function stanford_ssp_user_login() {
 
 /**
  * Authentication Endpoint.
- * @return [type] [description]
+ *
+ * Use this endpoint instead of the default `saml_login` endpoint included in
+ * the simplesaml module as it is easier to make adjustments prior to firing
+ * off that sequence through this function. For example: Check if the force
+ * https is on.
+ *
+ * @return array
+ *   Render array.
  */
 function stanford_ssp_sso_auth() {
   $output = array();
@@ -182,9 +189,11 @@ function stanford_ssp_sso_auth() {
 }
 
 /**
- * Checks to ensure user is on https and will force redirect if setting is enabled.
+ * Enforces the use https configuration setting.
  *
- * @return [type] [description]
+ * Checks to ensure user is on https and will force redirect if option is on.
+ * Also enforces secure cookies on https.
+ *
  */
 function stanford_ssp_force_https() {
 
@@ -213,12 +222,15 @@ function stanford_ssp_force_https() {
 
 /**
  * Handles 403 page errors and provided the automagic redirection to SAML login.
- * @param  [type] &$page [description]
- * @return [type]        [description]
+ *
+ * @param array &$page
+ *   The page render array.
  */
 function stanford_ssp_page_build(&$page) {
+  // We don't wnat to mess with the 403 page setting so we should check the
+  // header response on the page build.
   $headers = drupal_get_http_header();
-  if (isset($headers["status"]) && $headers["status"] == "403 Forbidden" && user_is_anonymous()) {
+  if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden") {
     if (variable_get("stanford_ssp_automagic_login", FALSE)) {
       unset($_GET['destination']);
       drupal_goto("sso/login");
@@ -232,9 +244,12 @@ function stanford_ssp_page_build(&$page) {
  * Needs a patch from https://www.drupal.org/node/2635152 in order for this
  * hook to exist. Without this hook, only username works for lookup.
  *
- * @param  [type] $ext_user                            [description]
- * @param  [type] $_simplesamlphp_auth_saml_attributes [description]
- * @param  [type] $auth_field                          [description]
+ * @param object $ext_user
+ *    A loaded user object.
+ * @param array $_simplesamlphp_auth_saml_attributes
+ *   User's Attributes from the simplesaml response.
+ * @param string $auth_field
+ *   A field name.
  *
  */
 function stanford_ssp_saml_ext_user_alter(&$ext_user, $_simplesamlphp_auth_saml_attributes, $auth_field) {
@@ -244,11 +259,10 @@ function stanford_ssp_saml_ext_user_alter(&$ext_user, $_simplesamlphp_auth_saml_
     return;
   }
 
-    // Debug.
+  // Debug.
   if (variable_get("stanford_ssp_debug", FALSE)) {
     watchdog("stanford_ssp", "stanford_ssp_saml_ext_user_alter: %attr", array("%attr" => serialize($_simplesamlphp_auth_as)), WATCHDOG_DEBUG);
   }
-
 
   // Doh, username not found. Try email.
   $mail = $_simplesamlphp_auth_saml_attributes[variable_get("simplesamlphp_auth_mailattr", "mail")];
@@ -267,7 +281,9 @@ function stanford_ssp_saml_ext_user_alter(&$ext_user, $_simplesamlphp_auth_saml_
 
 /**
  * Loads a user by sunet id.
- * @return [type] [description]
+ *
+ * @return mixed
+ *   A loaded user object or false if could not be loaded.
  */
 function stanford_ssp_user_load_by_sunetid($sunetid) {
   $uid = db_select("stanford_ssp_sunetid", "sss")
@@ -404,7 +420,7 @@ function stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $a
  */
 function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
   global $_simplesamlphp_auth_as;
-
+  
   // No authenticated user to work on. Go to bed.
   if (!$_simplesamlphp_auth_as->isAuthenticated()) {
     return;
