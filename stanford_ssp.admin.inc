@@ -483,6 +483,20 @@ function stanford_ssp_add_sso_user($form, &$form_state) {
  */
 
 /**
+ * Validation function for stanford_ssp_configuration_form().
+ */
+function stanford_ssp_configuration_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+
+  // Prevent both ssp and local login options from being disabled.
+  if ($values["simplesamlphp_auth_activate"] === 0 && $values["simplesamlphp_auth_allowdefaultlogin"] === 0) {
+    form_set_error('simplesamlphp_auth_allowdefaultlogin');
+    form_set_error('simplesamlphp_auth_activate', "Both SSO and Local log in cannot be disabled or you will lock yourself out of your site. Please enable one.");
+  }
+
+}
+
+/**
  * Validation function for Add WebAuth User form
  */
 function stanford_ssp_add_sso_user_validate($form, &$form_state) {
