@@ -571,9 +571,11 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
 
   $show_sso = variable_get("stanford_ssp_show_sso_login", TRUE);
   $show_local = variable_get("stanford_ssp_show_local_login", TRUE);
+  $sso_on = variable_get("simplesamlphp_auth_activate", FALSE);
+  $local_on = variable_get("simplesamlphp_auth_allowdefaultlogin", TRUE);
 
   // Display (or not) the login link for SSO (SAML).
-  if ($show_sso) {
+  if ($show_sso && $sso_on) {
     $form['saml_auth'] = array(
       '#type' => 'fieldset',
       '#title' => "SUNet Login",
@@ -588,7 +590,7 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
   }
 
   // If local logen form is enabled add a fieldset to title it.
-  if ($show_local) {
+  if ($show_local && $local_on) {
     // Add the fieldset for the Drupal login form.
     $form['drupal_auth'] = array(
       '#type' => 'fieldset',
@@ -598,7 +600,7 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
   }
 
   // If not showing local we need to unset the login form items.
-  if (!$show_local) {
+  if (!$show_local || !$local_on) {
     unset($form['name']);
     unset($form['pass']);
     unset($form['actions']);
