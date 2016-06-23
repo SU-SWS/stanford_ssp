@@ -332,6 +332,13 @@ function stanford_ssp_user_insert(&$edit, $account, $category) {
   module_load_include("inc", "simplesamlphp_auth", "simplesamlphp_auth");
   $attributes = simplesamlphp_auth_get_attributes();
 
+  // If the new account and the current user don't have matching emails then
+  // the account must have been created by a form instead of through login.
+  if ($attributes['email'][0] !== $account->init) {
+    return;
+  }
+
+  // Act on the current user.
   if (!empty($attributes)) {
     $record = array(
       'sunet' => array_pop($attributes['uid']),
