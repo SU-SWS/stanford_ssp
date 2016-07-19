@@ -634,6 +634,6 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
 function stanford_ssp_format_entitlement($entitlement) {
   $entitlement = strtolower($entitlement);
   $entitlement = str_replace(":", "_", $entitlement);
-  $entitlement = str_replace("-", "_", $entitlement);
+  // $entitlement = str_replace("-", "_", $entitlement);
   return $entitlement;
 }
