@@ -9,6 +9,6 @@ projects[simplesamlphp_auth][download][url] = "http://git.drupal.org/project/sim
 projects[simplesamlphp_auth][download][revision] = "6e92be67b007e4e9f4a071b9a82c7db8fbcee2af"
 
 ; https://www.drupal.org/node/2745089 | User registration and loading options.
-projects[simplesamlphp_auth][patch][] = https://www.drupal.org/files/issues/user-registration-process_4.patch
+projects[simplesamlphp_auth][patch][] = https://www.drupal.org/files/issues/user-registration-process_5.patch
 ; https://www.drupal.org/node/2745991 | Move the user roles alter hook.
 projects[simplesamlphp_auth][patch][] = https://www.drupal.org/files/issues/moved-user_roles_alter_0.patch
