@@ -9,4 +9,4 @@ projects[simplesamlphp_auth][download][url] = "http://git.drupal.org/project/sim
 projects[simplesamlphp_auth][download][revision] = "6e92be67b007e4e9f4a071b9a82c7db8fbcee2af"
 
 ; https://www.drupal.org/node/2745089 | User registration and loading options.
-projects[simplesamlphp_auth][patch][] = https://www.drupal.org/files/issues/user-registration-process_5.patch
+projects[simplesamlphp_auth][patch][] = https://www.drupal.org/files/issues/user-registration-process_6.patch
