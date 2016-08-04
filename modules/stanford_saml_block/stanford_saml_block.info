@@ -1,7 +1,7 @@
 name = Stanford SAML Login Block
 description = Places the SUNetID Login block
 core = 7.x
-package = Anchorage
+package = Stanford
 version = 7.x-2.0-dev
 dependencies[] = block
 dependencies[] = context
