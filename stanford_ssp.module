@@ -94,30 +94,6 @@ function stanford_ssp_menu() {
 }
 
 /**
- * Implements hook_menu_alter().
- */
-function stanford_ssp_menu_alter(&$items) {
-  // Disable the simplesamlphp_auth settings pages because we override everything.
-  $items['admin/config/people/simplesamlphp_auth']['access callback'] = 'stanford_ssp_user_one_access_only';
-  $items['admin/config/people/simplesamlphp_auth/basic']['access callback'] = 'stanford_ssp_user_one_access_only';
-  $items['admin/config/people/simplesamlphp_auth/sync']['access callback'] = 'stanford_ssp_user_one_access_only';
-  $items['admin/config/people/simplesamlphp_auth/local']['access callback'] = 'stanford_ssp_user_one_access_only';
-}
-
-/**
- * Allow access for user 1 only.
- * @return bool
- *   True if user 1 is logged in.
- */
-function stanford_ssp_user_one_access_only() {
-  global $user;
-  if (isset($user->uid) && $user->uid == 1) {
-    return TRUE;
-  }
-  return FALSE;
-}
-
-/**
  * Implements hook_permission().
  */
 function stanford_ssp_permission() {
@@ -182,8 +158,8 @@ function stanford_ssp_sso_auth() {
   stanford_ssp_force_https();
 
   // A way in to simplesaml.
-  module_load_include("inc", "simplesamlphp_auth", "simplesamlphp_auth.pages");
-  simplesamlphp_auth_loginpage();
+  module_load_include("inc", "stanford_simplesamlphp_auth", "stanford_simplesamlphp_auth.pages");
+  stanford_simplesamlphp_auth_loginpage();
 
   return $output;
 }
@@ -227,7 +203,7 @@ function stanford_ssp_force_https() {
  *   The page render array.
  */
 function stanford_ssp_page_build(&$page) {
-  // We don't wnat to mess with the 403 page setting so we should check the
+  // We don't want to mess with the 403 page setting so we should check the
   // header response on the page build.
   $headers = drupal_get_http_header();
   if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden") {
@@ -252,32 +228,23 @@ function stanford_ssp_page_build(&$page) {
  *   A field name.
  *
  */
-function stanford_ssp_saml_ext_user_alter(&$ext_user, $_simplesamlphp_auth_saml_attributes, $auth_field) {
+ function stanford_ssp_saml_ext_user_alter(&$ext_user, $attributes, $auth_field) {
 
-  // If a user has already been found we don't need to provide any extra work.
-  if ($ext_user) {
-    return;
-  }
+   // If a user has already been found we don't need to provide any extra work.
+   if ($ext_user) {
+     return;
+   }
 
-  // Debug.
-  if (variable_get("stanford_ssp_debug", FALSE)) {
-    watchdog("stanford_ssp", "stanford_ssp_saml_ext_user_alter: %attr", array("%attr" => serialize($_simplesamlphp_auth_saml_attributes)), WATCHDOG_DEBUG);
-  }
+   // If still no user try sunet id.
+   if (!$ext_user) {
+     $sunet = $attributes["uid"];
+     if (is_array($sunet)) {
+       $sunet = array_pop($sunet);
+     }
+     $ext_user = stanford_ssp_user_load_by_sunetid($sunet);
+   }
 
-  // Doh, username not found. Try email.
-  $mail = $_simplesamlphp_auth_saml_attributes[variable_get("simplesamlphp_auth_mailattr", "mail")];
-  $ext_user = user_load_by_mail($mail);
-
-  // If still no user try sunet id.
-  if (!$ext_user) {
-    $sunet = $_simplesamlphp_auth_saml_attributes["uid"];
-    if (is_array($sunet)) {
-      $sunet = array_pop($sunet);
-    }
-    $ext_user = stanford_ssp_user_load_by_sunetid($sunet);
-  }
-
-}
+ }
 
 /**
  * Loads a user by sunet id.
@@ -324,13 +291,12 @@ function stanford_ssp_get_sunetid_by_uid($uid) {
  */
 function stanford_ssp_user_insert(&$edit, $account, $category) {
 
-  if (!_simplesaml_auth_autoload()) {
-    return;
-  }
-
   // Get the users attributes.
-  module_load_include("inc", "simplesamlphp_auth", "simplesamlphp_auth");
-  $attributes = simplesamlphp_auth_get_attributes();
+  try {
+    $attributes = stanford_simplesamlphp_auth_get_saml_attributes();
+  } catch(Exception $e) {
+    watchdog('stanford_ssp_user_insert', 'Could not load SAML information', array(), WATCHDOG_DEBUG);
+  }
 
   // If the new account and the current user don't have matching emails then
   // the account must have been created by a form instead of through login.
@@ -346,6 +312,7 @@ function stanford_ssp_user_insert(&$edit, $account, $category) {
     );
     drupal_write_record("stanford_ssp_sunetid", $record);
   }
+
 }
 
 /**
@@ -359,7 +326,7 @@ function stanford_ssp_user_delete($account) {
 }
 
 /**
- * Implements hook_simplesamlphp_auth_allow_login.
+ * Implements hook_stanford_simplesamlphp_auth_allow_login.
  *
  * @param array $attributes
  *   SAML Attributes.
@@ -367,7 +334,7 @@ function stanford_ssp_user_delete($account) {
  * @return bool
  *   True if ok. False is not allowed to log in.
  */
-function stanford_ssp_simplesamlphp_auth_allow_login($attributes) {
+function stanford_ssp_stanford_simplesamlphp_auth_allow_login($attributes) {
 
   // Is the user allowed to log in?
   $isok = TRUE;
@@ -425,11 +392,17 @@ function stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $a
  * @param  [type] $roles [description]
  * @return [type]        [description]
  */
-function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
-  global $_simplesamlphp_auth_as;
+function stanford_ssp_stanford_simplesamlphp_auth_user_roles_alter($user) {
+  $saml = stanford_simplesamlphp_auth_get_saml_info();
+  $source = $saml['source'];
+
+  // No source object. Must be a local user.
+  if (!is_object($source)) {
+    return;
+  }
 
   // No authenticated user to work on. Go to bed.
-  if (!$_simplesamlphp_auth_as->isAuthenticated()) {
+  if (!$source->isAuthenticated()) {
     return;
   }
 
@@ -441,11 +414,8 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
     return;
   }
 
-  // We want to map eduPersonAffiliation to roles when not none.
-  stanford_ssp_auth_role_map_person_affiliation($user);
-
   // What roles are matchy pants.
-  $roles = _simplesamlphp_auth_rolepopulation(variable_get('simplesamlphp_auth_rolepopulation', ''));
+  $roles = stanford_simplesamlphp_auth_rolepopulation(variable_get('stanford_simplesamlphp_auth_rolepopulation', ''));
   $user_roles = user_roles();
   $userinfo = FALSE;
   $values = array_intersect_key($user_roles, $roles);
@@ -462,8 +432,8 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
     // Unline implesamlphp_auths re-assign roles option this will only add/grant
     // additional roles to the user.
     case 'grant':
-      $values = $user->roles + $values;
-      $userinfo = array('roles' => $values);
+      $new_roles= $user->roles + $values;
+      $userinfo = array('roles' => $new_roles);
       break;
   }
 
@@ -476,6 +446,9 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
   // Save the new roles.
   $user = user_save($user, $userinfo);
 
+  // We want to map eduPersonAffiliation to roles.
+  stanford_ssp_auth_role_map_person_affiliation($user);
+
 }
 
 /**
@@ -484,9 +457,9 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter($user) {
  *   The user to check the attributes on. Probably should be the currently
  *   logged in user as the attributes come from that user anyhow.
  */
-function stanford_ssp_auth_role_map_person_affiliation($user) {
+function stanford_ssp_auth_role_map_person_affiliation(&$user) {
   $roles = user_roles();
-  $attributes = simplesamlphp_auth_get_attributes();
+  $attributes = stanford_simplesamlphp_auth_get_attributes();
   $affiliations = $attributes['eduPersonAffiliation'];
 
   // Role mapping array goes as such:
@@ -519,7 +492,8 @@ function stanford_ssp_auth_role_map_person_affiliation($user) {
 
   // If anything was matched save the user.
   if (count($matches)) {
-    $user = user_save($user, array('roles' => $matches));
+    $final_roles = $user->roles + $matches;
+    $user = user_save($user, array('roles' => $final_roles));
   }
 
 }
@@ -538,9 +512,6 @@ function stanford_ssp_auth_role_map_person_affiliation($user) {
  */
 function stanford_ssp_form_user_profile_form_alter(&$form, &$form_state) {
 
-  // Remove enable this user as saml checkbox.
-  unset($form["saml"]);
-
   // Check for editing a user. If we don't have a user we can end.
   $account = isset($form["#user"]) ? $form["#user"] : FALSE;
   if (!$account) {
@@ -554,7 +525,7 @@ function stanford_ssp_form_user_profile_form_alter(&$form, &$form_state) {
   }
 
   // If a saml user check to see if they can use the password fields.
-  if (!variable_get("simplesamlphp_auth_allowsetdrupalpwd", FALSE)) {
+  if (!variable_get("stanford_simplesamlphp_auth_allowsetdrupalpwd", FALSE)) {
     $form["account"]['pass']['#access'] = FALSE;
   }
 
@@ -578,8 +549,8 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
 
   $show_sso = variable_get("stanford_ssp_show_sso_login", TRUE);
   $show_local = variable_get("stanford_ssp_show_local_login", TRUE);
-  $sso_on = variable_get("simplesamlphp_auth_activate", FALSE);
-  $local_on = variable_get("simplesamlphp_auth_allowdefaultlogin", TRUE);
+  $sso_on = variable_get("stanford_simplesamlphp_auth_activate", FALSE);
+  $local_on = variable_get("stanford_simplesamlphp_auth_allowdefaultlogin", TRUE);
 
   // Display (or not) the login link for SSO (SAML).
   if ($show_sso && $sso_on) {
@@ -596,7 +567,7 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
     );
   }
 
-  // If local logen form is enabled add a fieldset to title it.
+  // If local login form is enabled add a fieldset to title it.
   if ($show_local && $local_on) {
     // Add the fieldset for the Drupal login form.
     $form['drupal_auth'] = array(
@@ -618,6 +589,27 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
     $form["nothingtoseehere"]["#markup"] = "<h3>No login options available.</h3>";
   }
 
+}
+/**
+ * Implements hook form alter.
+ * @param  [type] $form       [description]
+ * @param  [type] $form_state [description]
+ * @return [type]             [description]
+ */
+function stanford_ssp_form_user_pass_alter(&$form, &$form_state) {
+  $form["#validate"][] = "stanford_ssp_form_user_pass_alter_validate";
+}
+
+/**
+ * Prevent password reset from working if local accounts turned off.
+ * @param  [type] $form       [description]
+ * @param  [type] $form_state [description]
+ * @return [type]             [description]
+ */
+function stanford_ssp_form_user_pass_alter_validate($form, $form_state) {
+  if (!variable_get("stanford_simplesamlphp_auth_allowdefaultlogin", TRUE)) {
+    form_set_error("", t("We're sorry but local account login has been disabled. Password reset is not available at this time."));
+  }
 }
 
 /**

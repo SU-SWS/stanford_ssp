@@ -59,7 +59,7 @@ function stanford_saml_block_block_view($delta = '') {
       $stanford_ssp_link_text = variable_get('stanford_ssp_link_text', 'SUNetID Login');
       $block = array(
         'subject' => t('SUNetID Login'),
-        'content' => l($stanford_ssp_link_text, 'saml_login'),
+        'content' => l($stanford_ssp_link_text, 'sso/login'),
       );
       break;
   }

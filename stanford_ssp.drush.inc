@@ -59,7 +59,7 @@ function drush_stanford_ssp_saml_entitlement_role($entitlement, $role) {
   $rid = $role_object->rid;
 
   // Look up current role mapping, if any.
-  $role_mapping = variable_get('simplesamlphp_auth_rolepopulation');
+  $role_mapping = variable_get('stanford_simplesamlphp_auth_rolepopulation');
   if (!empty($role_mapping)) {
     $role_mapping .= "|";
   }
@@ -68,7 +68,7 @@ function drush_stanford_ssp_saml_entitlement_role($entitlement, $role) {
   $role_mapping .= $rid . ":eduPersonEntitlement,=," . $entitlement;
 
   // Save our mapping.
-  variable_set('simplesamlphp_auth_rolepopulation', $role_mapping);
+  variable_set('stanford_simplesamlphp_auth_rolepopulation', $role_mapping);
   $message = t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role));
   drupal_set_message($message);
   watchdog('stanford_ssp', $message);
@@ -112,6 +112,7 @@ function drush_stanford_ssp_saml_add_user($sunet) {
     $form_state["values"]["roles"] = $ids;
   }
 
+  // @todo: Make this an option.
   $nofify = drush_get_option("notify");
   if (!empty($nofify) && ($nofity == "true" || (int) $notify == 1)) {
     $form_state["values"]["notify"] = TRUE;
