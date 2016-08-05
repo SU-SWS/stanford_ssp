@@ -392,6 +392,11 @@ function stanford_ssp_stanford_simplesamlphp_auth_user_roles_alter($user) {
   $saml = stanford_simplesamlphp_auth_get_saml_info();
   $source = $saml['source'];
 
+  // No source object. Must be a local user.
+  if (!is_object($source)) {
+    return;
+  }
+
   // No authenticated user to work on. Go to bed.
   if (!$source->isAuthenticated()) {
     return;
@@ -404,9 +409,6 @@ function stanford_ssp_stanford_simplesamlphp_auth_user_roles_alter($user) {
   if ($operation == "none") {
     return;
   }
-
-  // We want to map eduPersonAffiliation to roles when not none.
-  stanford_ssp_auth_role_map_person_affiliation($user);
 
   // What roles are matchy pants.
   $roles = stanford_simplesamlphp_auth_rolepopulation(variable_get('stanford_simplesamlphp_auth_rolepopulation', ''));
@@ -440,6 +442,9 @@ function stanford_ssp_stanford_simplesamlphp_auth_user_roles_alter($user) {
   // Save the new roles.
   $user = user_save($user, $userinfo);
 
+  // We want to map eduPersonAffiliation to roles.
+  stanford_ssp_auth_role_map_person_affiliation($user);
+
 }
 
 /**
@@ -448,7 +453,7 @@ function stanford_ssp_stanford_simplesamlphp_auth_user_roles_alter($user) {
  *   The user to check the attributes on. Probably should be the currently
  *   logged in user as the attributes come from that user anyhow.
  */
-function stanford_ssp_auth_role_map_person_affiliation($user) {
+function stanford_ssp_auth_role_map_person_affiliation(&$user) {
   $roles = user_roles();
   $attributes = stanford_simplesamlphp_auth_get_attributes();
   $affiliations = $attributes['eduPersonAffiliation'];

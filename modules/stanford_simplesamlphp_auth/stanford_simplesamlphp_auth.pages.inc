@@ -16,6 +16,11 @@ function stanford_simplesamlphp_auth_loginpage() {
   // Get the simplesamlphp session. Throws error if there is an issue.
   stanford_simplesamlphp_auth_autoload();
 
+  // Do nothing if config says we are not enabled.
+  if (!stanford_simplesamlphp_auth_is_enabled()) {
+    drupal_not_found();
+  }
+
   global $user;
   module_load_include('inc', 'stanford_simplesamlphp_auth');
   $saml = stanford_simplesamlphp_auth_get_saml_info();

@@ -36,7 +36,10 @@ function stanford_simplesamlphp_handle_user_login_register() {
   // If no external user then access denied as no user could be created and no
   // user was found.
   if (!$ext_user) {
-    drupal_access_denied();
+    // Cannot do an access denied here as it creates a redirect loop.
+    // @todo: Handle this moar better.
+    drupal_set_message("Sorry, but you do not have access to this page.", "error");
+    drupal_not_found();
     exit();
   }
 
@@ -100,7 +103,7 @@ function stanford_simplesamlphp_auth_is_auto_provision_enabled() {
  * Returns FALSE if at least one module returns FALSE
  */
 function stanford_simplesamlphp_auth_allow_user_by_attribute() {
-  $attributes = stanford_simplesamlphp_auth_get_attributes();
+  $attributes = stanford_simplesamlphp_auth_get_saml_attributes();
   foreach (module_implements('stanford_simplesamlphp_auth_allow_login') as $module) {
     if (module_invoke($module, 'stanford_simplesamlphp_auth_allow_login', $attributes) === FALSE) {
       return FALSE;

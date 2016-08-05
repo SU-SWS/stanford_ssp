@@ -105,6 +105,12 @@ function stanford_simplesamlphp_auth_init() {
  */
 function stanford_simplesamlphp_auth_user_login(&$edit, $account) {
 
+  // Only execute this on auth mapped users.
+  $saml = stanford_simplesamlphp_auth_get_saml_info();
+  if (empty($saml['instance'])) {
+    return;
+  }
+
   // Allow other modules to alter the users' roles.
   drupal_alter('stanford_simplesamlphp_auth_user_roles', $account);
 
