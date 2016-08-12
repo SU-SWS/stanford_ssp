@@ -106,10 +106,10 @@ function stanford_simplesamlphp_auth_init() {
 function stanford_simplesamlphp_auth_user_login(&$edit, $account) {
 
   // Only execute this on auth mapped users.
-  $saml = stanford_simplesamlphp_auth_get_saml_info();
-  if (empty($saml['instance'])) {
-    return;
-  }
+  // $saml = stanford_simplesamlphp_auth_get_saml_info();
+  // if (empty($saml['instance'])) {
+  //   return;
+  // }
 
   // Allow other modules to alter the users' roles.
   drupal_alter('stanford_simplesamlphp_auth_user_roles', $account);
@@ -166,9 +166,13 @@ function stanford_simplesamlphp_auth_validate_user_ability_to_login($user) {
   }
 
   // Allow other modules to allow or deny.
-  $other_checks = stanford_simplesamlphp_auth_allow_user_by_attribute();
+  $saml = stanford_simplesamlphp_auth_get_saml_info();
+  $other_checks = TRUE;
+  if (!empty($saml['instance'])) {
+    $other_checks = stanford_simplesamlphp_auth_allow_user_by_attribute();
+  }
 
-  // If either returns true
+  // If either returns true.
   return ($user_allowed_default_login && $other_checks);
 }
 
@@ -428,5 +432,3 @@ function stanford_simplesamlphp_auth_rolepopulation($rolemap) {
 
   return $roles;
 }
-
-
