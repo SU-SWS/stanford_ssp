@@ -586,6 +586,27 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
   }
 
 }
+/**
+ * Implements hook form alter.
+ * @param  [type] $form       [description]
+ * @param  [type] $form_state [description]
+ * @return [type]             [description]
+ */
+function stanford_ssp_form_user_pass_alter(&$form, &$form_state) {
+  $form["#validate"][] = "stanford_ssp_form_user_pass_alter_validate";
+}
+
+/**
+ * Prevent password reset from working if local accounts turned off.
+ * @param  [type] $form       [description]
+ * @param  [type] $form_state [description]
+ * @return [type]             [description]
+ */
+function stanford_ssp_form_user_pass_alter_validate($form, $form_state) {
+  if (!variable_get("stanford_simplesamlphp_auth_allowdefaultlogin", TRUE)) {
+    form_set_error("", t("We're sorry but Local account login not available at this time."));
+  }
+}
 
 /**
  * Formats workgroup entitlment.
