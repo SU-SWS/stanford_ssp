@@ -1,37 +1,25 @@
-#[Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
+#[Stanford SAML Block](https://github.com/SU-SWS/stanford_ssp)
 ##### Version: 7.x-2.x
 
 Maintainers: [jbickar](https://github.com/jbickar), [sherakama](https://github.com/sherakama)
-
 [Changelog.txt](CHANGELOG.txt)
 
-Simple SAML PHP authentication module for Drupal websites.
-
-
-Sub Modules
----
-
-**[Stanford SAML Block](https://github.com/SU-SWS/stanford_ssp/modules/stanford_saml_block)**
-Provides a login block and context for the sitewide header region. Also, alters the user login form to provide both local and SUNet login.
+This module places the saml login block where it should be using context. Also, alters the user login form at /user.
 
 Installation
 ---
 
 Install this module like any other module. [See Drupal Documentation](https://drupal.org/documentation/install/modules-themes/modules-7)
 
-Download and install the simplesamlphp_auth contrib module and add the patches this module needs by running the drush.make file included with this module.
-
-##TODO: Note about SAML and SIMPLESAML
-
 Configuration
 ---
 
-##TODO
+Nothing special needed.
 
 Troubleshooting
 ---
 
-Send a helpsu to Stanford Web Services.
+If you are experiencing issues with this module try reverting the feature first. If you are still experiencing issues try posting an issue on the GitHub issues page.
 
 Contribution / Collaboration
 ---
