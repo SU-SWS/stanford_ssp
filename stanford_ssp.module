@@ -292,7 +292,11 @@ function stanford_ssp_get_sunetid_by_uid($uid) {
 function stanford_ssp_user_insert(&$edit, $account, $category) {
 
   // Get the users attributes.
-  $attributes = stanford_simplesamlphp_auth_get_saml_attributes();
+  try {
+    $attributes = stanford_simplesamlphp_auth_get_saml_attributes();
+  } catch(Exception $e) {
+    watchdog('stanford_ssp_user_insert', 'Could not load SAML information', array(), WATCHDOG_DEBUG);
+  }
 
   // If the new account and the current user don't have matching emails then
   // the account must have been created by a form instead of through login.
