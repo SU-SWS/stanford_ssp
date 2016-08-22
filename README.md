@@ -1,8 +1,7 @@
 #[Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
-##### Version: 7.x-2.0
+##### Version: 7.x-2.0-dev
 
-Maintainers: [jbickar](https://github.com/jbickar),  
-[sherakama](https://github.com/sherakama)
+Maintainers: [jbickar](https://github.com/jbickar),  [sherakama](https://github.com/sherakama)
 
 [Changelog.txt](CHANGELOG.txt)
 
@@ -29,7 +28,9 @@ Install this module like any other module. [See Drupal Documentation](https://dr
 Prerequisites
 ---
 
-SimpleSAMLphp - you must have SimpleSAMLphp version 1.6 or newer installed and configured to operate as a service provider (SP). Your SimpleSAMLphp SP must be configured to use something other than "phpsession" (the default) for session storage. The alternatives are memcache or sql. The sql option was added in SimpleSAMLphp version 1.7. The simplest solution for folks running SimpleSAMLphp version 1.7 or higher is to edit the SimpleSAMLphp config/config.php by setting store.type => 'sql' and 'store.sql.dsn' => 'sqlite:/path/to/sqlitedatabase.sq3'
+SimpleSAMLphp - you must have SimpleSAMLphp version 1.6 or newer installed and configured to operate as a service provider (SP).
+
+Please see [simplesamlphp_auth modules configuration for more](https://github.com/SU-SWS/stanford_ssp/modules/stanford_simplesamlphp_auth).
 
 Configuration
 ---
