@@ -10,10 +10,10 @@ Simple SAML PHP authentication module for Drupal websites. This module is intend
 Sub Modules
 ---
 
-**[Stanford SAML Block](https://github.com/SU-SWS/stanford_ssp/modules/stanford_saml_block)**
+**[Stanford SAML Block](https://github.com/SU-SWS/stanford_ssp/tree/7.x-2.x/modules/stanford_saml_block)**
 Provides a login block and context for the sitewide header region. Also, alters the user login form to provide both local and SUNet login.
 
-**[Stanford SimpleSAMLPHP Authentication](https://github.com/SU-SWS/stanford_ssp/modules/stanford_simplesamlphp_auth)**
+**[Stanford SimpleSAMLPHP Authentication](https://github.com/SU-SWS/stanford_ssp/tree/7.x-2.x/modules/stanford_simplesamlphp_auth)**
 A complete re-write of the simplesamlphp_auth contrib module from Drupal.org. For more information on to why please see this thread: https://www.drupal.org/node/2745089
 
 Installation
@@ -30,7 +30,7 @@ Prerequisites
 
 SimpleSAMLphp - you must have SimpleSAMLphp version 1.6 or newer installed and configured to operate as a service provider (SP).
 
-Please see [simplesamlphp_auth modules configuration for more](https://github.com/SU-SWS/stanford_ssp/modules/stanford_simplesamlphp_auth).
+Please see [simplesamlphp_auth modules configuration for more](https://github.com/SU-SWS/stanford_ssp/tree/7.x-2.x/modules/stanford_simplesamlphp_auth#prerequisites).
 
 Configuration
 ---
