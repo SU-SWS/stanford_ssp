@@ -218,6 +218,8 @@ function stanford_simplesamlphp_auth_user_delete($account) {
  */
 function stanford_simplesamlphp_auth_form_alter(&$form, $form_state, $form_id) {
 
+  module_load_include("inc", "stanford_simplesamlphp_auth", "stanford_simplesamlphp_auth");
+
   // If this module is not enabled just go away quietly.
   if (!stanford_simplesamlphp_auth_is_enabled()) {
     // Exit without executing.
