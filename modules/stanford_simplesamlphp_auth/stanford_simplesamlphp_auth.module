@@ -233,7 +233,7 @@ function stanford_simplesamlphp_auth_form_alter(&$form, $form_state, $form_id) {
   $destination = drupal_get_destination();
   $link = l($login_name, $login_path, array('query' => $destination));
 
-  //Add SAML login link to user login form.
+  // Add SAML login link to user login form.
   if ($form_id == 'user_login_block' || $form_id == 'user_account_form') {
     $links = $form['links']['#markup'];
     $links = str_replace('</ul>', '<li class="saml">' . $link . '</li></ul>', $links);

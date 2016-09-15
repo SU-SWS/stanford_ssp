@@ -590,6 +590,10 @@ function stanford_simplesamlphp_auth_get_email() {
   if (isset($attributes[variable_get('stanford_simplesamlphp_auth_mailattr', 'mail')])) {
     return $attributes[variable_get('stanford_simplesamlphp_auth_mailattr', 'mail')][0];
   }
+  // If no valid mail attribute, cheat, and look for the sunet.
+  elseif (isset($attributes['uid'])) {
+    return $attributes['uid'][0] . "@stanford.edu";
+  }
   else {
     throw new Exception(t('Error in stanford_simplesamlphp_auth.module: No valid mail attribute set.'));
   }
