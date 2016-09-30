@@ -3,6 +3,7 @@
  * @file
  * Schema definitions. Install/update/uninstall hooks.
  */
+
 /**
  * Implements hook_install().
  */
@@ -124,4 +125,14 @@ function stanford_ssp_schema() {
  */
 function stanford_ssp_update_7200(&$sandbox) {
   drupal_install_schema("stanford_ssp");
+}
+
+/**
+ * Update any existing authmaps from left over systems.
+ */
+function stanford_ssp_update_7201(&$sandbox) {
+  db_update("authmap")
+    ->fields(array("module" => "stanford_simplesamlphp_auth"))
+    ->condition("module", "simplesamlphp_auth")
+    ->execute();
 }
