@@ -18,7 +18,7 @@ function stanford_ssp_menu() {
     'title' => "Stanford SSO Authentication Endpoint",
     'description' => "Authentication endpoint.",
     'page callback' => 'stanford_ssp_sso_auth',
-    'access callback' => "user_is_anonymous",
+    'access callback' => "stanford_ssp_access_login_page",
   );
 
   $items['sso/denied-test'] = array(
@@ -106,6 +106,26 @@ function stanford_ssp_permission() {
 }
 
 /**
+ * Custom access callback to validate user's access to login page sso/login
+ */
+function stanford_ssp_access_login_page() {
+
+  // If user is anonymous then go through the log-in process.
+  if (user_is_anonymous()) {
+    return TRUE;
+  }
+
+  // If the user is already logged in and a goto is set then do the redirect.
+  if (isset($_GET['goto'])) {
+    $goto = check_plain($_GET['goto']);
+    if (drupal_valid_path($goto)) {
+      drupal_goto($goto);
+    }
+  }
+}
+
+
+/**
  * Implements hook_init().
  *
  * Tried to use hook boot but too few api functions were available.
@@ -133,11 +153,23 @@ function stanford_ssp_init() {
  * Implements hook_user_login().
  */
 function stanford_ssp_user_login() {
+
   // Redirect the user if setting available.
   $redir = variable_get("stanford_ssp_redirect_on_login", FALSE);
+
+  // If the force redirect option has not been set check for the `goto` url
+  // parameter.
+  if (!$redir && isset($_GET['goto'])) {
+    $goto = check_plain($_GET['goto']);
+    if (drupal_valid_path($goto)) {
+      $redir = $goto;
+    }
+  }
+
   if (!empty($redir)) {
     drupal_goto($redir);
   }
+
 }
 
 /**
@@ -208,8 +240,14 @@ function stanford_ssp_page_build(&$page) {
   $headers = drupal_get_http_header();
   if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden") {
     if (variable_get("stanford_ssp_automagic_login", FALSE)) {
+
+      $dest = drupal_get_destination();
+
+      // If we don't unset the destination we get a redirect loop.
       unset($_GET['destination']);
-      drupal_goto("sso/login");
+
+      // Need to go to here to log in.
+      drupal_goto("sso/login", array('query' => array('goto' => $dest['destination'])));
     }
   }
 }
