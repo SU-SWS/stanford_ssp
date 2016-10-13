@@ -10,10 +10,10 @@ Stanford SimpleSAML PHP 7.x-2.1         2016-10-13
 - HSDO-435: Fixes for missing email attribute. Sometimes a person does not have
   an email attribute but they always have a sunetid. We can cheat an email with
   using the sunet and appending @stanford.edu
-- Upgrade path from previous simplesaml_auth module. Changes the authmaps to
+- Upgrade path from previous simplesamlphp_auth module. Changes the authmaps to
   the new goodness.
 - HSDO-510: HTTP/HTTPS redirect and redirect on login functionality. So you get
-  where your going and are no longer presented an access denied error.
+  where you are going and are no longer presented an access denied error.
 
 Stanford SimpleSAML PHP 7.x-2.0         2016-08-22
 --------------------------------------------------
