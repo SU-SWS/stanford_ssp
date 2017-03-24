@@ -1,4 +1,4 @@
-#[Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
+# [Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
 ##### Version: 7.x-2.1-dev
 
 Maintainers: [jbickar](https://github.com/jbickar),  [sherakama](https://github.com/sherakama)
