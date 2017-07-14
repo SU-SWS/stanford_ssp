@@ -136,3 +136,30 @@ function stanford_ssp_update_7201(&$sandbox) {
     ->condition("module", "simplesamlphp_auth")
     ->execute();
 }
+
+/**
+ * Enable two new dependencies: switch and stanford_simplesamlphp_auth
+ */
+function stanford_bean_types_update_7202(&$sandbox) {
+
+  if (!module_exists('stanford_simplesamlphp_auth')) {
+    if (!module_enable(array('stanford_simplesamlphp_auth'))) {
+      watchdog('stanford_ssp', 'Could not enable stanford_simplesamlphp_auth module');
+      throw new DrupalUpdateException("Could not enable stanford_simplesamlphp_auth module. Please check that the module exists.");
+    }
+    else {
+      watchdog('stanford_ssp', 'Enabled stanford_simplesamlphp_auth module.');
+    }
+  }
+  
+  if (!module_exists('switch')) {
+    if (!module_enable(array('switch'))) {
+      watchdog('stanford_ssp', 'Could not enable switch module');
+      throw new DrupalUpdateException("Could not enable switch module. Please check that the module exists.");
+    }
+    else {
+      watchdog('stanford_ssp', 'Enabled switch module.');
+    }
+  }
+  
+}
