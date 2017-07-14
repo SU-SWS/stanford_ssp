@@ -140,7 +140,7 @@ function stanford_ssp_update_7201(&$sandbox) {
 /**
  * Enable two new dependencies: switch and stanford_simplesamlphp_auth
  */
-function stanford_bean_types_update_7202(&$sandbox) {
+function stanford_ssp_update_7202(&$sandbox) {
 
   if (!module_exists('stanford_simplesamlphp_auth')) {
     if (!module_enable(array('stanford_simplesamlphp_auth'))) {
