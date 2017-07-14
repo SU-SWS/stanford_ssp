@@ -151,7 +151,7 @@ function stanford_bean_types_update_7202(&$sandbox) {
       watchdog('stanford_ssp', 'Enabled stanford_simplesamlphp_auth module.');
     }
   }
-  
+
   if (!module_exists('switch')) {
     if (!module_enable(array('switch'))) {
       watchdog('stanford_ssp', 'Could not enable switch module');
@@ -161,5 +161,5 @@ function stanford_bean_types_update_7202(&$sandbox) {
       watchdog('stanford_ssp', 'Enabled switch module.');
     }
   }
-  
+
 }
