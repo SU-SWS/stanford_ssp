@@ -127,7 +127,7 @@ function stanford_ssp_schema() {
  *
  * Install database table matching SUNetIDs and user IDs.
  */
-function stanford_ssp_update_7200(&$sandbox) {
+function stanford_ssp_update_7200() {
   drupal_install_schema("stanford_ssp");
 }
 
@@ -148,7 +148,7 @@ function stanford_ssp_update_7201(&$sandbox) {
  *
  * Enable two new dependencies: switch and stanford_simplesamlphp_auth.
  */
-function stanford_ssp_update_7202(&$sandbox) {
+function stanford_ssp_update_7202() {
 
   if (!module_exists('stanford_simplesamlphp_auth')) {
     if (!module_enable(array('stanford_simplesamlphp_auth'))) {
@@ -177,7 +177,7 @@ function stanford_ssp_update_7202(&$sandbox) {
  *
  * Add 4 new roles.
  */
-function stanford_ssp_update_7203(&$sandbox) {
+function stanford_ssp_update_7203() {
   // Add default roles.
   $roles = array(
     'SSO User',
@@ -205,7 +205,7 @@ function stanford_ssp_update_7203(&$sandbox) {
  *
  * Set variables based on simplesamlphp_auth settings.
  */
-function stanford_ssp_update_7204(&$sandbox) {
+function stanford_ssp_update_7204() {
   // Create an array where the key is the name of the simplesamlphp_auth
   // variable, and the value is the stanford_simplesamlphp_auth default value.
   // This works because Canada (mostly) kept the syntax the same.
@@ -271,6 +271,6 @@ function stanford_ssp_update_7204(&$sandbox) {
  *
  * Disable simplesamlphp_auth contrib module.
  */
-function stanford_ssp_update_7205(&$sandbox) {
+function stanford_ssp_update_7205() {
   module_disable(array('simplesamlphp_auth'));
 }
