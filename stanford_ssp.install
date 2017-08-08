@@ -274,3 +274,13 @@ function stanford_ssp_update_7204() {
 function stanford_ssp_update_7205() {
   module_disable(array('simplesamlphp_auth'));
 }
+
+/**
+ * Implements hook_update_N().
+ *
+ * Grant permission for administrator role to administer stanford_ssp.
+ */
+function stanford_ssp_update_7206() {
+  $admin_rid = variable_get('user_admin_role');
+  user_role_grant_permissions($admin_rid, array("administer stanford_ssp"));
+}
