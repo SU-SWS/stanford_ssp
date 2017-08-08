@@ -263,3 +263,12 @@ function stanford_ssp_update_7204(&$sandbox) {
   variable_set('stanford_ssp_show_sso_login', TRUE);
   variable_set('stanford_ssp_sso_link_text', 'Log in with your SUNet ID »');
 }
+
+/**
+ * Implements hook_update_N().
+ *
+ * Disable simplesamlphp_auth contrib module.
+ */
+function stanford_ssp_update_7205(&$sandbox) {
+  module_disable(array('simplesamlphp_auth'));
+}
