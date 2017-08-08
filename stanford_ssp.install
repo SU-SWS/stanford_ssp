@@ -122,12 +122,16 @@ function stanford_ssp_schema() {
 
 /**
  * Implements hook_update_N().
+ *
+ * Install database table matching SUNetIDs and user IDs.
  */
 function stanford_ssp_update_7200(&$sandbox) {
   drupal_install_schema("stanford_ssp");
 }
 
 /**
+ * Implements hook_update_N().
+ *
  * Update any existing authmaps from left over systems.
  */
 function stanford_ssp_update_7201(&$sandbox) {
@@ -138,7 +142,9 @@ function stanford_ssp_update_7201(&$sandbox) {
 }
 
 /**
- * Enable two new dependencies: switch and stanford_simplesamlphp_auth
+ * Implements hook_update_N().
+ *
+ * Enable two new dependencies: switch and stanford_simplesamlphp_auth.
  */
 function stanford_ssp_update_7202(&$sandbox) {
 
