@@ -79,6 +79,8 @@ function stanford_ssp_uninstall() {
   variable_del('stanford_ssp_show_sso_login');
   variable_del('stanford_ssp_sso_link_text');
   variable_del('stanford_ssp_debug');
+
+
 }
 
 /**
@@ -196,4 +198,65 @@ function stanford_ssp_update_7203(&$sandbox) {
     }
   }
 
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Set variables based on simplesamlphp_auth settings.
+ */
+function stanford_ssp_update_7204(&$sandbox) {
+  // Create an array where the key is the name of the simplesamlphp_auth variable, and the value is the stanford_simplesamlphp_auth default value.
+  $simplesamlphp_auth_variables = array(
+    'simplesamlphp_auth_activate' => TRUE,
+    'simplesamlphp_auth_allowdefaultlogin' => TRUE,
+    'simplesamlphp_auth_allowdefaultloginroles' => '',
+    'simplesamlphp_auth_allowdefaultloginusers' => '',
+    'simplesamlphp_auth_allowsetdrupalpwd' => FALSE,
+    'simplesamlphp_auth_authsource' => 'default-sp',
+    'simplesamlphp_auth_installdir' => '/opt/simplesamlphp',
+    'simplesamlphp_auth_logoutgotourl' => '',
+    'simplesamlphp_auth_mailattr' => 'mail',
+    'simplesamlphp_auth_registerusers' => TRUE,
+    'simplesamlphp_auth_rolepopulation' => '',
+    'simplesamlphp_auth_user_name' => 'displayName',
+    'simplesamlphp_auth_user_register_original' => '',
+  );
+  // If the simplesamlphp_auth variable is set, set stanford_simplesamlphp_auth_foo to that value.
+  foreach($simplesamlphp_auth_variables as $var => $new_value) {
+    $old_value = variable_get($var);
+    if (isset($old_value)) {
+      variable_set('stanford_' . $var,$old_value);
+    }
+    else {
+      variable_set('stanford_' . $var, $new_value);
+    }
+  }
+  // A few variables don't have matching syntax.
+  $simplesamlphp_auth_forcehttps = variable_get('simplesamlphp_auth_forcehttps');
+  if ($simplesamlphp_auth_forcehttps == "1") {
+    variable_set('stanford_ssp_force_https', TRUE);
+  }
+  else {
+    variable_set('stanford_ssp_force_https', FALSE);
+  }
+  $simplesamlphp_auth_roleevaleverytime = variable_get('simplesamlphp_auth_roleevaleverytime');
+  if ($simplesamlphp_auth_roleevaleverytime = "1") {
+    variable_set('stanford_ssp_auth_role_map', 'reassign');
+  }
+  else {
+    variable_set('simplesamlphp_auth_roleevaleverytime', 'grant');
+  }
+  // And then a bunch we want to set explicitly.
+  variable_set('stanford_simplesamlphp_auth_unique_id', 'uid');
+  variable_set('stanford_ssp_automagic_login', TRUE);
+  variable_set('stanford_ssp_redirect_on_login', FALSE);
+  variable_set('stanford_simplesamlphp_auth_autoenablesaml', TRUE);
+  variable_set('stanford_ssp_prevent_cache', FALSE);
+  variable_set('stanford_ssp_auth_restrictions', 'any');
+  variable_set('stanford_ssp_auth_restriction_sunet', '');
+  variable_set('stanford_ssp_auth_restriction_group', '');
+  variable_set('stanford_ssp_show_local_login', TRUE);
+  variable_set('stanford_ssp_show_sso_login', TRUE);
+  variable_set('stanford_ssp_sso_link_text', 'Log in with your SUNet ID »');
 }
