@@ -209,7 +209,7 @@ function stanford_ssp_update_7204() {
   // Create an array where the key is the name of the simplesamlphp_auth
   // variable, and the value is the stanford_simplesamlphp_auth default value.
   // This works because Canada (mostly) kept the syntax the same.
-  $simplesamlphp_auth_variables = array(
+  $contrib_variables = array(
     'simplesamlphp_auth_activate' => TRUE,
     'simplesamlphp_auth_allowdefaultlogin' => TRUE,
     'simplesamlphp_auth_allowdefaultloginroles' => '',
@@ -227,7 +227,7 @@ function stanford_ssp_update_7204() {
 
   // If the variable from simplesamlphp_auth is set, set
   // stanford_simplesamlphp_auth_foo to that value.
-  foreach ($simplesamlphp_auth_variables as $var => $new_value) {
+  foreach ($contrib_variables as $var => $new_value) {
     $old_value = variable_get($var);
     if (isset($old_value)) {
       variable_set('stanford_' . $var, $old_value);
@@ -238,15 +238,15 @@ function stanford_ssp_update_7204() {
   }
 
   // A few variables don't have matching syntax.
-  $simplesamlphp_auth_forcehttps = variable_get('simplesamlphp_auth_forcehttps');
-  if ($simplesamlphp_auth_forcehttps == "1") {
+  $forcehttps = variable_get('simplesamlphp_auth_forcehttps');
+  if ($forcehttps == "1") {
     variable_set('stanford_ssp_force_https', TRUE);
   }
   else {
     variable_set('stanford_ssp_force_https', FALSE);
   }
-  $simplesamlphp_auth_roleevaleverytime = variable_get('simplesamlphp_auth_roleevaleverytime');
-  if ($simplesamlphp_auth_roleevaleverytime = "1") {
+  $roleevaleverytime = variable_get('simplesamlphp_auth_roleevaleverytime');
+  if ($roleevaleverytime = "1") {
     variable_set('stanford_ssp_auth_role_map', 'reassign');
   }
   else {
