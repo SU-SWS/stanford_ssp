@@ -207,6 +207,7 @@ function stanford_ssp_update_7203(&$sandbox) {
  */
 function stanford_ssp_update_7204(&$sandbox) {
   // Create an array where the key is the name of the simplesamlphp_auth variable, and the value is the stanford_simplesamlphp_auth default value.
+  // This works because Canada (mostly) kept the syntax the same.
   $simplesamlphp_auth_variables = array(
     'simplesamlphp_auth_activate' => TRUE,
     'simplesamlphp_auth_allowdefaultlogin' => TRUE,
@@ -222,6 +223,7 @@ function stanford_ssp_update_7204(&$sandbox) {
     'simplesamlphp_auth_user_name' => 'displayName',
     'simplesamlphp_auth_user_register_original' => '',
   );
+
   // If the simplesamlphp_auth variable is set, set stanford_simplesamlphp_auth_foo to that value.
   foreach($simplesamlphp_auth_variables as $var => $new_value) {
     $old_value = variable_get($var);
@@ -232,6 +234,7 @@ function stanford_ssp_update_7204(&$sandbox) {
       variable_set('stanford_' . $var, $new_value);
     }
   }
+
   // A few variables don't have matching syntax.
   $simplesamlphp_auth_forcehttps = variable_get('simplesamlphp_auth_forcehttps');
   if ($simplesamlphp_auth_forcehttps == "1") {
