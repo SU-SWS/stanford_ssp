@@ -169,3 +169,31 @@ function stanford_ssp_update_7202(&$sandbox) {
   }
 
 }
+
+/**
+ * Implements hook_update_N().
+ *
+ * Add 4 new roles.
+ */
+function stanford_ssp_update_7203(&$sandbox) {
+  // Add default roles.
+  $roles = array(
+    'SSO User',
+    'Stanford Student',
+    'Stanford Staff',
+    'Stanford Faculty',
+  );
+
+  foreach ($roles as $role) {
+    $role_exists = (bool) db_query("SELECT COUNT(*) FROM {role} WHERE name = :name", array(':name' => $role))->fetchField();
+    if (!$role_exists) {
+      db_insert('role')
+        ->fields(array(
+          'name' => $role,
+        ))
+        ->execute();
+      drupal_set_message(st('Added Role @role', array('@role' => $role)));
+    }
+  }
+
+}
