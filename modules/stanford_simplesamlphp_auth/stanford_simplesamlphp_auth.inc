@@ -37,7 +37,7 @@ function stanford_simplesamlphp_handle_user_login_register() {
   if (!$ext_user) {
     // Cannot do an access denied here as it creates a redirect loop.
     // @todo: Handle this moar better.
-    drupal_set_message("Sorry, but you do not have access to this page.", "error");
+    drupal_set_message(t("Sorry, but you do not have access to this page."), "error");
     drupal_not_found();
     exit();
   }
@@ -200,6 +200,7 @@ function stanford_simplesamlphp_auth_log_the_user_in($ext_user = NULL) {
   // or incorrectly does a redirect which would leave the old session in place.
   drupal_session_regenerate();
 
+  $edit = array();
   user_module_invoke('login', $edit, $user);
 
   // If for some reason the user account was not able to be created we should
@@ -319,16 +320,16 @@ function stanford_simplesamlphp_auth_get_saml_attributes() {
 /**
  * Return any attributes provided by the SAML IDP.
  *
- * @param array $attribute
+ * @param string $attribute
  *   (optional) The attribute whose value to return.  Can be skipped if all
  *   attribute values are requested.
  *
- * @return string
+ * @return mixed
  *   If an attribute was provided, the value of the attribute is returned.
  *   Otherwise, an array of all attribute values is returned, keyed by
  *   attribute.
  */
-function stanford_simplesamlphp_auth_get_attributes(array $attribute = NULL) {
+function stanford_simplesamlphp_auth_get_attributes($attribute = NULL) {
   $attributes = stanford_simplesamlphp_auth_get_saml_attributes();
   if (is_null($attribute)) {
     return $attributes;
@@ -429,7 +430,7 @@ function stanford_simplesamlphp_auth_get_host() {
     'HTTP_X_FORWARDED_HOST',
     'HTTP_HOST',
     'SERVER_NAME',
-    'SERVER_ADDR'
+    'SERVER_ADDR',
   );
   $sourceTransformations = array(
     "HTTP_X_FORWARDED_HOST" => function($value) {
