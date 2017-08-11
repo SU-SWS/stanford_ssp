@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Schema definitions. Install/update/uninstall hooks.
@@ -79,8 +80,6 @@ function stanford_ssp_uninstall() {
   variable_del('stanford_ssp_show_sso_login');
   variable_del('stanford_ssp_sso_link_text');
   variable_del('stanford_ssp_debug');
-
-
 }
 
 /**
@@ -123,8 +122,6 @@ function stanford_ssp_schema() {
 }
 
 /**
- * Implements hook_update_N().
- *
  * Install database table matching SUNetIDs and user IDs.
  */
 function stanford_ssp_update_7200() {
@@ -132,8 +129,6 @@ function stanford_ssp_update_7200() {
 }
 
 /**
- * Implements hook_update_N().
- *
  * Update any existing authmaps from left over systems.
  */
 function stanford_ssp_update_7201(&$sandbox) {
@@ -144,8 +139,6 @@ function stanford_ssp_update_7201(&$sandbox) {
 }
 
 /**
- * Implements hook_update_N().
- *
  * Enable two new dependencies: switch and stanford_simplesamlphp_auth.
  */
 function stanford_ssp_update_7202() {
@@ -228,8 +221,8 @@ function stanford_ssp_update_7204() {
   // If the variable from simplesamlphp_auth is set, set
   // stanford_simplesamlphp_auth_foo to that value.
   foreach ($contrib_variables as $var => $new_value) {
-    $old_value = variable_get($var);
-    if (isset($old_value)) {
+    $old_value = variable_get($var, NULL);
+    if (!is_null($old_value)) {
       variable_set('stanford_' . $var, $old_value);
     }
     else {
@@ -245,13 +238,15 @@ function stanford_ssp_update_7204() {
   else {
     variable_set('stanford_ssp_force_https', FALSE);
   }
+
   $roleevaleverytime = variable_get('simplesamlphp_auth_roleevaleverytime');
-  if ($roleevaleverytime = "1") {
+  if ($roleevaleverytime == "1") {
     variable_set('stanford_ssp_auth_role_map', 'reassign');
   }
   else {
     variable_set('simplesamlphp_auth_roleevaleverytime', 'grant');
   }
+
   // And then a bunch we want to set explicitly.
   variable_set('stanford_simplesamlphp_auth_unique_id', 'uid');
   variable_set('stanford_ssp_automagic_login', TRUE);
@@ -267,17 +262,14 @@ function stanford_ssp_update_7204() {
 }
 
 /**
- * Implements hook_update_N().
- *
- * Disable simplesamlphp_auth contrib module.
+ * Disable and uninstall simplesamlphp_auth contrib module.
  */
 function stanford_ssp_update_7205() {
-  module_disable(array('simplesamlphp_auth'));
+  module_disable(array('simplesamlphp_auth'), FALSE);
+  drupal_uninstall_modules(array('simplesamlphp_auth'), FALSE)
 }
 
 /**
- * Implements hook_update_N().
- *
  * Grant permission for administrator role to administer stanford_ssp.
  */
 function stanford_ssp_update_7206() {
