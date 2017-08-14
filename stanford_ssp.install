@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Schema definitions. Install/update/uninstall hooks.
@@ -121,9 +122,9 @@ function stanford_ssp_schema() {
 }
 
 /**
- * Implements hook_update_N().
+ * Install database table matching SUNetIDs and user IDs.
  */
-function stanford_ssp_update_7200(&$sandbox) {
+function stanford_ssp_update_7200() {
   drupal_install_schema("stanford_ssp");
 }
 
@@ -138,9 +139,9 @@ function stanford_ssp_update_7201(&$sandbox) {
 }
 
 /**
- * Enable two new dependencies: switch and stanford_simplesamlphp_auth
+ * Enable two new dependencies: switch and stanford_simplesamlphp_auth.
  */
-function stanford_ssp_update_7202(&$sandbox) {
+function stanford_ssp_update_7202() {
 
   if (!module_exists('stanford_simplesamlphp_auth')) {
     if (!module_enable(array('stanford_simplesamlphp_auth'))) {
@@ -162,4 +163,112 @@ function stanford_ssp_update_7202(&$sandbox) {
     }
   }
 
+}
+
+/**
+ * Add 4 new roles.
+ */
+function stanford_ssp_update_7203() {
+  // Add default roles.
+  $roles = array(
+    'SSO User',
+    'Stanford Student',
+    'Stanford Staff',
+    'Stanford Faculty',
+  );
+
+  foreach ($roles as $role) {
+    $role_exists = (bool) db_query("SELECT COUNT(*) FROM {role} WHERE name = :name", array(':name' => $role))->fetchField();
+    if (!$role_exists) {
+      db_insert('role')
+        ->fields(array(
+          'name' => $role,
+        ))
+        ->execute();
+      drupal_set_message(st('Added Role @role', array('@role' => $role)));
+    }
+  }
+
+}
+
+/**
+ * Set variables based on simplesamlphp_auth settings.
+ */
+function stanford_ssp_update_7204() {
+  // Create an array where the key is the name of the simplesamlphp_auth
+  // variable, and the value is the stanford_simplesamlphp_auth default value.
+  // This works because Canada (mostly) kept the syntax the same.
+  $contrib_variables = array(
+    'simplesamlphp_auth_activate' => TRUE,
+    'simplesamlphp_auth_allowdefaultlogin' => TRUE,
+    'simplesamlphp_auth_allowdefaultloginroles' => '',
+    'simplesamlphp_auth_allowdefaultloginusers' => '',
+    'simplesamlphp_auth_allowsetdrupalpwd' => FALSE,
+    'simplesamlphp_auth_authsource' => 'default-sp',
+    'simplesamlphp_auth_installdir' => '/opt/simplesamlphp',
+    'simplesamlphp_auth_logoutgotourl' => '',
+    'simplesamlphp_auth_mailattr' => 'mail',
+    'simplesamlphp_auth_registerusers' => TRUE,
+    'simplesamlphp_auth_rolepopulation' => '',
+    'simplesamlphp_auth_user_name' => 'displayName',
+    'simplesamlphp_auth_user_register_original' => '',
+  );
+
+  // If the variable from simplesamlphp_auth is set, set
+  // stanford_simplesamlphp_auth_foo to that value.
+  foreach ($contrib_variables as $var => $new_value) {
+    $old_value = variable_get($var, NULL);
+    if (!is_null($old_value)) {
+      variable_set('stanford_' . $var, $old_value);
+    }
+    else {
+      variable_set('stanford_' . $var, $new_value);
+    }
+  }
+
+  // A few variables don't have matching syntax.
+  $forcehttps = variable_get('simplesamlphp_auth_forcehttps');
+  if ($forcehttps == "1") {
+    variable_set('stanford_ssp_force_https', TRUE);
+  }
+  else {
+    variable_set('stanford_ssp_force_https', FALSE);
+  }
+
+  $roleevaleverytime = variable_get('simplesamlphp_auth_roleevaleverytime');
+  if ($roleevaleverytime == "1") {
+    variable_set('stanford_ssp_auth_role_map', 'reassign');
+  }
+  else {
+    variable_set('simplesamlphp_auth_roleevaleverytime', 'grant');
+  }
+
+  // And then a bunch we want to set explicitly.
+  variable_set('stanford_simplesamlphp_auth_unique_id', 'uid');
+  variable_set('stanford_ssp_automagic_login', TRUE);
+  variable_set('stanford_ssp_redirect_on_login', FALSE);
+  variable_set('stanford_simplesamlphp_auth_autoenablesaml', TRUE);
+  variable_set('stanford_ssp_prevent_cache', FALSE);
+  variable_set('stanford_ssp_auth_restrictions', 'any');
+  variable_set('stanford_ssp_auth_restriction_sunet', '');
+  variable_set('stanford_ssp_auth_restriction_group', '');
+  variable_set('stanford_ssp_show_local_login', TRUE);
+  variable_set('stanford_ssp_show_sso_login', TRUE);
+  variable_set('stanford_ssp_sso_link_text', 'Log in with your SUNet ID »');
+}
+
+/**
+ * Disable and uninstall simplesamlphp_auth contrib module.
+ */
+function stanford_ssp_update_7205() {
+  module_disable(array('simplesamlphp_auth'), FALSE);
+  drupal_uninstall_modules(array('simplesamlphp_auth'), FALSE);
+}
+
+/**
+ * Grant permission for administrator role to administer stanford_ssp.
+ */
+function stanford_ssp_update_7206() {
+  $admin_rid = variable_get('user_admin_role');
+  user_role_grant_permissions($admin_rid, array("administer stanford_ssp"));
 }

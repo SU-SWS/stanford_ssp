@@ -5,7 +5,6 @@
  * Contains non-hook implementations.
  */
 
-
 /**
  * Handles the log in and authentication of a user with SAML attributes.
  */
@@ -38,7 +37,7 @@ function stanford_simplesamlphp_handle_user_login_register() {
   if (!$ext_user) {
     // Cannot do an access denied here as it creates a redirect loop.
     // @todo: Handle this moar better.
-    drupal_set_message("Sorry, but you do not have access to this page.", "error");
+    drupal_set_message(t("Sorry, but you do not have access to this page."), "error");
     drupal_not_found();
     exit();
   }
@@ -48,8 +47,7 @@ function stanford_simplesamlphp_handle_user_login_register() {
 }
 
 /**
- * Trys to find a local user that matches the SAML attributes by the authmap
- * table.
+ * Find a local user that matches the SAML attributes by the authmap table.
  */
 function stanford_simplesamlphp_auth_find_external_user($authname) {
 
@@ -62,9 +60,10 @@ function stanford_simplesamlphp_auth_find_external_user($authname) {
 }
 
 /**
+ * Match SAML Attributes to local accounts.
+ *
  * Trys to find a local account that matches the SAML attributes by trying to
  * match up user properties to saml attributes.
- *
  */
 function stanford_simplesamlphp_auth_find_local_user($username) {
 
@@ -91,6 +90,8 @@ function stanford_simplesamlphp_auth_find_local_user($username) {
 }
 
 /**
+ * Boolean check for autoenable feature.
+ *
  * @return bool
  *   Returns TRUE is users can be auto registered.
  */
@@ -100,7 +101,9 @@ function stanford_simplesamlphp_auth_is_auto_provision_enabled() {
 
 /**
  * Asks all modules if current federated user is allowed to login.
- * Returns FALSE if at least one module returns FALSE
+ *
+ * @return bool
+ *   Returns FALSE if at least one module returns FALSE
  */
 function stanford_simplesamlphp_auth_allow_user_by_attribute() {
   $attributes = stanford_simplesamlphp_auth_get_saml_attributes();
@@ -126,8 +129,7 @@ function stanford_simplesamlphp_auth_user_register() {
   $username = stanford_simplesamlphp_auth_get_username();
   $email = stanford_simplesamlphp_auth_get_email();
 
-
-   // Validate the name.
+  // Validate the name.
   if (!stanford_simplesamlphp_auth_valid_username($username)) {
     $username = stanford_simplesamlphp_auth_get_valid_username($username);
   }
@@ -198,6 +200,7 @@ function stanford_simplesamlphp_auth_log_the_user_in($ext_user = NULL) {
   // or incorrectly does a redirect which would leave the old session in place.
   drupal_session_regenerate();
 
+  $edit = array();
   user_module_invoke('login', $edit, $user);
 
   // If for some reason the user account was not able to be created we should
@@ -278,6 +281,7 @@ function stanford_simplesamlphp_auth_moderate_local_login() {
 
 /**
  * Returns the SAML information static variable.
+ *
  * @return array
  *   SAML information array. see autoload.
  */
@@ -287,6 +291,7 @@ function stanford_simplesamlphp_auth_get_saml_info() {
 
 /**
  * Returns the SAML instance object: SimpleSAML_Configuration::getInstance()
+ *
  * @return object
  *   SimpleSAML_Configuration::getInstance()
  */
@@ -300,6 +305,7 @@ function stanford_simplesamlphp_auth_get_saml_instance() {
 
 /**
  * Returns the SAML instance object: SimpleSAML_Configuration::getInstance()
+ *
  * @return object
  *   SimpleSAML_Auth_Simple->getAttributes()
  */
@@ -314,11 +320,11 @@ function stanford_simplesamlphp_auth_get_saml_attributes() {
 /**
  * Return any attributes provided by the SAML IDP.
  *
- * @param $attribute
+ * @param string $attribute
  *   (optional) The attribute whose value to return.  Can be skipped if all
  *   attribute values are requested.
  *
- * @return
+ * @return mixed
  *   If an attribute was provided, the value of the attribute is returned.
  *   Otherwise, an array of all attribute values is returned, keyed by
  *   attribute.
@@ -359,7 +365,9 @@ function stanford_simplesamlphp_auth_is_authenticated() {
 }
 
 /**
- * @param $type string
+ * Set a logged out cookie for user.
+ *
+ * @param string $type
  *   The key of the cookie message type.
  */
 function stanford_simplesamlphp_auth_set_logged_out_cookie($type = "") {
@@ -376,17 +384,17 @@ function stanford_simplesamlphp_auth_set_logged_out_cookie($type = "") {
   switch ($type) {
     case "local_disabled":
       $text = "We're sorry, but local Drupal account login has been disabled.";
-      $error_type  = "error";
+      $error_type = "error";
       break;
 
     case "not_authorized":
       $text = "We're sorry, but that account is not authorized for this website.";
-      $error_type  = "error";
+      $error_type = "error";
       break;
 
     default:
       $value = "";
-      $error_type  = "";
+      $error_type = "";
   }
 
   if (empty($text)) {
@@ -416,27 +424,38 @@ function stanford_simplesamlphp_auth_get_logged_out_cookie() {
  * Helper function stolen from symphony.
  *
  * Gets and returns the domain name (host)
- *
  */
 function stanford_simplesamlphp_auth_get_host() {
-  $possibleHostSources = array('HTTP_X_FORWARDED_HOST', 'HTTP_HOST', 'SERVER_NAME', 'SERVER_ADDR');
+  $possibleHostSources = array(
+    'HTTP_X_FORWARDED_HOST',
+    'HTTP_HOST',
+    'SERVER_NAME',
+    'SERVER_ADDR',
+  );
   $sourceTransformations = array(
     "HTTP_X_FORWARDED_HOST" => function($value) {
       $elements = explode(',', $value);
       return trim(end($elements));
     }
   );
+
   $host = '';
   foreach ($possibleHostSources as $source) {
-    if (!empty($host)) break;
-    if (empty($_SERVER[$source])) continue;
+    if (!empty($host)) {
+      break;
+    }
+
+    if (empty($_SERVER[$source])) {
+      continue;
+    }
+
     $host = $_SERVER[$source];
     if (array_key_exists($source, $sourceTransformations)) {
       $host = $sourceTransformations[$source]($host);
     }
   }
 
-  // Remove port number from host
+  // Remove port number from host.
   $host = preg_replace('/:\d+$/', '', $host);
 
   return trim($host);
@@ -445,10 +464,10 @@ function stanford_simplesamlphp_auth_get_host() {
 /**
  * Validates a name for a user.
  *
- * @param $name
- *   The string name
+ * @param string $name
+ *   The string name.
  *
- * return bool
+ * @return bool
  *   True if valid name and not already taken.
  */
 function stanford_simplesamlphp_auth_valid_username($name = "") {
@@ -478,25 +497,28 @@ function stanford_simplesamlphp_auth_valid_username($name = "") {
 /**
  * Generates a unique name for the user if it already exists by appending an integer.
  *
- * @param $name
+ * @param string $name
+ *   The name.
+ *
  * @return mixed
+ *   Could be anything.
  */
 function stanford_simplesamlphp_auth_get_valid_username($name) {
   $trys = 1;
   $name_clone = $name . $trys;
-  while(!stanford_simplesamlphp_auth_valid_username($name_clone)) {
+  while (!stanford_simplesamlphp_auth_valid_username($name_clone)) {
     $trys++;
     $name_clone = $name . $trys;
   }
+
   return $name_clone;
 }
-
 
 /**
  * Checks if authentication via SimpleSAMLphp should be activated.
  *
  * @param bool $show_inactive_msg
- *   Whether to display the "module not activated" message
+ *   Whether to display the "module not activated" message.
  *
  * @return bool
  *   TRUE if simplesamlphp_auth is enabled.
@@ -533,8 +555,6 @@ function stanford_simplesamlphp_auth_is_enabled($show_inactive_msg = FALSE) {
   }
   return FALSE;
 }
-
-
 
 /**
  * Gets the authname attribute from the SAML assertion.
