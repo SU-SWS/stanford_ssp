@@ -266,7 +266,7 @@ function stanford_ssp_update_7204() {
  */
 function stanford_ssp_update_7205() {
   module_disable(array('simplesamlphp_auth'), FALSE);
-  drupal_uninstall_modules(array('simplesamlphp_auth'), FALSE)
+  drupal_uninstall_modules(array('simplesamlphp_auth'), FALSE);
 }
 
 /**
