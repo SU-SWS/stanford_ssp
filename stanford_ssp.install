@@ -166,8 +166,6 @@ function stanford_ssp_update_7202() {
 }
 
 /**
- * Implements hook_update_N().
- *
  * Add 4 new roles.
  */
 function stanford_ssp_update_7203() {
@@ -194,8 +192,6 @@ function stanford_ssp_update_7203() {
 }
 
 /**
- * Implements hook_update_N().
- *
  * Set variables based on simplesamlphp_auth settings.
  */
 function stanford_ssp_update_7204() {
