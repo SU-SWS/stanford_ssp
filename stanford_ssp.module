@@ -666,3 +666,52 @@ function stanford_ssp_format_entitlement($entitlement) {
   $entitlement = str_replace(":", "_", $entitlement);
   return $entitlement;
 }
+
+/**
+ * Set variables based on webauth settings.
+ */
+function stanford_ssp_import_webauth_settings() {
+  // Create an array of default values for webauth variables.
+  $webauth_variables = array(
+    'webauth_destination' => '',
+    'webauth_require_users' => '',
+    'webauth_require_privgroups' => '',
+    'webauth_link_text' => 'Log in with WebAuth',
+  );
+
+  // Create an array of default values for stanford_ssp variables.
+  $ssp_variables = array(
+    'stanford_ssp_redirect_on_login' => FALSE,
+    'stanford_ssp_auth_restriction_sunet' => '',
+    'stanford_ssp_auth_restriction_group' => '',
+    'stanford_ssp_sso_link_text' => 'Log in with your SUNet ID »',
+  );
+
+  // For each webauth variable, check to see if it's set. If not, set the
+  // stanford_ssp variable to the default. If it is, set it to the corresponding
+  // stanford_ssp variable value.
+  foreach ($webauth_variables as $var => $new_value) {
+    $old_value = variable_get($var);
+    if (isset($old_value)) {
+      variable_set($var, $old_value);
+    }
+    else {
+      variable_set($var, $new_value);
+    }
+  }
+
+  // Custom logic: webauth_default_role, webauth_restrict_message, webauth_require_valid_user, webauth_allow_local.
+
+  // And then a bunch we want to set explicitly.
+  variable_set('stanford_simplesamlphp_auth_unique_id', 'uid');
+  variable_set('stanford_ssp_automagic_login', TRUE);
+  variable_set('stanford_ssp_redirect_on_login', FALSE);
+  variable_set('stanford_simplesamlphp_auth_autoenablesaml', TRUE);
+  variable_set('stanford_ssp_prevent_cache', FALSE);
+  variable_set('stanford_ssp_auth_restrictions', 'any');
+  variable_set('stanford_ssp_auth_restriction_sunet', '');
+  variable_set('stanford_ssp_auth_restriction_group', '');
+  variable_set('stanford_ssp_show_local_login', TRUE);
+  variable_set('stanford_ssp_show_sso_login', TRUE);
+  variable_set('stanford_ssp_sso_link_text', 'Log in with your SUNet ID »');
+}
