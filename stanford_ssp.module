@@ -745,7 +745,52 @@ function stanford_ssp_import_webauth_settings() {
   variable_set('stanford_ssp_automagic_login', TRUE);
   variable_set('stanford_simplesamlphp_auth_autoenablesaml', TRUE);
   variable_set('stanford_ssp_prevent_cache', FALSE);
-//  variable_set('stanford_ssp_auth_restrictions', 'any');
-//  variable_set('stanford_ssp_show_local_login', TRUE);
   variable_set('stanford_ssp_show_sso_login', TRUE);
+
+  // Convert our WMD role mappings to Stanford SSP.
+  stanford_ssp_convert_webauth_role_mappings();
+
+  // Finally, disable WMD.
+  module_disable(array('webauth'));
+}
+
+/**
+ * Query the `webauth_roles` table to get an array of Role IDs and the workgroup
+ * they are mapped to.
+ *
+ * @return array An array of objects that each contain an rid and a workgroup.
+ */
+function stanford_ssp_get_webauth_role_mappings() {
+  $query = db_select("webauth_roles", "wr")
+    ->fields("wr", array("rid", "wa_group"));
+  $result = $query->execute();
+  $mappings = array();
+  foreach ($result as $record) {
+    $mappings[] = $record;
+  }
+  return $mappings;
+
+}
+
+/**
+ * Convert WMD workgroup mappings to SAML mappings.
+ */
+function stanford_ssp_convert_webauth_role_mappings() {
+  // TODO: this duplicates some functionality in stanford_ssp_map_entitlement_to_role().
+  // Update stanford_ssp_map_entitlement_to_role() to use this explode/implode,
+  // and then use that function here.
+  $webauth_roles = stanford_ssp_get_webauth_role_mappings();
+  $rolepop = variable_get('stanford_simplesamlphp_auth_rolepopulation', NULL);
+  $roles = array();
+  if (!is_null($rolepop)) {
+    $roles = explode('|', $rolepop);
+  }
+  foreach ($webauth_roles as $mapping) {
+    // stanford_simplesamlphp_auth_rolepopulation = $rid:eduPersonEntitlement,=,$workgroup|$rid:eduPersonEntitlement,=,$workgroup
+    // Replace colons with underscores.
+    $workgroup = preg_replace('/:/', '_', $mapping->wa_group);
+    $roles[] = $mapping->rid . ":eduPersonEntitlement,=," . $workgroup;
+  }
+  $new_rolepop = implode('|', $roles);
+  variable_set('stanford_simplesamlphp_auth_rolepopulation', $new_rolepop);
 }
