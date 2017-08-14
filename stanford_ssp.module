@@ -696,6 +696,11 @@ function stanford_ssp_import_webauth_settings() {
     // of the variables based on WMD settings.
     $sspvar = key($ssp_variables);
     if (!is_null($user_set_var)) {
+      // Process text for SUNet and workgroup restriction.
+      if ($var == "webauth_require_users" || $var == "webauth_require_privgroups") {
+        $user_set_var = preg_replace('/\r\n/', ',', $user_set_var);
+        $user_set_var = preg_replace('/:/', '_', $user_set_var);
+      }
       variable_set($sspvar, $user_set_var);
     }
     else {
