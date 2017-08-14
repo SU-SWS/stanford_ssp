@@ -690,28 +690,62 @@ function stanford_ssp_import_webauth_settings() {
   // For each webauth variable, check to see if it's set. If not, set the
   // stanford_ssp variable to the default. If it is, set it to the corresponding
   // stanford_ssp variable value.
-  foreach ($webauth_variables as $var => $new_value) {
-    $old_value = variable_get($var);
-    if (isset($old_value)) {
-      variable_set($var, $old_value);
+  foreach ($webauth_variables as $var => $default_var) {
+    $user_set_var = variable_get($var, NULL);
+    // We'll step through our $ssp_variables in parallel here and set the values
+    // of the variables based on WMD settings.
+    $sspvar = key($ssp_variables);
+    if (!is_null($user_set_var)) {
+      variable_set($sspvar, $user_set_var);
     }
     else {
-      variable_set($var, $new_value);
+      variable_set($sspvar, $default_var);
     }
+    // Advance the pointer.
+    next($ssp_variables);
   }
 
   // Custom logic: webauth_default_role, webauth_restrict_message, webauth_require_valid_user, webauth_allow_local.
+  // webauth_require_valid_user.
+  $wrvu = variable_get('webauth_require_valid_user', NULL);
+  if (!is_null($wrvu)) {
+    if ($wrvu == "0") {
+      variable_set('stanford_ssp_auth_restrictions', "restrict");
+    }
+    // In theory, the only values for this variable should be "1" or "0".
+    // However, who knows, so we'll set it to the default of "any" unless
+    // someone has explicitly set it to "0".
+    else {
+      variable_set('stanford_ssp_auth_restrictions', "any");
+    }
+  }
+  else {
+    variable_set('stanford_ssp_auth_restrictions', 'any');
+  }
+
+  // webauth_allow_local.
+  $wal = variable_get('webauth_allow_local', NULL);
+  if (!is_null($wal)) {
+    if ($wal == "0") {
+      variable_set('stanford_ssp_show_local_login', FALSE);
+    }
+    // In theory, the only values for this variable should be "1" or "0".
+    // However, who knows, so we'll set it to the default of TRUE unless
+    // someone has explicitly set it to "0".
+    else {
+      variable_set('stanford_ssp_show_local_login', TRUE);
+    }
+  }
+  else {
+    variable_set('stanford_ssp_show_local_login', TRUE);
+  }
 
   // And then a bunch we want to set explicitly.
   variable_set('stanford_simplesamlphp_auth_unique_id', 'uid');
   variable_set('stanford_ssp_automagic_login', TRUE);
-  variable_set('stanford_ssp_redirect_on_login', FALSE);
   variable_set('stanford_simplesamlphp_auth_autoenablesaml', TRUE);
   variable_set('stanford_ssp_prevent_cache', FALSE);
-  variable_set('stanford_ssp_auth_restrictions', 'any');
-  variable_set('stanford_ssp_auth_restriction_sunet', '');
-  variable_set('stanford_ssp_auth_restriction_group', '');
-  variable_set('stanford_ssp_show_local_login', TRUE);
+//  variable_set('stanford_ssp_auth_restrictions', 'any');
+//  variable_set('stanford_ssp_show_local_login', TRUE);
   variable_set('stanford_ssp_show_sso_login', TRUE);
-  variable_set('stanford_ssp_sso_link_text', 'Log in with your SUNet ID »');
 }
