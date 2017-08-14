@@ -27,7 +27,7 @@ function stanford_simplesamlphp_auth_loginpage() {
 
   // If the Drupal user object is available prompt a message to log out first.
   if ($user->uid > 1) {
-    drupal_set_message("You are already logged in an cannot log in again. Please log out first to switch users.", "error");
+    drupal_set_message(t("You are already logged in an cannot log in again. Please log out first to switch users."), "error");
     drupal_goto("user/" . $user->uid);
   }
 
