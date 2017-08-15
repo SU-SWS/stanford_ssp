@@ -240,7 +240,7 @@ function stanford_ssp_update_7204() {
     variable_set('stanford_ssp_auth_role_map', 'reassign');
   }
   else {
-    variable_set('simplesamlphp_auth_roleevaleverytime', 'grant');
+    variable_set('stanford_ssp_auth_role_map', 'grant');
   }
 
   // And then a bunch we want to set explicitly.
