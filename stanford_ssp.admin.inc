@@ -10,7 +10,7 @@
  * @param  [type] &$form_state [description]
  * @return [type]              [description]
  */
-function stanford_ssp_configuration_form($form = array(), &$form_state) {
+function stanford_ssp_configuration_form($form, &$form_state) {
 
   // Vertical Tab container.
   $form['togglers'] = array(
@@ -616,7 +616,7 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
 
   // Account was not created.
   if (!isset($account->uid)) {
-    drupal_set_message("User account creation went wrong. Please try again.", "error");
+    drupal_set_message(t("User account creation went wrong. Please try again."), "error");
     return;
   }
 
@@ -629,7 +629,7 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
   // Was the notify checkbox checked?
   if ($form_state["values"]["notify"] && $account) {
     _user_mail_notify('status_activated', $account);
-    drupal_set_message("Email sent to user", "status");
+    drupal_set_message(t("Email sent to user"), "status");
   }
 
   // Save the sunetid to the db.
@@ -716,7 +716,7 @@ function stanford_ssp_remove_waird($form, &$form_state) {
   }
   $imp = implode("|", $xp);
   variable_set("stanford_simplesamlphp_auth_rolepopulation", $imp);
-  drupal_set_message("Role mapping was removed");
+  drupal_set_message(t("Role mapping was removed"));
 }
 
 /**
@@ -724,5 +724,3 @@ function stanford_ssp_remove_waird($form, &$form_state) {
  * HELPER / UTIL
  * *****************************************************************
  */
-
-

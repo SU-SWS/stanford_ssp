@@ -39,10 +39,13 @@ function hook_stanford_simplesamlphp_auth_user_roles_alter(&$roles) {
  * a boolean indicating the success of the access check. Access will be denied
  * if any implementations return FALSE.
  *
- * @param $attributes
+ * @param array $attributes
+ *   An array of attributes.
+ *
  * @return bool
+ *   True or false.
  */
-function hook_stanford_simplesamlphp_auth_allow_login($attributes) {
+function hook_stanford_simplesamlphp_auth_allow_login(array $attributes) {
   if (in_array('student', $attributes)) {
     return FALSE;
   }
@@ -59,11 +62,12 @@ function hook_stanford_simplesamlphp_auth_allow_login($attributes) {
  * to appropriate error pages, there is no message implementation at hook
  * invocation.
  *
- * @param $attributes
- * @param $ext_user
- *  The user object for the current user
+ * @param array $attributes
+ *   An array of attributes.
+ * @param object $ext_user
+ *   The user object for the current user.
  */
-function hook_stanford_simplesamlphp_auth_pre_login($attributes, $ext_user) {
+function hook_stanford_simplesamlphp_auth_pre_login(array $attributes, $ext_user) {
   // Disallow students from logging in with a specific role.
   if ($ext_user['roles'] == '3' && (in_array('student', $attributes))) {
     drupal_goto('some-error-page-path');
