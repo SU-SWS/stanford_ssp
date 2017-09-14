@@ -683,6 +683,8 @@ function stanford_ssp_import_webauth_settings() {
     drush_log("Enabled stanford_saml_block", "success");
   }
 
+  $sso_role = user_role_load_by_name('SSO User');
+
   drush_log("Beginning webauth config settings to ssp settings conversion.", "success");
 
   // If the redirect is set then migrate to the equivalent ssp var.
@@ -740,7 +742,6 @@ function stanford_ssp_import_webauth_settings() {
   // webauth_default_role
   // 1. Add the SSO Role to everyone that already exists as a webauth user.
   // X (maybe). Change the authmap key to email from sunetid.
-  // 3. Add users to stanford_ssp_sunetid from the authmap table.
 
   $authmaps = db_select("authmap")
     ->fields("authmap", array("authname", "uid"))
@@ -755,6 +756,11 @@ function stanford_ssp_import_webauth_settings() {
         'uid' => $entry->uid,
       ])
       ->execute();
+
+    // Also grant the new SSO USER role.
+    if (isset($sso_role->rid) && is_numeric($sso_role->rid)) {
+      user_multiple_role_edit(array($entry->uid), 'add_role', $sso_role->rid);
+    }
   }
 
   // And then a bunch we want to set explicitly.
