@@ -37,6 +37,16 @@ function stanford_ssp_drush_command() {
     'aliases' => array('ssp-au'),
   );
 
+  $items['stanford-ssp-migrate-wmd'] = array(
+    'description' => 'Migrate settings from the WebAuth Module for Drupal (WMD) to Stanford SimpleSAML PHP',
+    'options' => array(
+      'dry-run' => array(
+        'description'   => "Do a dry run and see what values will be changed.",
+      ),
+    ),
+    'aliases' => array('sspwmd'),
+  );
+
   return $items;
 }
 
@@ -120,4 +130,12 @@ function drush_stanford_ssp_saml_add_user($sunet) {
 
   drupal_form_submit('stanford_ssp_add_sso_user', $form_state);
 
+}
+
+/**
+ * Implements drush_COMMANDFILE_COMMANDNAME().
+ */
+function drush_stanford_ssp_migrate_wmd() {
+  module_load_include('module', 'stanford_ssp');
+  stanford_ssp_import_webauth_settings();
 }
