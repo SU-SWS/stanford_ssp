@@ -696,14 +696,13 @@ function stanford_ssp_import_webauth_settings() {
   // If webauth allowed local logins, translate that in to SSPs options.
   $webauth_allow_local = variable_get("webauth_allow_local", NULL);
   if (!is_null($webauth_allow_local)) {
-    variable_set("stanford_simplesamlphp_auth_allowdefaultlogin", $webauth_allow_local);
     variable_set("stanford_ssp_show_local_login", $webauth_allow_local);
   }
 
   // Map the link text to the new variables.
   $webauth_link_text = variable_get("webauth_link_text", 'Log in with WebAuth');
   if ($webauth_link_text !== "Log in with WebAuth") {
-    variable_get("stanford_ssp_sso_link_text", $webauth_link_text);
+    variable_set("stanford_ssp_sso_link_text", $webauth_link_text);
   }
 
   // Anyone with a valid SUNet ID will be allowed to log in.
@@ -726,8 +725,7 @@ function stanford_ssp_import_webauth_settings() {
   // webauth_require_users.
   $webauth_require_users = variable_get("webauth_require_users", FALSE);
   if ($webauth_require_users) {
-    $webauth_require_users = preg_replace('/\r\n/', ',', $webauth_require_users);
-    $webauth_require_users = preg_replace('/:/', '_', $webauth_require_users);
+    $webauth_require_users = check_plain(preg_replace('/\r\n/', ',', $webauth_require_users));
     variable_set("stanford_ssp_auth_restriction_sunet", $webauth_require_users);
   }
 
@@ -738,6 +736,13 @@ function stanford_ssp_import_webauth_settings() {
     $webauth_require_privgroups = preg_replace('/:/', '_', $webauth_require_privgroups);
     variable_set("stanford_ssp_auth_restriction_groups", $webauth_require_privgroups);
   }
+
+  // Update the authmap table to point existing users to ssp.
+  drush_log("Updating all users in the authmap table.", "notice");
+  db_update("authmap")
+    ->fields(array("module" => "stanford_simplesamlphp_auth"))
+    ->condition("module", "webauth")
+    ->execute();
 
   // webauth_default_role
   // 1. Add the SSO Role to everyone that already exists as a webauth user.
@@ -773,17 +778,10 @@ function stanford_ssp_import_webauth_settings() {
   // Convert our WMD role mappings to Stanford SSP.
   stanford_ssp_convert_webauth_role_mappings();
 
-  // Update the authmap table to point existing users to ssp.
-  drush_log("Updating all users in the authmap table.", "success");
-  db_update("authmap")
-    ->fields(array("module" => "stanford_simplesamlphp_auth"))
-    ->condition("module", "webauth")
-    ->execute();
-
   // Finally, disable and uninstall WMD.
+  drush_log("Disabling and uninstalling the webauth modules.", "notice");
   module_disable(array('webauth', 'webauth_extras'));
   drupal_uninstall_modules(array('webauth', 'webauth_extras'));
-  drush_log("Disabiling and uninstalling the webauth modules.", "success");
 
   // FIN.
   drush_log("Migrated from and uninstalled the webauth module.", "success");
