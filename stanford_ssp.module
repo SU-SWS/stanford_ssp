@@ -98,6 +98,14 @@ function stanford_ssp_menu() {
     'access callback' => "stanford_ssp_access_login_page",
   );
 
+  // Redirect login path of WMD to our endpoint.
+  $items['sites/default/webauth/login'] = array(
+    'title' => "Redirect",
+    'description' => "Redirect from saml_login to sso/login.",
+    'page callback' => 'stanford_ssp_redirect',
+    'access callback' => "stanford_ssp_access_login_page",
+  );
+
   return $items;
 }
 
