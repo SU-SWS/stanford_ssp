@@ -709,6 +709,12 @@ function stanford_ssp_import_webauth_settings() {
   }
 
   $sso_role = user_role_load_by_name('SSO User');
+  $sunet_role = user_role_load_by_name('SUNet User');
+  if ($sunet_role) {
+    drush_log("Transferring SUNet User permissions to SSO User.", "success");
+    $sunet_role_permissions = user_role_permissions(array($sunet_role->rid => $sunet_role->name));
+    user_role_grant_permissions($sso_role->rid, array_keys($sunet_role_permissions[$sunet_role->rid]));
+  }
 
   drush_log("Beginning webauth config settings to ssp settings conversion.", "success");
 
