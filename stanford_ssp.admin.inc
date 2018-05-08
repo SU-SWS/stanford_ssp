@@ -83,6 +83,14 @@ function stanford_ssp_configuration_form($form, &$form_state) {
     '#description' => t("Enforce that authentication and authenticated transactions happen over HTTPS. This should be enabled on production websites."),
   );
 
+  // Reformat entitlements, replacing : with _
+  $form['general-config']['stanford_ssp_format_entitlements'] = array(
+    '#type' => 'switch',
+    '#title' => t('Reformat entitlements.'),
+    '#default_value' => variable_get('stanford_ssp_format_entitlements', FALSE),
+    '#description' => t("If your SP configuration reformats entitlements (e.g. stanford:stanford to stanford_stanford), enable this option."),
+  );
+
   $form['general-config'] ['stanford_ssp_redirect_on_login'] = array(
     '#type' => 'textfield',
     '#title' => t('Redirect all users on successful login to this url.'),
