@@ -17,7 +17,7 @@ function stanford_saml_block_block_info() {
     'visibility' => BLOCK_VISIBILITY_NOTLISTED,
     'pages'      => "user\nuser/*",
     'weight'     => 0,
-    'region'     => '',
+    'region'     => -1,
     'cache'      => DRUPAL_NO_CACHE,
   );
   return $blocks;
