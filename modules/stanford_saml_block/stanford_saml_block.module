@@ -45,6 +45,17 @@ function stanford_saml_block_block_configure($delta = '') {
 }
 
 /**
+ * Implements hook_block_save().
+ */
+
+function stanford_saml_block_block_save($delta = '', $edit = array()) {
+  switch ($delta) {
+    case 'stanford_saml_block_login_block':
+      variable_set('stanford_ssp_link_text', filter_xss($edit['stanford_ssp_link_text']));
+  }
+}
+
+/**
  * Implements hook_block_view().
  */
 
