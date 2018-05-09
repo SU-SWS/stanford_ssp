@@ -39,11 +39,6 @@ function stanford_ssp_drush_command() {
 
   $items['stanford-ssp-migrate-wmd'] = array(
     'description' => 'Migrate settings from the WebAuth Module for Drupal (WMD) to Stanford SimpleSAML PHP',
-    'options' => array(
-      'dry-run' => array(
-        'description'   => "Do a dry run and see what values will be changed.",
-      ),
-    ),
     'aliases' => array('sspwmd'),
   );
 
