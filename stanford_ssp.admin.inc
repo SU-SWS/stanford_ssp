@@ -143,8 +143,8 @@ function stanford_ssp_configuration_form($form, &$form_state) {
   $form['saml-config']['stanford_simplesamlphp_auth_installdir'] = array(
     '#type' => 'textfield',
     '#title' => t('Installation directory'),
-    '#default_value' => variable_get('stanford_simplesamlphp_auth_installdir', '/usr/share/simplesamlphp'),
-    '#description' => t('The base directory of simpleSAMLphp. Absolute path with no trailing slash. default: /usr/share/simplesamlphp'),
+    '#default_value' => variable_get('stanford_simplesamlphp_auth_installdir', '/opt/simplesamlphp'),
+    '#description' => t('The base directory of simpleSAMLphp. Absolute path with no trailing slash. default: /opt/simplesamlphp'),
   );
 
   $form['saml-config']['stanford_simplesamlphp_auth_authsource'] = array(

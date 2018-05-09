@@ -44,7 +44,7 @@ function stanford_simplesamlphp_auth_autoload() {
   $saml = array();
 
   // Get the simplesamlphp session.
-  $basedir = variable_get('stanford_simplesamlphp_auth_installdir', '/usr/share/simplesamlphp');
+  $basedir = variable_get('stanford_simplesamlphp_auth_installdir', '/opt/simplesamlphp');
 
   // Find out if simplesaml is available and can be loaded.
   if (file_exists($basedir . '/lib/_autoload.php')) {
