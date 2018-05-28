@@ -105,12 +105,6 @@ function stanford_simplesamlphp_auth_init() {
  */
 function stanford_simplesamlphp_auth_user_login(&$edit, $account) {
 
-  // Only execute this on auth mapped users.
-  // $saml = stanford_simplesamlphp_auth_get_saml_info();
-  // if (empty($saml['instance'])) {
-  //   return;
-  // }
-
   // Allow other modules to alter the users' roles.
   drupal_alter('stanford_simplesamlphp_auth_user_roles', $account);
 
@@ -146,7 +140,7 @@ function stanford_simplesamlphp_auth_validate_user_ability_to_login($user) {
   $saml = stanford_simplesamlphp_auth_get_saml_info();
   $is_saml = (isset($saml['instance']) && !empty($saml['instance']));
 
-  // Check if local user is allowed default login and not a saml user
+  // Check if local user is allowed default login and not a saml user.
   if (variable_get('stanford_simplesamlphp_auth_allowdefaultlogin', TRUE) && !$is_saml) {
 
     // Get users that are allowed default login.
@@ -249,15 +243,6 @@ function stanford_simplesamlphp_auth_form_alter(&$form, $form_state, $form_id) {
     $form['links']['#markup'] = $link;
   }
 
-  // if (($form_id == 'user_register_form' || $is_user_profile_account_form) && user_access('change saml authentication setting')) {
-  //   $form['saml'] = array(
-  //     '#type' => 'checkbox',
-  //     '#title' => t('Enable this user to leverage SAML authentication'),
-  //     '#default_value' => $form_id == 'user_register_form' ? TRUE : (bool) user_get_authmaps($form['#user']->name),
-  //   );
-  //   $form['#submit'][] = 'simplesaml_auth_user_profile_form_submit';
-  // }
-
   // If the user has a simplesamlphp_auth authmap record, then don't require
   // them to know their Drupal password. This will allow them to change their
   // e-mail address, and set a Drupal password if they want to (and are
@@ -326,7 +311,7 @@ function stanford_simplesamlphp_auth_generate_block_text() {
   }
 
   // Check if valid local session exists..
-  if ($source ->isAuthenticated()) {
+  if ($source->isAuthenticated()) {
     $block_content .= '<p>' . t('Logged in as: @username', array('@username' => $user->name))
     . '<br />' . l(t('Log Out'), 'user/logout') . '</p>';
   }
@@ -337,105 +322,4 @@ function stanford_simplesamlphp_auth_generate_block_text() {
   }
 
   return $block_content;
-}
-
-/**
- * Evaluates a role rule.
- *
- * The rules work as follows:
- * = does an exact match on an attribute and will iterate over array values if
- * the array is multivalued.
- * @= matches the domain portion of an email address. It assumes the attribute
- * is a string, and will not iterate over an array (but take the first value).
- * ~= does a partial string match on the attribute, and does iterate over
- * multiple values, returning true if any of the values match.
- *
- * @param array $roleruleevaluation
- *   An array containing the role rule to evaluate.
- * @param array $attributes
- *   An array containing the identity attributes.
- *
- * @return array
- *   An array containing role value and the attribute, or FALSE.
- */
-function stanford_simplesamlphp_auth_evaulaterolerule($roleruleevaluation, $attributes) {
-  if (variable_get('stanford_simplesamlphp_auth_debug', 0)) {
-    watchdog('stanford_simplesamlphp_auth', 'Evaluate rule (key=%key,operator=%op,value=%val)', array(
-      '%key' => $roleruleevaluation[0],
-      '%op' => $roleruleevaluation[1],
-      '%val' => $roleruleevaluation[2],
-    ), WATCHDOG_DEBUG);
-  }
-
-  if (!array_key_exists($roleruleevaluation[0], $attributes)) {
-    return FALSE;
-  }
-  $attribute = $attributes[$roleruleevaluation[0]];
-
-  switch ($roleruleevaluation[1]) {
-    case '=':
-      return in_array($roleruleevaluation[2], $attribute);
-
-    case '@=':
-      $dc = explode('@', $attribute[0]);
-      if (count($dc) != 2) {
-        return FALSE;
-      }
-
-      return $dc[1] == $roleruleevaluation[2];
-
-    case '~=':
-      foreach ($attribute as $subattr) {
-        $pos = strpos($subattr, $roleruleevaluation[2]);
-        if ($pos !== FALSE) {
-          return TRUE;
-        }
-      }
-      return FALSE;
-  }
-
-  return FALSE;
-}
-
-/**
- * Performs role population.
- *
- * @param array $rolemap
- *   A string containing the role map.
- *
- * @return array
- *   An array containing user's roles.
- */
-function stanford_simplesamlphp_auth_rolepopulation($rolemap) {
-  $saml = stanford_simplesamlphp_auth_get_saml_info();
-  $source = $saml['source'];
-  $attributes = $saml["attributes"];
-  $roles = array();
-
-  // Check if valid local session exists..
-  if (!empty($rolemap) && $source->isAuthenticated()) {
-    $rolerules = explode('|', $rolemap);
-
-    foreach ($rolerules as $rolerule) {
-
-      $roleruledecompose = explode(':', $rolerule, 2);
-      $roleid = $roleruledecompose[0];
-      $roleruleevaluations = explode(';', $roleruledecompose[1]);
-      $addnew = TRUE;
-
-      foreach ($roleruleevaluations as $roleruleevaluation) {
-        $roleruleevaluationdc = str_getcsv($roleruleevaluation);
-        if (!stanford_simplesamlphp_auth_evaulaterolerule($roleruleevaluationdc, $attributes)) {
-          $addnew = FALSE;
-        }
-      }
-
-      if ($addnew) {
-        $roles[$roleid] = $roleid;
-      }
-
-    }
-  }
-
-  return $roles;
 }

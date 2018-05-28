@@ -1,5 +1,5 @@
 # [Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
-##### Version: 7.x-2.1-dev
+##### Version: 7.x-2.2-dev
 
 Maintainers: [jbickar](https://github.com/jbickar),  [sherakama](https://github.com/sherakama)
 
@@ -15,6 +15,9 @@ Provides a login block and context for the sitewide header region. Also, alters 
 
 **[Stanford SimpleSAMLPHP Authentication](https://github.com/SU-SWS/stanford_ssp/tree/7.x-2.x/modules/stanford_simplesamlphp_auth)**
 A complete re-write of the simplesamlphp_auth contrib module from Drupal.org. For more information on to why please see this thread: https://www.drupal.org/node/2745089
+
+**[Stanford SSP Role Mapping](https://github.com/SU-SWS/stanford_ssp/tree/7.x-2.x/modules/stanford_ssp_role_mapping)**
+Allows mapping of Drupal roles to an authenticated user based off of their entitlements.
 
 Installation
 ---

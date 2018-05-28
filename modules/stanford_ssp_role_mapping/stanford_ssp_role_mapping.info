@@ -1,0 +1,7 @@
+name = Stanford SSP Role Mapping
+description = Creates the ability to map a Drupal role to a user's entitlement.
+core = 7.x
+project = "stanford_ssp_role_mapping"
+package = Stanford
+version = 7.x-2.2-dev
+dependencies[] = "stanford_ssp"

@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Role Mapping.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function stanford_ssp_role_mapping_install(&$install_state) {
+
+}

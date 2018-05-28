@@ -1,0 +1,275 @@
+<?php
+
+/**
+ * @file
+ * Role Mapping.
+ */
+
+/**
+ * Implments hook_menu().
+ */
+function stanford_ssp_role_mapping_menu() {
+  $items = array();
+
+  $items['sso/workgroup-api-test'] = array(
+    'title' => "workgroup api test endpoint",
+    'description' => "Test endpoint response.",
+    'page callback' => 'stanford_ssp_role_mapping_test_response',
+  );
+
+  $items['admin/config/stanford/stanford_ssp/role-mappings'] = array(
+    'title' => "Role Mappings",
+    'description' => "Configure role assignments for authenticated users.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("stanford_ssp_role_mapping_role_mappings_form"),
+    'access arguments' => array('administer stanford_ssp'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'stanford_ssp_role_mapping.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Sample repsonse from the API enpoint.
+ *
+ * @see: https://web.stanford.edu/dept/as/mais/applications/workgroupapi/api.html
+ * https://workgroupsvc.stanford.edu/v1/workgroups/mais:test
+ */
+function stanford_ssp_role_mapping_test_response() {
+  $body = <<<EOD
+<?xml version="1.0" encoding="UTF-8"?>
+<workgroup>
+    <description>Test workgroup</description>
+    <filter>FACULTY_STAFF_STUDENT</filter>
+    <visibility>PRIVATE</visibility>
+    <reusable>TRUE</reusable>
+    <privgroup>TRUE</privgroup>
+    <members>
+        <member name="user1" url="https://workgroupsvc.stanford.edu/v1/users/user1"/>
+        <member name="user2" url="https://workgroupsvc.stanford.edu/v1/users/user2"/>
+        <workgroup name="workgroup:mais" url="https://workgroupsvc.stanford.edu/v1/workgroups/workgroup:mais"/>
+        <workgroup name="workgroup:mais-dev" url="https://workgroupsvc.stanford.edu/v1/workgroups/workgroup:mais-dev"/>
+    </members>
+    <administrators>
+        <member name="user3" url="https://workgroupsvc.stanford.edu/v1/users/user3"/>
+        <member name="user4" url="https://workgroupsvc.stanford.edu/v1/users/user4"/>
+        <workgroup name="mais-staff" url="https://workgroupsvc.stanford.edu/v1/workgroups/mais-staff"/>
+    </administrators>
+</workgroup>
+EOD;
+
+  print $body;
+  exit();
+}
+
+/**
+ * Implements simplesamlphp_auth_user_roles_alter()
+ * @param  [type] $roles [description]
+ * @return [type]        [description]
+ */
+function stanford_ssp_role_mapping_stanford_simplesamlphp_auth_user_roles_alter($user) {
+  $saml = stanford_simplesamlphp_auth_get_saml_info();
+  $source = $saml['source'];
+
+  // No source object. Must be a local user.
+  if (!is_object($source)) {
+    return;
+  }
+
+  // No authenticated user to work on. Go to bed.
+  if (!$source->isAuthenticated()) {
+    return;
+  }
+
+  // Action to perform when evaluating roles.
+  $operation = variable_get("stanford_ssp_auth_role_map", "none");
+
+  // If the action to do is none then we can end this function.
+  if ($operation == "none") {
+    return;
+  }
+
+  // What roles are matchy pants.
+  $roles = stanford_simplesamlphp_auth_rolepopulation(variable_get('stanford_simplesamlphp_auth_rolepopulation', ''));
+  $user_roles = user_roles();
+  $userinfo = FALSE;
+  $values = array_intersect_key($user_roles, $roles);
+
+  // Do the op.
+  switch ($operation) {
+
+    // Much like simplesamlphp_auths re-assign roles option this will replace
+    // all of the users roles with the ones that were matched in the mapping.
+    case 'reassign':
+      $userinfo = array('roles' => $values);
+      break;
+
+    // Unline implesamlphp_auths re-assign roles option this will only add/grant
+    // additional roles to the user.
+    case 'grant':
+      $new_roles = $user->roles + $values;
+      $userinfo = array('roles' => $new_roles);
+      break;
+  }
+
+  // Always add the SSO User role if it exists.
+  $sso_user_role = user_role_load_by_name("SSO User");
+  if ($sso_user_role) {
+    $userinfo['roles'][$sso_user_role->rid] = $sso_user_role->name;
+  }
+
+  // Save the new roles.
+  $user = user_save($user, $userinfo);
+
+  // We want to map eduPersonAffiliation to roles.
+  stanford_ssp_role_mapping_auth_role_map_person_affiliation($user);
+
+}
+
+/**
+ * Maps the affiliations to the user roles.
+ *
+ * @param object $user
+ *   The user to check the attributes on. Probably should be the currently
+ *   logged in user as the attributes come from that user anyhow.
+ */
+function stanford_ssp_role_mapping_auth_role_map_person_affiliation(&$user) {
+  $roles = user_roles();
+  $attributes = stanford_simplesamlphp_auth_get_attributes();
+  $affiliations = $attributes['eduPersonAffiliation'];
+
+  // Role mapping array goes as such:
+  // regex => role name.
+  $maps = array(
+    '/faculty/i' => 'Stanford Faculty',
+    '/staff/i' => 'Stanford Staff',
+    '/postdoc/i' => 'Stanford Student',
+    '/student/i' => 'Stanford Student',
+  );
+
+  // Loop through the expressions looking for matches in the maps array.
+  $matches = array();
+  foreach ($maps as $expression => $role_name) {
+    $has_matches = preg_grep($expression, $affiliations);
+
+    // If any of the affiliations match the pattern add it to the matches array
+    // keying by id so that we don't get duplicates.
+    if (count($has_matches)) {
+      // Check to see if the role exist. It may have been deleted.
+      $role = user_role_load_by_name($role_name);
+      if ($role) {
+        $matches[$role->rid] = $role->name;
+      }
+    }
+
+  }
+
+  // If anything was matched save the user.
+  if (count($matches)) {
+    $final_roles = $user->roles + $matches;
+    $user = user_save($user, array('roles' => $final_roles));
+  }
+
+}
+
+/**
+ * Evaluates a role rule.
+ *
+ * The rules work as follows:
+ * = does an exact match on an attribute and will iterate over array values if
+ * the array is multivalued.
+ * @= matches the domain portion of an email address. It assumes the attribute
+ * is a string, and will not iterate over an array (but take the first value).
+ * ~= does a partial string match on the attribute, and does iterate over
+ * multiple values, returning true if any of the values match.
+ *
+ * @param array $roleruleevaluation
+ *   An array containing the role rule to evaluate.
+ * @param array $attributes
+ *   An array containing the identity attributes.
+ *
+ * @return array
+ *   An array containing role value and the attribute, or FALSE.
+ */
+function stanford_ssp_role_mapping_auth_evaulaterolerule(array $roleruleevaluation, array $attributes) {
+  if (variable_get('stanford_simplesamlphp_auth_debug', 0)) {
+    watchdog('stanford_simplesamlphp_auth', 'Evaluate rule (key=%key,operator=%op,value=%val)', array(
+      '%key' => $roleruleevaluation[0],
+      '%op' => $roleruleevaluation[1],
+      '%val' => $roleruleevaluation[2],
+    ), WATCHDOG_DEBUG);
+  }
+
+  if (!array_key_exists($roleruleevaluation[0], $attributes)) {
+    return FALSE;
+  }
+  $attribute = $attributes[$roleruleevaluation[0]];
+
+  switch ($roleruleevaluation[1]) {
+    case '=':
+      return in_array($roleruleevaluation[2], $attribute);
+
+    case '@=':
+      $dc = explode('@', $attribute[0]);
+      if (count($dc) != 2) {
+        return FALSE;
+      }
+
+      return $dc[1] == $roleruleevaluation[2];
+
+    case '~=':
+      foreach ($attribute as $subattr) {
+        $pos = strpos($subattr, $roleruleevaluation[2]);
+        if ($pos !== FALSE) {
+          return TRUE;
+        }
+      }
+      return FALSE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Performs role population.
+ *
+ * @param array $rolemap
+ *   A string containing the role map.
+ *
+ * @return array
+ *   An array containing user's roles.
+ */
+function stanford_ssp_role_mapping_auth_rolepopulation($rolemap) {
+  $saml = stanford_simplesamlphp_auth_get_saml_info();
+  $source = $saml['source'];
+  $attributes = $saml["attributes"];
+  $roles = array();
+
+  // Check if valid local session exists..
+  if (!empty($rolemap) && $source->isAuthenticated()) {
+    $rolerules = explode('|', $rolemap);
+
+    foreach ($rolerules as $rolerule) {
+
+      $roleruledecompose = explode(':', $rolerule, 2);
+      $roleid = $roleruledecompose[0];
+      $roleruleevaluations = explode(';', $roleruledecompose[1]);
+      $addnew = TRUE;
+
+      foreach ($roleruleevaluations as $roleruleevaluation) {
+        $roleruleevaluationdc = str_getcsv($roleruleevaluation);
+        if (!stanford_simplesamlphp_auth_evaulaterolerule($roleruleevaluationdc, $attributes)) {
+          $addnew = FALSE;
+        }
+      }
+
+      if ($addnew) {
+        $roles[$roleid] = $roleid;
+      }
+
+    }
+  }
+
+  return $roles;
+}

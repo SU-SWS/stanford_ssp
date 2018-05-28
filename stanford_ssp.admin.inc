@@ -278,155 +278,54 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
 }
 
 /**
- * Role mapping form for mapping a role to an authenticated user.
- * @param  [type] $form        [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
- */
-function stanford_ssp_role_mappings_form($form, &$form_state) {
-
-  $options = array(
-    'none' => t("Do not adjust roles. Allow local administration of roles only."),
-    'grant' => t("Grant new roles only. Will only add roles based on role assignments."),
-    'reassign' => t("Re-evaluate roles on every log in. This will grant and remove roles."),
-  );
-
-  $form['stanford_ssp_auth_role_map'] = array(
-    '#type' => 'radios',
-    '#title' => 'Action to perform on successful authentication with SUNet ID',
-    '#options' => $options,
-    '#default_value' => variable_get("stanford_ssp_auth_role_map", 'none'),
-  );
-
-  // ROLE MAPPING FORM.
-
-  $table = array();
-  $submitted = !empty($form_state['post']);
-  $roles = user_roles(TRUE);
-  // Remove authenticated user has this will be defaulted to true.
-  unset($roles[2]);
-
-
-  $form['role_id'] = array(
-    '#name' => 'role_id',
-    '#type' => 'select',
-    '#options' => $roles,
-  );
-
-  $form['entitlement'] = array(
-    '#name' => 'entitlement',
-    '#type' => 'textfield',
-    '#default_value' => '',
-  );
-
-  $form['new_submit'] = array(
-    '#name' => 'new_submit',
-    '#type' => 'submit',
-    '#value' => t('Add Mapping'),
-  );
-
-  $table[] = array(drupal_render($form['role_id']), drupal_render($form['entitlement']), drupal_render($form['new_submit']));
-
-  $header = array(
-    t('Drupal Role'),
-    t('Workgroup (e.g. anchorage_humanbiology-admins)'),
-    t('Action')
-  );
-
-  $rolemaps = variable_get("stanford_simplesamlphp_auth_rolepopulation", "");
-  if (!empty($rolemaps)) {
-    $xp = explode("|", $rolemaps);
-    foreach ($xp as $index => $rule) {
-      $button_id = 'remove_warid_' . $index;
-      $form[$button_id] = array(
-        '#name' => $button_id,
-        '#type' => 'submit',
-        '#value' => t('Remove Mapping'),
-        '#submit' => array('stanford_ssp_remove_waird'),
-      );
-
-      // Special hidden element.
-      $form[$button_id . "_value"] = array(
-        '#type' => 'value',
-        '#value' => $index,
-      );
-
-      // $rule = rid:expression.
-      $bits = explode(':', $rule, 2);
-      $role = user_role_load($bits[0]);
-      $eval = str_getcsv($bits[1]);
-
-      $row = array($role->name, $eval[2], drupal_render($form[$button_id]));
-      $table[] = $row;
-    }
-  }
-
-  $form['add_roles'] = array(
-    '#markup' => theme('table', array(
-      'header' => $header,
-      'rows' => $table,
-      'attributes' => array(
-        "class" => array(
-          'add-roles-table',
-        ),
-      ),
-    )),
-    // Unfortunately states don't work here so we added a bit of JS to account
-    // for the loss.
-    '#attached' => array(
-      'js' => array(
-        drupal_get_path('module', 'stanford_ssp') . '/js/stanford_ssp.js',
-      ),
-    ),
-  );
-
-  // END ROLE MAPPING FORM.
-  $form["#submit"][] = "stanford_ssp_role_mappings_form_submit";
-  return system_settings_form($form);
-}
-
-
-/**
  * The login block and forms form form.
- * @param  [type] $form        [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
+ *
+ * @param array $form
+ *   Form array.
+ * @param array &$form_state
+ *   Form state.
+ *
+ * @return array
+ *   Settings form.
  */
-function stanford_ssp_login_block_forms_form($form, &$form_state) {
+function stanford_ssp_login_block_forms_form(array $form, array &$form_state) {
 
   $form['stanford_ssp_show_local_login'] = array(
     '#type' => 'switch',
     '#title' => t('Show the local login form on the user page'),
     '#default_value' => variable_get('stanford_ssp_show_local_login', TRUE),
-    '#description' => t("Turn on to show the local Drupal account login option on the !link.", array("!link" => l("user page", "user"))),
+    '#description' => t("Turn on to show the local Drupal account login option on the !link.", array("!link" => l(t("user page"), "user"))),
   );
 
   $form['stanford_ssp_show_sso_login'] = array(
     '#type' => 'switch',
     '#title' => t('Show the SSO login link on user page'),
     '#default_value' => variable_get('stanford_ssp_show_sso_login', TRUE),
-    '#description' => t("Turn on to show the SSO login link on the !link.", array("!link" => l("user page", "user"))),
+    '#description' => t("Turn on to show the SSO login link on the !link.", array("!link" => l(t("user page"), "user"))),
   );
 
   $form['stanford_ssp_sso_link_text'] = array(
     '#type' => 'textfield',
     '#title' => t('SSO login link text'),
     '#default_value' => variable_get('stanford_ssp_sso_link_text', t("Log in with your SUNet ID »")),
-    '#description' => t("Override the link text for the SSO login link on the !link.", array("!link" => l("user page", "user"))),
+    '#description' => t("Override the link text for the SSO login link on the !link.", array("!link" => l(t("user page"), "user"))),
   );
-
 
   return system_settings_form($form);
 }
 
-
 /**
  * Add a new SSO user account.
- * @param  [type] $form        [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
+ *
+ * @param array $form
+ *   Form array.
+ * @param array &$form_state
+ *   Form state.
+ *
+ * @return array
+ *   Settings form.
  */
-function stanford_ssp_add_sso_user($form, &$form_state) {
+function stanford_ssp_add_sso_user(array $form, array &$form_state) {
 
   $form['sunetid'] = array(
     '#type' => 'textfield',
@@ -435,20 +334,20 @@ function stanford_ssp_add_sso_user($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['name']  = array(
+  $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
-    '#description' => t('If you wish to specify the user\'s preferred name (instead of sunetid@stanford.edu), enter it here.'),
+    '#description' => t("If you wish to specify the user's preferred name (instead of sunetid@stanford.edu), enter it here."),
   );
 
-  $form['email']  = array(
+  $form['email'] = array(
     '#type' => 'textfield',
     '#title' => t('Email Address'),
     '#description' => t('If you wish to specify an alternate email address (instead of sunetid@stanford.edu), enter it here.'),
   );
 
-  $roles = user_roles(TRUE);
   // Remove authenticated user has this will be defaulted to true.
+  $roles = user_roles(TRUE);
   unset($roles[2]);
 
   // Only show the option if there is an option.
