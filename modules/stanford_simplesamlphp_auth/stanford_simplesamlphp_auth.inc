@@ -528,7 +528,7 @@ function stanford_simplesamlphp_auth_is_enabled($show_inactive_msg = FALSE) {
 
   $failure = NULL;
   $is_activated = variable_get('stanford_simplesamlphp_auth_activate');
-  $basedir = variable_get('stanford_simplesamlphp_auth_installdir', '/usr/share/simplesamlphp');
+  $basedir = variable_get('stanford_simplesamlphp_auth_installdir', '/opt/simplesamlphp');
 
   if ($is_activated) {
     // Make sure we know where SimpleSAMLphp is.

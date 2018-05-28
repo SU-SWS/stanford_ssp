@@ -17,7 +17,7 @@ function stanford_saml_block_block_info() {
     'visibility' => BLOCK_VISIBILITY_NOTLISTED,
     'pages'      => "user\nuser/*",
     'weight'     => 0,
-    'region'     => '',
+    'region'     => -1,
     'cache'      => DRUPAL_NO_CACHE,
   );
   return $blocks;
@@ -42,6 +42,17 @@ function stanford_saml_block_block_configure($delta = '') {
     );
   }
   return $form;
+}
+
+/**
+ * Implements hook_block_save().
+ */
+
+function stanford_saml_block_block_save($delta = '', $edit = array()) {
+  switch ($delta) {
+    case 'stanford_saml_block_login_block':
+      variable_set('stanford_ssp_link_text', filter_xss($edit['stanford_ssp_link_text']));
+  }
 }
 
 /**

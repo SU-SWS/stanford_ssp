@@ -684,8 +684,11 @@ function stanford_ssp_form_user_pass_alter_validate($form, $form_state) {
  *   eg: anchorage_humanbiology-admins
  */
 function stanford_ssp_format_entitlement($entitlement) {
-  $entitlement = strtolower($entitlement);
-  $entitlement = str_replace(":", "_", $entitlement);
+  $format_enabled = variable_get('stanford_ssp_format_entitlements', FALSE);
+  if ($format_enabled) {
+    $entitlement = strtolower($entitlement);
+    $entitlement = str_replace(":", "_", $entitlement);
+  }
   return $entitlement;
 }
 
@@ -706,6 +709,12 @@ function stanford_ssp_import_webauth_settings() {
   }
 
   $sso_role = user_role_load_by_name('SSO User');
+  $sunet_role = user_role_load_by_name('SUNet User');
+  if ($sunet_role) {
+    drush_log("Transferring SUNet User permissions to SSO User.", "success");
+    $sunet_role_permissions = user_role_permissions(array($sunet_role->rid => $sunet_role->name));
+    user_role_grant_permissions($sso_role->rid, array_keys($sunet_role_permissions[$sunet_role->rid]));
+  }
 
   drush_log("Beginning webauth config settings to ssp settings conversion.", "success");
 
@@ -754,9 +763,10 @@ function stanford_ssp_import_webauth_settings() {
   // webauth_require_privgroups.
   $webauth_require_privgroups = variable_get("webauth_require_privgroups", FALSE);
   if ($webauth_require_privgroups) {
-    $webauth_require_privgroups = preg_replace('/\r\n/', ',', $webauth_require_privgroups);
-    $webauth_require_privgroups = preg_replace('/:/', '_', $webauth_require_privgroups);
-    variable_set("stanford_ssp_auth_restriction_groups", $webauth_require_privgroups);
+    $privgroups = explode("\r\n", $webauth_require_privgroups);
+    $privgroups = array_map('stanford_ssp_format_entitlement', $privgroups);
+    $webauth_require_privgroups = implode(',', $privgroups);
+    variable_set("stanford_ssp_auth_restriction_group", $webauth_require_privgroups);
   }
 
   // Update the authmap table to point existing users to ssp.
@@ -842,7 +852,7 @@ function stanford_ssp_convert_webauth_role_mappings() {
   foreach ($webauth_roles as $mapping) {
     // stanford_simplesamlphp_auth_rolepopulation = $rid:eduPersonEntitlement,=,$workgroup|$rid:eduPersonEntitlement,=,$workgroup
     // Replace colons with underscores.
-    $workgroup = preg_replace('/:/', '_', $mapping->wa_group);
+    $workgroup = stanford_ssp_format_entitlement($mapping->wa_group);
     $roles[] = $mapping->rid . ":eduPersonEntitlement,=," . $workgroup;
   }
   $new_rolepop = implode('|', $roles);
