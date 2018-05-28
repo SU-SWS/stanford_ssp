@@ -21,14 +21,20 @@ function stanford_ssp_menu() {
   $items['sso/denied-test'] = array(
     'title' => "Always denied",
     'description' => "Authentication endpoint test.",
-    'page callback' => 'stanford_ssp_sample_workgroup_response',
+    'page callback' => 'stanford_ssp_sso_auth',
   );
 
   $items['sso/workgroup-test'] = array(
     'title' => "Workgroup XML sample response",
     'description' => "Workgroup data test.",
-    'page callback' => 'stanford_ssp_sso_auth',
-    'access callback' => FALSE,
+    'page callback' => 'stanford_ssp_sample_workgroup_response',
+    'access callback' => TRUE,
+  );
+
+  $items['sso/test-test'] = array(
+    'title' => 'title title',
+    'page callback' => 'stanford_ssp_get_workgroup_members_by_api',
+    'access callback' => TRUE,
   );
 
   // Configuration Forms
@@ -455,7 +461,7 @@ function stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets(array $sune
 function stanford_ssp_simplesamlphp_auth_allow_login_validate_groups(array $groups, array $attributes) {
 
   // How do we validate the group? Via saml attribute or by the workgroup api?
-  $method = variable_get('stanford_ssp_role_map_source', 'entitlement';)
+  $method = variable_get('stanford_ssp_role_map_source', 'entitlement');
   $result = FALSE;
 
   switch ($method) {
@@ -912,23 +918,74 @@ function stanford_ssp_validate_workgroup_by_api($sunet, array $groups) {
   return FALSE;
 }
 
-
 /**
- * [stanford_ssp_get_workgroup_members_by_api description]
- * @param  [type] $group [description]
- * @return [type]        [description]
+ * Get an array of sunet ids in a workgroup.
+ *
+ * @param string $group
+ *   The workgroup name. eg: `mais:test`.
+ *
+ * @return array
+ *   An array of members for the passed in workgroup.
  */
 function stanford_ssp_get_workgroup_members_by_api($group) {
+
+  // Validate group name. Needs to be in the format 'something:something'.
+  $xp = explode($group, ":");
+  if (count($xp) !== 2) {
+    watchdog('stanford_ssp', 'Invalid workgroup format.', array(), WATCHDOG_ERROR);
+    return array();
+  }
+
+  // Workgroup endpoint. Needs and installed SSL cert to work.
   $endpoint = variable_get('stanford_ssp_workgroup_api_endpoint', 'https://workgroupsvc.stanford.edu/v1/workgroups/');
-  
+  $endpoint .= $group;
+
+  $response = drupal_http_request($endpoint, array('timeout' => 5));
+
+  if ($response->code !== "200") {
+    watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
+    return array();
+  }
+
+  // We have a valid response. Load up the xml and parse out the users.
+  $xml = simplexml_load_string($response->data);
+  $json = json_encode($xml);
+  $values = json_decode($json, TRUE);
+
+  $members = array();
+  foreach ($values['administrators']['member'] as $member) {
+    $members[] = stanford_ssp_get_api_members_from_xml_array($member);
+  }
+
+  foreach ($values['administrators']['member'] as $member) {
+    $members[] = stanford_ssp_get_api_members_from_xml_array($member);
+  }
+
+  return array_unique($members);
 }
 
+/**
+ * Pull out the sunet id of the member from the xml array.
+ *
+ * @param array $member
+ *   Member from api repsonse.
+ *
+ * @return string
+ *   Sunet id.
+ */
+function stanford_ssp_get_api_members_from_xml_array(array $member) {
+  return $member['@attributes']['name'];
+}
 
 /**
  * [stanford_ssp_sample_workgroup_response description]
  * @return [type] [description]
  */
 function stanford_ssp_sample_workgroup_response() {
+
+  // drupal_add_http_header('Content-Disposition', 'attachment; filename="mais:test.xml"');
+  drupal_add_http_header('Content-Type', 'text/xml;charset=UTF-8');
+
   $response = <<<EOD
 <?xml version="1.0" encoding="UTF-8"?>
 <workgroup>
@@ -951,5 +1008,6 @@ function stanford_ssp_sample_workgroup_response() {
 </workgroup>
 EOD;
 
-  exit($response);
+  print($response);
+  exit();
 }
