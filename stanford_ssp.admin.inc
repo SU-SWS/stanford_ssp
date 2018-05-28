@@ -289,11 +289,16 @@ function stanford_ssp_authorizations_form(array $form, array &$form_state) {
 
 /**
  * Role mapping form for mapping a role to an authenticated user.
- * @param  [type] $form        [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
+ *
+ * @param array $form
+ *   The form array.
+ * @param array &$form_state
+ *   The form state array.
+ *
+ * @return array
+ *   The form array.
  */
-function stanford_ssp_role_mappings_form($form, &$form_state) {
+function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
 
   $options = array(
     'none' => t("Do not adjust roles. Allow local administration of roles only."),
@@ -313,7 +318,7 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     '#title' => 'Source to validate role mapping groups against.',
     '#options' => array(
       'workgroup' => t('Workgroup API'),
-      'entitlement' => t('eduPersonEntitlement attribute'),
+      'entitlement' => t('SAML attribute'),
     ),
     '#default_value' => variable_get("stanford_ssp_role_map_source", 'entitlement'),
   );
