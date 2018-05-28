@@ -272,3 +272,22 @@ function stanford_ssp_update_7206() {
   $admin_rid = variable_get('user_admin_role');
   user_role_grant_permissions($admin_rid, array("administer stanford_ssp"));
 }
+
+/**
+ * stanford_ssp_update_7207
+ *
+ * Set the default path for the simplesamlphp library if it hasnt been changed.
+ * If is has been changed leave it alone. Also, set the reformatting of the
+ * entitlements to true for updated installs to keep that functionality
+ * preserved.
+ */
+function stanford_ssp_update_7207() {
+
+  $basedir = variable_get('stanford_simplesamlphp_auth_installdir', "nothing set");
+  if ($basedir == "nothing set") {
+    variable_set("stanford_simplesamlphp_auth_installdir", "/usr/share/simplesamlphp");
+  }
+
+  // Preserve the old settings about reformatting but allow new ones to decide.
+  variable_set('stanford_ssp_format_entitlements', TRUE);
+}
