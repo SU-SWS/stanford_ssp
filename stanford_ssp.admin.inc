@@ -357,7 +357,7 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
 
   $header = array(
     t('Drupal Role'),
-    t('Workgroup (e.g. anchorage_humanbiology-admins)'),
+    t('Workgroup (e.g. anchorage:humanbiology-admins)'),
     t('Action'),
   );
 
@@ -716,7 +716,7 @@ function stanford_ssp_role_mappings_form_submit(array $form, array &$form_state)
  * Maps an entitlement to a role.
  *
  * @param string $entitlement
- *   A value in eduPersonEntitlement, e.g., anchorage_support.
+ *   A value in eduPersonEntitlement, e.g., anchorage:support.
  * @param mixed $role
  *   Either the role id or a name.
  */

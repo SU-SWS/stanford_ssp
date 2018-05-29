@@ -389,6 +389,11 @@ function stanford_simplesamlphp_auth_api_evaluaterolerule(array $roleruleevaluat
   $workgroup = $roleruleevaluation[2];
   $operation = $roleruleevaluation[1];
 
+  // If formatting is on we need to change it back for the API.
+  if (variable_get("stanford_ssp_format_entitlements", TRUE)) {
+    $workgroup = str_replace("_", ":", $workgroup);
+  }
+
   // Unless you were crafty and drush set a special evaluation rule in to the
   // list of rules all operations should be exact matches as the UI doesn't give
   // any options for anything else. This is going to allow me to assume exact
