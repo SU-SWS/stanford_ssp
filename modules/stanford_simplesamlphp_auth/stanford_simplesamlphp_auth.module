@@ -351,11 +351,11 @@ function stanford_simplesamlphp_auth_evaulaterolerule(array $roleruleevaluation,
   }
 
   // What kind of eval are we going to perform?
-  $workgroup_source = varaiable_get('stanford_ssp_role_map_source', 'entitlement');
+  $workgroup_source = variable_get('stanford_ssp_role_map_source', 'entitlement');
 
   // If SAML eval check if the key exists in the attributes to start with.
   if ($workgroup_source == 'entitlement') {
-    return stanford_simplesamlphp_auth_saml_evaluaterolerule();
+    return stanford_simplesamlphp_auth_saml_evaluaterolerule($roleruleevaluation, $attributes);
   }
 
   // If workgroup API check the remote api for if this user is in one.
@@ -473,13 +473,13 @@ function stanford_simplesamlphp_auth_saml_evaluaterolerule(array $roleruleevalua
 /**
  * Performs role population.
  *
- * @param array $rolemap
+ * @param string $rolemap
  *   A string containing the role map.
  *
  * @return array
  *   An array containing user's roles.
  */
-function stanford_simplesamlphp_auth_rolepopulation(array $rolemap) {
+function stanford_simplesamlphp_auth_rolepopulation($rolemap) {
   $saml = stanford_simplesamlphp_auth_get_saml_info();
   $source = $saml['source'];
   $attributes = $saml["attributes"];

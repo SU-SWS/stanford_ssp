@@ -539,7 +539,7 @@ function stanford_simplesamlphp_auth_is_enabled($show_inactive_msg = FALSE) {
 
   if ($is_activated) {
     // Make sure we know where SimpleSAMLphp is.
-    if (!file_exists($basedir)) {
+    if (!is_dir($basedir)) {
       $failure = t('SimpleSAMLphp could not be found at %basedir . The simplesamlphp_auth module cannot function until the path to the local SimpleSAMLphp instance is configured.', array('%basedir' => $basedir));
       watchdog('stanford_simplesamlphp_auth', $failure, NULL, WATCHDOG_WARNING);
     }

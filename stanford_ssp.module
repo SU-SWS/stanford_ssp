@@ -540,7 +540,7 @@ function stanford_ssp_stanford_simplesamlphp_auth_user_roles_alter($user) {
   $user = user_save($user, $userinfo);
 
   // We want to map eduPersonAffiliation to roles.
-  stanford_ssp_auth_role_map_person_affiliation($user);
+  // stanford_ssp_auth_role_map_person_affiliation($user);
 
 }
 
@@ -887,7 +887,7 @@ function stanford_ssp_convert_webauth_role_mappings() {
   // Update stanford_ssp_map_entitlement_to_role() to use this explode/implode,
   // and then use that function here.
   $webauth_roles = stanford_ssp_get_webauth_role_mappings();
-  $rolepop = variable_get('stanford_simplesamlphp_auth_rolepopulation', NULL);
+  $rolepop = variable_get('stanford_simplesamlphp_auth_rolepopulation', '');
   $roles = array();
   if (!is_null($rolepop)) {
     $roles = explode('|', $rolepop);
