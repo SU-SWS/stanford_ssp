@@ -385,7 +385,7 @@ function stanford_simplesamlphp_auth_api_evaluaterolerule(array $roleruleevaluat
 
   // Grab the sunet out of the SAML repsonse attributes and a few keys from the
   // SAML mapping rule.
-  $sunet = $attributes[variable_get('stanford_simplesamlphp_auth_unique_id', 'eduPersonPrincipalName')];
+  $sunet = array_pop($attributes[variable_get('stanford_simplesamlphp_auth_unique_id', 'eduPersonPrincipalName')]);
   $workgroup = $roleruleevaluation[2];
   $operation = $roleruleevaluation[1];
 

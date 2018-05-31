@@ -938,7 +938,7 @@ function stanford_ssp_validate_workgroup_by_api($sunet, array $groups) {
 function stanford_ssp_get_workgroup_members_by_api($group) {
 
   // Validate group name. Needs to be in the format 'something:something'.
-  $xp = explode($group, ":");
+  $xp = explode(":", $group);
   if (count($xp) !== 2) {
     watchdog('stanford_ssp', 'Invalid workgroup format.', array(), WATCHDOG_ERROR);
     return array();
