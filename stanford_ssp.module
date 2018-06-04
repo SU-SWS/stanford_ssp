@@ -28,12 +28,14 @@ function stanford_ssp_menu() {
     'title' => "Workgroup XML sample response",
     'description' => "Workgroup data test.",
     'page callback' => 'stanford_ssp_sample_workgroup_response',
+    // Just a test page. Nothing doing here.
     'access callback' => TRUE,
   );
 
   $items['sso/test-test'] = array(
     'title' => 'title title',
     'page callback' => 'stanford_ssp_get_workgroup_members_by_api',
+    // Just a test page. Nothing doing here.
     'access callback' => TRUE,
   );
 
@@ -538,10 +540,6 @@ function stanford_ssp_stanford_simplesamlphp_auth_user_roles_alter($user) {
 
   // Save the new roles.
   $user = user_save($user, $userinfo);
-
-  // We want to map eduPersonAffiliation to roles.
-  // stanford_ssp_auth_role_map_person_affiliation($user);
-
 }
 
 /**
@@ -627,11 +625,6 @@ function stanford_ssp_form_user_profile_form_alter(array &$form, array &$form_st
 
 /**
  * Implements hook_form_FORMID_alter().
- *
- * @param array $form
- *   The form array.
- * @param array &$form_state
- *   The form state array.
  */
 function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
 
@@ -688,12 +681,7 @@ function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
 }
 
 /**
- * Implements hook form alter.
- *
- * @param array $form
- *   The form array.
- * @param array &$form_state
- *   The form state array.
+ * Implements hook_form_alter().
  */
 function stanford_ssp_form_user_pass_alter(array &$form, array &$form_state) {
   $form["#validate"][] = "stanford_ssp_form_user_pass_alter_validate";

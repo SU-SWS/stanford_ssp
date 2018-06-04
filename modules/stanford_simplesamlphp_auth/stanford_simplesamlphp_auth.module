@@ -336,7 +336,7 @@ function stanford_simplesamlphp_auth_generate_block_text() {
  * @param array $attributes
  *   An array containing the SAML response identity attributes.
  *
- * @return array
+ * @return mixed
  *   An array containing role value and the attribute, or FALSE.
  */
 function stanford_simplesamlphp_auth_evaulaterolerule(array $roleruleevaluation, array $attributes) {
@@ -447,7 +447,7 @@ function stanford_simplesamlphp_auth_saml_evaluaterolerule(array $roleruleevalua
   // multiple values, returning true if any of the values match.
   switch ($roleruleevaluation[1]) {
     case '=':
-      return in_array($roleruleevaluation[2], $attribute);
+      return in_array($role_to_lookup, $attribute);
 
     case '@=':
       $dc = explode('@', $attribute[0]);
@@ -455,11 +455,11 @@ function stanford_simplesamlphp_auth_saml_evaluaterolerule(array $roleruleevalua
         return FALSE;
       }
 
-      return $dc[1] == $roleruleevaluation[2];
+      return $dc[1] == $role_to_lookup;
 
     case '~=':
       foreach ($attribute as $subattr) {
-        $pos = strpos($subattr, $roleruleevaluation[2]);
+        $pos = strpos($subattr, $role_to_lookup);
         if ($pos !== FALSE) {
           return TRUE;
         }
