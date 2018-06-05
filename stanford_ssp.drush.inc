@@ -118,8 +118,8 @@ function drush_stanford_ssp_saml_add_user($sunet) {
   }
 
   // @todo: Make this an option.
-  $nofify = drush_get_option("notify");
-  if (!empty($nofify) && ($nofity == "true" || (int) $notify == 1)) {
+  $notify = drush_get_option("notify");
+  if (!empty($notify) && ($notify == "true" || (int) $notify == 1)) {
     $form_state["values"]["notify"] = TRUE;
   }
 
