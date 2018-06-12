@@ -323,6 +323,53 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
     '#default_value' => variable_get("stanford_ssp_role_map_source", 'entitlement'),
   );
 
+  // In order to make this request openssl has to be available to php.
+  if (function_exists('openssl_get_cert_locations')) {
+    // Add the SSL certificate paths.
+    $openssl_defaults = openssl_get_cert_locations();
+    $default_path = $openssl_defaults['default_cert_dir'];;
+    $cert_filename = variable_get('stanford_ssp_workgroup_api_cert', $default_path . "/stanford-ssp.cert");
+    $key_filename = variable_get('stanford_ssp_workgroup_api_key', $default_path . "/stanford-ssp.key");
+
+    $form['stanford_ssp_workgroup_api_cert'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Path to Workgroup API SSL Certificate.',
+      '#default_value' => $cert_filename,
+      '#description' => 'For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="stanford_ssp_role_map_source"]' => array('value' => 'workgroup'),
+        ),
+      ),
+    );
+
+    $form['stanford_ssp_workgroup_api_key'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Path to Workgroup API SSL Key.',
+      '#default_value' => $key_filename,
+      '#description' => 'For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="stanford_ssp_role_map_source"]' => array('value' => 'workgroup'),
+        ),
+      ),
+    );
+
+  }
+  else {
+    $form['no_open_ssl'] = array (
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="stanford_ssp_role_map_source"]' => array('value' => 'workgroup'),
+        ),
+      ),
+    );
+    $form['no_open_ssl']['no_open_ssl_message'] = array(
+      '#markup' => '<div class="messages message error"><h2>OpenSSL is not available. Please compile PHP with OpenSSL to use workgroup api validation.</h2></div>',
+    );
+  }
+
   // ROLE MAPPING FORM.
   $table = array();
   $submitted = !empty($form_state['post']);
