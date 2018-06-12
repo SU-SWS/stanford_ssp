@@ -334,7 +334,7 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
     $form['stanford_ssp_workgroup_api_cert'] = array(
       '#type' => 'textfield',
       '#title' => 'Path to Workgroup API SSL Certificate.',
-      '#default_value' => $cert_filename,
+      '#default_value' => !empty($cert_filename) ? $cert_filename : $default_path . "/stanford-ssp.cert",
       '#description' => t('For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates'),
       '#states' => array(
         'visible' => array(
@@ -346,7 +346,7 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
     $form['stanford_ssp_workgroup_api_key'] = array(
       '#type' => 'textfield',
       '#title' => 'Path to Workgroup API SSL Key.',
-      '#default_value' => $key_filename,
+      '#default_value' => !empty($key_filename) ? $key_filename : $default_path . "/stanford-ssp.key",
       '#description' => t('For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates'),
       '#states' => array(
         'visible' => array(
@@ -356,6 +356,7 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
     );
 
   }
+  // If OpenSSL is not available then we should inform the end user.
   else {
     $form['no_open_ssl'] = array(
       '#type' => 'container',
