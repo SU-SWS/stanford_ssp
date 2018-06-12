@@ -80,6 +80,9 @@ function stanford_ssp_uninstall() {
   variable_del('stanford_ssp_sso_link_text');
   variable_del('stanford_ssp_debug');
   variable_del('stanford_ssp_role_map_source');
+  variable_del('stanford_ssp_workgroup_api_cert');
+  variable_del('stanford_ssp_workgroup_api_key');
+  variable_del('stanford_ssp_workgroup_api_endpoint');
 }
 
 /**
