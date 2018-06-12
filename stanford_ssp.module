@@ -681,7 +681,7 @@ function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_FORM_ID_alter().
  */
 function stanford_ssp_form_user_pass_alter(array &$form, array &$form_state) {
   $form["#validate"][] = "stanford_ssp_form_user_pass_alter_validate";
@@ -950,8 +950,8 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
 
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $endpoint);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
   curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
   curl_setopt($ch, CURLOPT_TIMEOUT, 5);
   curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
@@ -964,7 +964,7 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
   $errmsg = curl_error($ch);
   curl_close($ch);
 
-  if (empty($response) || ($err == 0 && !empty($errmsg) )) {
+  if (empty($response) || ($err == 0 && !empty($errmsg))) {
     watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
     return array();
   }
@@ -1020,19 +1020,19 @@ function stanford_ssp_sample_workgroup_response() {
     <reusable>TRUE</reusable>
     <privgroup>TRUE</privgroup>
     <members>
-        <member name="user1" url="https://workgroupsvc.stanford.edu/v1/users/user1"/>
-        <member name="user2" url="https://workgroupsvc.stanford.edu/v1/users/user2"/>
+        <member id="sunet1" name="user1" url="https://workgroupsvc.stanford.edu/v1/users/user1"/>
+        <member id="sunet2" name="user2" url="https://workgroupsvc.stanford.edu/v1/users/user2"/>
         <workgroup name="workgroup:mais" url="https://workgroupsvc.stanford.edu/v1/workgroups/workgroup:mais"/>
         <workgroup name="workgroup:mais-dev" url="https://workgroupsvc.stanford.edu/v1/workgroups/workgroup:mais-dev"/>
     </members>
     <administrators>
-        <member name="user3" url="https://workgroupsvc.stanford.edu/v1/users/user3"/>
-        <member name="user4" url="https://workgroupsvc.stanford.edu/v1/users/user4"/>
+        <member id="sunet3" name="user3" url="https://workgroupsvc.stanford.edu/v1/users/user3"/>
+        <member id="sunet4" name="user4" url="https://workgroupsvc.stanford.edu/v1/users/user4"/>
         <workgroup name="mais-staff" url="https://workgroupsvc.stanford.edu/v1/workgroups/mais-staff"/>
     </administrators>
 </workgroup>
 EOD;
 
   print($response);
-  exit();
+  drupal_exit();
 }

@@ -335,7 +335,7 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
       '#type' => 'textfield',
       '#title' => 'Path to Workgroup API SSL Certificate.',
       '#default_value' => $cert_filename,
-      '#description' => 'For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates',
+      '#description' => t('For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates'),
       '#states' => array(
         'visible' => array(
           ':input[name="stanford_ssp_role_map_source"]' => array('value' => 'workgroup'),
@@ -347,7 +347,7 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
       '#type' => 'textfield',
       '#title' => 'Path to Workgroup API SSL Key.',
       '#default_value' => $key_filename,
-      '#description' => 'For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates',
+      '#description' => t('For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates'),
       '#states' => array(
         'visible' => array(
           ':input[name="stanford_ssp_role_map_source"]' => array('value' => 'workgroup'),
@@ -357,7 +357,7 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
 
   }
   else {
-    $form['no_open_ssl'] = array (
+    $form['no_open_ssl'] = array(
       '#type' => 'container',
       '#states' => array(
         'visible' => array(

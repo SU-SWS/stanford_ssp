@@ -50,6 +50,4 @@ function stanford_simplesamlphp_auth_loginpage() {
 
   // And redirect to somewhere.
   drupal_goto("user/" . $user->uid);
-
-  return;
 }
