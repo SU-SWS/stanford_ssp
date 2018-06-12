@@ -933,23 +933,49 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
   }
 
   // Workgroup endpoint. Needs and installed SSL cert to work.
+  // UAT server is at: https://workgroupsvc-uat.stanford.edu/v1/workgroups/
   $endpoint = variable_get('stanford_ssp_workgroup_api_endpoint', 'https://workgroupsvc.stanford.edu/v1/workgroups/');
   $endpoint .= $group;
 
-  $response = drupal_http_request($endpoint, array('timeout' => 5));
+  // In order to make this request openssl has to be available to php.
+  if (!function_exists('openssl_get_cert_locations')) {
+    throw new Exception("PHP must be compiled with Openssl in order for workgroup api validation to work.");
+  }
 
-  if ($response->code !== "200") {
+  // Add the SSL certificate paths.
+  $openssl_defaults = openssl_get_cert_locations();
+  $default_path = $openssl_defaults['default_cert_dir'];
+  $cert_filename = variable_get('stanford_ssp_workgroup_api_cert', $default_path . "/stanford-ssp.cert");
+  $key_filename = variable_get('stanford_ssp_workgroup_api_key', $default_path . "/stanford-ssp.key");
+
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $endpoint);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+  curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
+  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+  curl_setopt($ch, CURLOPT_SSLKEY, $key_filename);
+  curl_setopt($ch, CURLOPT_SSLCERT, $cert_filename);
+
+  $response = curl_exec($ch);
+  $err = curl_errno($ch);
+  $errmsg = curl_error($ch);
+  curl_close($ch);
+
+  if (empty($response) || ($err == 0 && !empty($errmsg) )) {
     watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
     return array();
   }
 
   // We have a valid response. Load up the xml and parse out the users.
-  $xml = simplexml_load_string($response->data);
+  $xml = simplexml_load_string($response);
   $json = json_encode($xml);
   $values = json_decode($json, TRUE);
 
   $members = array();
-  foreach ($values['administrators']['member'] as $member) {
+  foreach ($values['members']['member'] as $member) {
     $members[] = stanford_ssp_get_api_members_from_xml_array($member);
   }
 
@@ -970,7 +996,7 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
  *   Sunet id.
  */
 function stanford_ssp_get_api_members_from_xml_array(array $member) {
-  return $member['@attributes']['name'];
+  return $member['@attributes']['id'];
 }
 
 /**
