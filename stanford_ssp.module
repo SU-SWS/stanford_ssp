@@ -934,7 +934,7 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
 
   // Workgroup endpoint. Needs and installed SSL cert to work.
   // UAT server is at: https://workgroupsvc-uat.stanford.edu/v1/workgroups/
-  $endpoint = variable_get('stanford_ssp_workgroup_api_endpoint', 'https://workgroupsvc.stanford.edu/v1/workgroups/');
+  $endpoint = variable_get('stanford_ssp_workgroup_api_endpoint', 'https://aswsweb.stanford.edu/mais/workgroupsvc/v1/workgroups/');
   $endpoint .= $group;
 
   // In order to make this request openssl has to be available to php.
