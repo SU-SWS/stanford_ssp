@@ -962,7 +962,13 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
   $response = curl_exec($ch);
   $err = curl_errno($ch);
   $errmsg = curl_error($ch);
+  $curl_info = curl_getinfo($ch);
   curl_close($ch);
+
+  if ($curl_info['http_code'] !== 200) {
+    watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
+    return array();
+  }
 
   if (empty($response) || ($err == 0 && !empty($errmsg))) {
     watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
