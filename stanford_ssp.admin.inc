@@ -783,10 +783,10 @@ function stanford_ssp_role_mappings_form_validate(array $form, array $form_state
 
   $group = $values['entitlement'];
   try {
-    $members = stanford_ssp_fetch_from_workgroup_api($group);
+    stanford_ssp_fetch_from_workgroup_api($group);
   }
   catch (Exception $e) {
-    form_set_error('entitlement', 'Invalid workgroup.');
+    form_set_error('entitlement', t('Invalid workgroup.'));
   }
 }
 
