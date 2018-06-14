@@ -124,7 +124,7 @@ function stanford_simplesamlphp_auth_user_login(&$edit, $account) {
 }
 
 /**
- * Checks wether the user is allowed to be logged in or not.
+ * Checks whether the user is allowed to be logged in or not.
  *
  * @param object $user
  *   A loaded user object.
@@ -328,7 +328,7 @@ function stanford_simplesamlphp_auth_generate_block_text() {
 /**
  * Evaluates a role rule.
  *
- * Evaluate wether or not somebody who has logged in should get a role in
+ * Evaluate whether or not somebody who has logged in should get a role in
  * the Drupal website by evaluating the rules as set by the role mapping ui.
  *
  * @param array $roleruleevaluation
@@ -368,7 +368,7 @@ function stanford_simplesamlphp_auth_evaulaterolerule(array $roleruleevaluation,
 }
 
 /**
- * Evaluate wether a user is in a workgroup through the workgroup api.
+ * Evaluate whether a user is in a workgroup through the workgroup api.
  *
  * This evaluation is used when eduPersonEntitlement has not been released with
  * all of the private and normal workgroups that need to be available.
@@ -409,7 +409,7 @@ function stanford_simplesamlphp_auth_api_evaluaterolerule(array $roleruleevaluat
 }
 
 /**
- * Evaluate wether a user is in a workgroup through a SAML attribute.
+ * Evaluate whether a user is in a workgroup through a SAML attribute.
  *
  * This evaluation is used when eduPersonEntitlement has not been released with
  * all of the private and normal workgroups that need to be available.
