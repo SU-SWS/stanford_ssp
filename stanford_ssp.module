@@ -918,7 +918,7 @@ function stanford_ssp_validate_workgroup_by_api($sunet, array $groups) {
  * Get an array of sunet ids in a workgroup.
  *
  * @param string $group
- *   The workgroup name. eg: `mais:test`.
+ *   The workgroup name. eg: "helpdesk:consultants".
  *
  * @return array
  *   An array of members for the passed in workgroup.
@@ -966,7 +966,7 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
  *   The workgroup to look up.
  */
 function stanford_ssp_fetch_from_workgroup_api($group = "") {
-  // Workgroup endpoint. Needs and installed SSL cert to work.
+  // Workgroup endpoint. Needs an installed SSL cert to work.
   // UAT server is at: https://workgroupsvc-uat.stanford.edu/v1/workgroups/
   $endpoint = variable_get('stanford_ssp_workgroup_api_endpoint', 'https://aswsweb.stanford.edu/mais/workgroupsvc/v1/workgroups/');
   $endpoint .= $group;
