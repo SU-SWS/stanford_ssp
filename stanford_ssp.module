@@ -704,13 +704,13 @@ function stanford_ssp_form_user_pass_alter_validate(array $form, array $form_sta
 /**
  * Formats workgroup entitlment.
  *
- * Eg: anchorage:humanbiology-admins to anchorage_humanbiology-admins.
+ * E.g.: helpdesk:consultants to helpdesk_consultants.
  *
  * @param string $entitlement
- *   Eg: anchorage:humanbiology-admins.
+ *   E.g.: helpdesk:consultants.
  *
  * @return string
- *   eg: anchorage_humanbiology-admins
+ *   E.g.: helpdesk_consultants
  */
 function stanford_ssp_format_entitlement($entitlement) {
   $format_enabled = variable_get('stanford_ssp_format_entitlements', FALSE);
