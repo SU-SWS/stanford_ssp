@@ -388,7 +388,6 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
   $form['entitlement'] = array(
     '#name' => 'entitlement',
     '#type' => 'textfield',
-    '#default_value' => '',
   );
 
   $form['new_submit'] = array(
@@ -458,6 +457,7 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
 
   // END ROLE MAPPING FORM.
   $form["#submit"][] = "stanford_ssp_role_mappings_form_submit";
+  $form["#validate"][] = "stanford_ssp_role_mappings_form_validate";
   return system_settings_form($form);
 }
 
@@ -758,6 +758,36 @@ function stanford_ssp_role_mappings_form_submit(array $form, array &$form_state)
     stanford_ssp_map_entitlement_to_role($entitlement, $role);
   }
 
+}
+
+/**
+ * Validate the workgroup against the api if that mapping is available.
+ *
+ * @param array $form
+ *   Form array.
+ * @param array $form_state
+ *   Form state array.
+ */
+function stanford_ssp_role_mappings_form_validate(array $form, array $form_state) {
+
+  // Only validate if the api setting is set.
+  $values = $form_state['values'];
+  if ($values['stanford_ssp_role_map_source'] !== "workgroup") {
+    return;
+  }
+
+  // If we were sent a new entitlement validate it.
+  if (empty($values['entitlement'])) {
+    return;
+  }
+
+  $group = $values['entitlement'];
+  try {
+    $members = stanford_ssp_fetch_from_workgroup_api($group);
+  }
+  catch (Exception $e) {
+    form_set_error('entitlement', 'Invalid workgroup.');
+  }
 }
 
 /**

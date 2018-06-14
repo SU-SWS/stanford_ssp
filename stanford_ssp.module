@@ -932,6 +932,40 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
     return array();
   }
 
+  try {
+    $values = stanford_ssp_fetch_from_workgroup_api($group);
+  }
+  catch (Exception $e) {
+    // Return nothing.
+    return array();
+  }
+
+  if (empty($values['members'])) {
+    return array();
+  }
+
+  $members = array();
+  foreach ($values['members']['member'] as $member) {
+    try {
+      $members[] = stanford_ssp_get_api_members_from_xml_array($member);
+    }
+    catch (Exception $e) {
+      watchdog('stanford_ssp', $e->getMessage(), array(), WATCHDOG_DEBUG);
+    }
+  }
+
+  return array_unique($members);
+}
+
+/**
+ * Makes a call to the workgroup endpoint via curl.
+ *
+ * Fetch the group information from the configured endpoint.
+ *
+ * @param string $group
+ *   The workgroup to look up.
+ */
+function stanford_ssp_fetch_from_workgroup_api($group = "") {
   // Workgroup endpoint. Needs and installed SSL cert to work.
   // UAT server is at: https://workgroupsvc-uat.stanford.edu/v1/workgroups/
   $endpoint = variable_get('stanford_ssp_workgroup_api_endpoint', 'https://aswsweb.stanford.edu/mais/workgroupsvc/v1/workgroups/');
@@ -967,12 +1001,12 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
 
   if ($curl_info['http_code'] !== 200) {
     watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
-    return array();
+    throw new Exception("Error fetching workgroup api information.");
   }
 
   if (empty($response) || ($err == 0 && !empty($errmsg))) {
     watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
-    return array();
+    throw new Exception($errmsg);
   }
 
   // We have a valid response. Load up the xml and parse out the users.
@@ -980,16 +1014,7 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
   $json = json_encode($xml);
   $values = json_decode($json, TRUE);
 
-  $members = array();
-  foreach ($values['members']['member'] as $member) {
-    $members[] = stanford_ssp_get_api_members_from_xml_array($member);
-  }
-
-  foreach ($values['administrators']['member'] as $member) {
-    $members[] = stanford_ssp_get_api_members_from_xml_array($member);
-  }
-
-  return array_unique($members);
+  return $values;
 }
 
 /**
@@ -1002,6 +1027,9 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
  *   Sunet id.
  */
 function stanford_ssp_get_api_members_from_xml_array(array $member) {
+  if (!isset($member['@attributes'])) {
+    throw new Exception("Invalid member attribute data");
+  }
   return $member['@attributes']['id'];
 }
 
