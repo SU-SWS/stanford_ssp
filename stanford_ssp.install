@@ -291,3 +291,9 @@ function stanford_ssp_update_7207() {
   // Preserve the old settings about reformatting but allow new ones to decide.
   variable_set('stanford_ssp_format_entitlements', TRUE);
 }
+
+function stanford_ssp_update_7208() {
+
+    $what = "at";
+
+ }
