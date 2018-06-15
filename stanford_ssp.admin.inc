@@ -1,16 +1,22 @@
 <?php
-/**
- * @file config forms.
- */
 
+/**
+ * @file
+ * Config forms.
+ */
 
 /**
  * The main landing page for the configuration form.
- * @param  [type] $form        [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
+ *
+ * @param array $form
+ *   Form array.
+ * @param array &$form_state
+ *   Form state array.
+ *
+ * @return array
+ *   The form array.
  */
-function stanford_ssp_configuration_form($form, &$form_state) {
+function stanford_ssp_configuration_form(array $form, array &$form_state) {
 
   // Vertical Tab container.
   $form['togglers'] = array(
@@ -18,8 +24,8 @@ function stanford_ssp_configuration_form($form, &$form_state) {
     '#default_tab' => 'edit-general-config',
   );
 
-  // Tab Groups
-  // ----------------------------------------------------------------
+  // Tab Groups.
+  // ----------------------------------------------------------------.
 
   // Tab for the general options.
   $form['general-config'] = array(
@@ -49,7 +55,7 @@ function stanford_ssp_configuration_form($form, &$form_state) {
   );
 
   // General Config
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------.
 
   // Enables / Disables user authentication by simplesamlphp.
   $form['general-config']['stanford_simplesamlphp_auth_activate'] = array(
@@ -83,7 +89,7 @@ function stanford_ssp_configuration_form($form, &$form_state) {
     '#description' => t("Enforce that authentication and authenticated transactions happen over HTTPS. This should be enabled on production websites."),
   );
 
-  // Reformat entitlements, replacing : with _
+  // Reformat entitlements, replacing : with _.
   $form['general-config']['stanford_ssp_format_entitlements'] = array(
     '#type' => 'switch',
     '#title' => t('Reformat entitlements.'),
@@ -91,7 +97,7 @@ function stanford_ssp_configuration_form($form, &$form_state) {
     '#description' => t("If your SP configuration reformats entitlements (e.g. stanford:stanford to stanford_stanford), enable this option."),
   );
 
-  $form['general-config'] ['stanford_ssp_redirect_on_login'] = array(
+  $form['general-config']['stanford_ssp_redirect_on_login'] = array(
     '#type' => 'textfield',
     '#title' => t('Redirect all users on successful login to this url.'),
     '#default_value' => variable_get('stanford_ssp_redirect_on_login', FALSE),
@@ -99,7 +105,7 @@ function stanford_ssp_configuration_form($form, &$form_state) {
   );
 
   // User Config
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------.
 
   // Auto create an account for users on auth.
   $form['user-config']['stanford_simplesamlphp_auth_registerusers'] = array(
@@ -138,7 +144,7 @@ function stanford_ssp_configuration_form($form, &$form_state) {
   );
 
   // SAML Config
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------.
 
   $form['saml-config']['stanford_simplesamlphp_auth_installdir'] = array(
     '#type' => 'textfield',
@@ -180,14 +186,18 @@ function stanford_ssp_configuration_form($form, &$form_state) {
   return system_settings_form($form);
 }
 
-
 /**
  * Authorization and authentication settings form.
- * @param  [type] $form        [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
+ *
+ * @param array $form
+ *   Form array.
+ * @param array $form_state
+ *   Form state array.
+ *
+ * @return array
+ *   The form array.
  */
-function stanford_ssp_authorizations_form($form, &$form_state) {
+function stanford_ssp_authorizations_form(array $form, array &$form_state) {
 
   // Vertical Tab container.
   $form['togglers'] = array(
@@ -196,7 +206,7 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
   );
 
   // Tab Groups
-  // ----------------------------------------------------------------
+  // ----------------------------------------------------------------.
 
   // Tab for the general options.
   $form['saml-config'] = array(
@@ -215,7 +225,7 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
   );
 
   // SSO AUTH CONFIG
-  // -------------------------------------------------------------------
+  // -------------------------------------------------------------------.
 
   $options = array(
     'any' => t("Allow any valid SSO (SUNet) user."),
@@ -254,7 +264,7 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
   );
 
   // LOCAL AUTH CONFIG
-  // -------------------------------------------------------------------
+  // -------------------------------------------------------------------.
 
   $roles = user_roles(TRUE);
   $form['local-config']['stanford_simplesamlphp_auth_allowdefaultloginroles'] = array(
@@ -279,11 +289,16 @@ function stanford_ssp_authorizations_form($form, &$form_state) {
 
 /**
  * Role mapping form for mapping a role to an authenticated user.
- * @param  [type] $form        [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
+ *
+ * @param array $form
+ *   The form array.
+ * @param array &$form_state
+ *   The form state array.
+ *
+ * @return array
+ *   The form array.
  */
-function stanford_ssp_role_mappings_form($form, &$form_state) {
+function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
 
   $options = array(
     'none' => t("Do not adjust roles. Allow local administration of roles only."),
@@ -298,14 +313,71 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     '#default_value' => variable_get("stanford_ssp_auth_role_map", 'none'),
   );
 
-  // ROLE MAPPING FORM.
+  $form['stanford_ssp_role_map_source'] = array(
+    '#type' => 'radios',
+    '#title' => 'Source to validate role mapping groups against.',
+    '#options' => array(
+      'workgroup' => t('Workgroup API'),
+      'entitlement' => t('SAML attribute'),
+    ),
+    '#default_value' => variable_get("stanford_ssp_role_map_source", 'entitlement'),
+  );
 
+  // In order to make this request openssl has to be available to php.
+  if (function_exists('openssl_get_cert_locations')) {
+    // Add the SSL certificate paths.
+    $openssl_defaults = openssl_get_cert_locations();
+    $default_path = $openssl_defaults['default_cert_dir'];;
+    $cert_filename = variable_get('stanford_ssp_workgroup_api_cert', $default_path . "/stanford-ssp.cert");
+    $key_filename = variable_get('stanford_ssp_workgroup_api_key', $default_path . "/stanford-ssp.key");
+
+    $form['stanford_ssp_workgroup_api_cert'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Path to Workgroup API SSL Certificate.',
+      '#default_value' => !empty($cert_filename) ? $cert_filename : $default_path . "/stanford-ssp.cert",
+      '#description' => t('For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="stanford_ssp_role_map_source"]' => array('value' => 'workgroup'),
+        ),
+      ),
+    );
+
+    $form['stanford_ssp_workgroup_api_key'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Path to Workgroup API SSL Key.',
+      '#default_value' => !empty($key_filename) ? $key_filename : $default_path . "/stanford-ssp.key",
+      '#description' => t('For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="stanford_ssp_role_map_source"]' => array('value' => 'workgroup'),
+        ),
+      ),
+    );
+
+  }
+  // If OpenSSL is not available then we should inform the end user.
+  else {
+    $form['no_open_ssl'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="stanford_ssp_role_map_source"]' => array('value' => 'workgroup'),
+        ),
+      ),
+    );
+    $form['no_open_ssl']['no_open_ssl_message'] = array(
+      '#markup' => '<div class="messages message error"><h2>OpenSSL is not available. Please compile PHP with OpenSSL to use workgroup api validation.</h2></div>',
+    );
+  }
+
+  // ROLE MAPPING FORM.
   $table = array();
   $submitted = !empty($form_state['post']);
-  $roles = user_roles(TRUE);
-  // Remove authenticated user has this will be defaulted to true.
-  unset($roles[2]);
 
+  // Remove authenticated user has this will be defaulted to true.
+  $roles = user_roles(TRUE);
+  unset($roles[2]);
 
   $form['role_id'] = array(
     '#name' => 'role_id',
@@ -316,7 +388,6 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
   $form['entitlement'] = array(
     '#name' => 'entitlement',
     '#type' => 'textfield',
-    '#default_value' => '',
   );
 
   $form['new_submit'] = array(
@@ -325,12 +396,16 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
     '#value' => t('Add Mapping'),
   );
 
-  $table[] = array(drupal_render($form['role_id']), drupal_render($form['entitlement']), drupal_render($form['new_submit']));
+  $table[] = array(
+    drupal_render($form['role_id']),
+    drupal_render($form['entitlement']),
+    drupal_render($form['new_submit']),
+  );
 
   $header = array(
     t('Drupal Role'),
-    t('Workgroup (e.g. anchorage_humanbiology-admins)'),
-    t('Action')
+    t('Workgroup (e.g. helpdesk:consultants)'),
+    t('Action'),
   );
 
   $rolemaps = variable_get("stanford_simplesamlphp_auth_rolepopulation", "");
@@ -382,51 +457,59 @@ function stanford_ssp_role_mappings_form($form, &$form_state) {
 
   // END ROLE MAPPING FORM.
   $form["#submit"][] = "stanford_ssp_role_mappings_form_submit";
+  $form["#validate"][] = "stanford_ssp_role_mappings_form_validate";
   return system_settings_form($form);
 }
 
-
 /**
  * The login block and forms form form.
- * @param  [type] $form        [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
+ *
+ * @param array $form
+ *   Form array.
+ * @param array $form_state
+ *   Form state array.
+ *
+ * @return array
+ *   The form array.
  */
-function stanford_ssp_login_block_forms_form($form, &$form_state) {
+function stanford_ssp_login_block_forms_form(array $form, array &$form_state) {
 
   $form['stanford_ssp_show_local_login'] = array(
     '#type' => 'switch',
     '#title' => t('Show the local login form on the user page'),
     '#default_value' => variable_get('stanford_ssp_show_local_login', TRUE),
-    '#description' => t("Turn on to show the local Drupal account login option on the !link.", array("!link" => l("user page", "user"))),
+    '#description' => t("Turn on to show the local Drupal account login option on the !link.", array("!link" => l(t("user page"), "user"))),
   );
 
   $form['stanford_ssp_show_sso_login'] = array(
     '#type' => 'switch',
     '#title' => t('Show the SSO login link on user page'),
     '#default_value' => variable_get('stanford_ssp_show_sso_login', TRUE),
-    '#description' => t("Turn on to show the SSO login link on the !link.", array("!link" => l("user page", "user"))),
+    '#description' => t("Turn on to show the SSO login link on the !link.", array("!link" => l(t("user page"), "user"))),
   );
 
   $form['stanford_ssp_sso_link_text'] = array(
     '#type' => 'textfield',
     '#title' => t('SSO login link text'),
     '#default_value' => variable_get('stanford_ssp_sso_link_text', t("Log in with your SUNet ID »")),
-    '#description' => t("Override the link text for the SSO login link on the !link.", array("!link" => l("user page", "user"))),
+    '#description' => t("Override the link text for the SSO login link on the !link.", array("!link" => l(t("user page"), "user"))),
   );
-
 
   return system_settings_form($form);
 }
 
-
 /**
  * Add a new SSO user account.
- * @param  [type] $form        [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
+ *
+ * @param array $form
+ *   Form array.
+ * @param array $form_state
+ *   Form state array.
+ *
+ * @return array
+ *   The form array.
  */
-function stanford_ssp_add_sso_user($form, &$form_state) {
+function stanford_ssp_add_sso_user(array $form, array &$form_state) {
 
   $form['sunetid'] = array(
     '#type' => 'textfield',
@@ -435,20 +518,20 @@ function stanford_ssp_add_sso_user($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['name']  = array(
+  $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
-    '#description' => t('If you wish to specify the user\'s preferred name (instead of sunetid@stanford.edu), enter it here.'),
+    '#description' => t("If you wish to specify the user's preferred name (instead of sunetid@stanford.edu), enter it here."),
   );
 
-  $form['email']  = array(
+  $form['email'] = array(
     '#type' => 'textfield',
     '#title' => t('Email Address'),
     '#description' => t('If you wish to specify an alternate email address (instead of sunetid@stanford.edu), enter it here.'),
   );
 
-  $roles = user_roles(TRUE);
   // Remove authenticated user has this will be defaulted to true.
+  $roles = user_roles(TRUE);
   unset($roles[2]);
 
   // Only show the option if there is an option.
@@ -492,8 +575,13 @@ function stanford_ssp_add_sso_user($form, &$form_state) {
 
 /**
  * Validation function for stanford_ssp_configuration_form().
+ *
+ * @param array $form
+ *   Form array.
+ * @param array $form_state
+ *   Form state array.
  */
-function stanford_ssp_configuration_form_validate($form, &$form_state) {
+function stanford_ssp_configuration_form_validate(array $form, array &$form_state) {
   $values = $form_state['values'];
 
   // Prevent both ssp and local login options from being disabled.
@@ -505,9 +593,14 @@ function stanford_ssp_configuration_form_validate($form, &$form_state) {
 }
 
 /**
- * Validation function for Add WebAuth User form
+ * Validation function for Add WebAuth User form.
+ *
+ * @param array $form
+ *   Form array.
+ * @param array $form_state
+ *   Form state array.
  */
-function stanford_ssp_add_sso_user_validate($form, &$form_state) {
+function stanford_ssp_add_sso_user_validate(array $form, array &$form_state) {
 
   $sunet = strtolower(trim(check_plain($form_state['values']['sunetid'])));
 
@@ -525,7 +618,7 @@ function stanford_ssp_add_sso_user_validate($form, &$form_state) {
   // If no name is specified, use the default name (sunetid + @stanford.edu).
   $name = trim(check_plain($form_state['values']['name']));
   if (empty($name)) {
-    $name  = $authname;
+    $name = $authname;
   }
 
   // Check that there is no user with the same name.
@@ -569,7 +662,6 @@ function stanford_ssp_authorizations_form_validate(&$form, &$form_state) {
   form_set_value($form['saml-config']['stanford_ssp_auth_restriction_group'], $workgroups, $form_state);
 }
 
-
 /**
  * ***************************************************************
  * SUBMIT FUNCTIONS
@@ -578,11 +670,13 @@ function stanford_ssp_authorizations_form_validate(&$form, &$form_state) {
 
 /**
  * Submit handler for stanford_ssp_add_sso_user form.
- * @param  [type] &$form       [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
+ *
+ * @param array $form
+ *   Form array.
+ * @param array $form_state
+ *   Form state array.
  */
-function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
+function stanford_ssp_add_sso_user_submit(array &$form, array &$form_state) {
 
   // Sunet.
   $sunet = strtolower(trim(check_plain($form_state['values']['sunetid'])));
@@ -591,7 +685,7 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
   // If no name is specified, use the default name (sunetid + @stanford.edu).
   $name = trim(check_plain($form_state['values']['name']));
   if (empty($name)) {
-    $name  = $authname;
+    $name = $authname;
   }
 
   // Email and default.
@@ -609,7 +703,7 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
   $account->init = $sunet . '@stanford.edu';
   $account->status = TRUE;
   $roles = array(
-    DRUPAL_AUTHENTICATED_RID => TRUE
+    DRUPAL_AUTHENTICATED_RID => TRUE,
   );
 
   // Add in roles from config form.
@@ -650,13 +744,9 @@ function stanford_ssp_add_sso_user_submit(&$form, &$form_state) {
 }
 
 /**
- *
  * Implements hook_form_submit().
- *
- * @param $form
- * @param $form_state
  */
-function stanford_ssp_role_mappings_form_submit($form, &$form_state) {
+function stanford_ssp_role_mappings_form_submit(array $form, array &$form_state) {
 
   $entitlement = $form_state['values']['entitlement'];
   $role = $form_state['values']['role_id'];
@@ -671,17 +761,47 @@ function stanford_ssp_role_mappings_form_submit($form, &$form_state) {
 }
 
 /**
+ * Validate the workgroup against the api if that mapping is available.
+ *
+ * @param array $form
+ *   Form array.
+ * @param array $form_state
+ *   Form state array.
+ */
+function stanford_ssp_role_mappings_form_validate(array $form, array $form_state) {
+
+  // Only validate if the api setting is set.
+  $values = $form_state['values'];
+  if ($values['stanford_ssp_role_map_source'] !== "workgroup") {
+    return;
+  }
+
+  // If we were sent a new entitlement validate it.
+  if (empty($values['entitlement'])) {
+    return;
+  }
+
+  $group = $values['entitlement'];
+  try {
+    stanford_ssp_fetch_from_workgroup_api($group);
+  }
+  catch (Exception $e) {
+    form_set_error('entitlement', t('Invalid workgroup.'));
+  }
+}
+
+/**
  * Maps an entitlement to a role.
  *
  * @param string $entitlement
- *   A value in eduPersonEntitlement, e.g., anchorage_support.
+ *   A value in eduPersonEntitlement, e.g., helpdesk:consultants.
  * @param mixed $role
  *   Either the role id or a name.
  */
 function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
   $entitlement = check_plain($entitlement);
-  // Look up rid.
 
+  // Look up rid.
   $role_object = FALSE;
   if (is_numeric($role)) {
     $role_object = user_role_load($role);
@@ -702,6 +822,7 @@ function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
     }
     // Add our mapping.
     $role_mapping .= $rid . ":eduPersonEntitlement,=," . $entitlement;
+
     // Save our mapping.
     variable_set('stanford_simplesamlphp_auth_rolepopulation', $role_mapping);
     $message = t('Mapped the "@entitlement" entitlement to the "@role" role.', array('@entitlement' => $entitlement, '@role' => $role_object->name));
@@ -711,10 +832,14 @@ function stanford_ssp_map_entitlement_to_role($entitlement, $role) {
 }
 
 /**
- * @param $form
- * @param $form_state
+ * Remove waird formatting.
+ *
+ * @param array $form
+ *   Form array.
+ * @param array $form_state
+ *   Form state array.
  */
-function stanford_ssp_remove_waird($form, &$form_state) {
+function stanford_ssp_remove_waird(array $form, array &$form_state) {
   $trigger = $form_state["triggering_element"]['#name'];
   $index = $form_state['values'][$trigger . "_value"];
   $rolemaps = variable_get("stanford_simplesamlphp_auth_rolepopulation", array());
@@ -726,9 +851,3 @@ function stanford_ssp_remove_waird($form, &$form_state) {
   variable_set("stanford_simplesamlphp_auth_rolepopulation", $imp);
   drupal_set_message(t("Role mapping was removed"));
 }
-
-/**
- * *****************************************************************
- * HELPER / UTIL
- * *****************************************************************
- */

@@ -16,7 +16,7 @@ function stanford_ssp_drush_command() {
   $items['saml-entitlement-role'] = array(
     'description' => 'Map a SAML entitlement to a role',
     'arguments' => array(
-      'entitlement' => 'A value from eduPersonEntitlement, e.g., "anchorage_support"',
+      'entitlement' => 'A value from eduPersonEntitlement, e.g., "helpdesk:consultants"',
       'role' => 'The name of the role, e.g., "administrator"',
     ),
     'aliases' => array('ssp-ser'),

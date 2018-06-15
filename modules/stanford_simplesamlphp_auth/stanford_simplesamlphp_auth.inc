@@ -76,7 +76,8 @@ function stanford_simplesamlphp_auth_find_local_user($username) {
     $ext_user = user_load_by_mail($mail);
   }
 
-  // Give opportunity to load user according to load a different user according to fields received in the auth.
+  // Give opportunity to load user according to load a different user according
+  // to fields received in the auth.
   $auth_field = variable_get('simplesamlphp_auth_unique_id', 'eduPersonPrincipalName');
   $attributes = stanford_simplesamlphp_auth_get_saml_attributes();
   drupal_alter("saml_ext_user", $ext_user, $attributes, $auth_field);
@@ -407,7 +408,10 @@ function stanford_simplesamlphp_auth_set_logged_out_cookie($type = "") {
 }
 
 /**
- * Gets and processes the cookie in order to set a message for the logged out user.
+ * Get logged out cookie.
+ *
+ * Gets and processes the cookie in order to set a message for the logged
+ * out user.
  */
 function stanford_simplesamlphp_auth_get_logged_out_cookie() {
   if (isset($_COOKIE['stanford_simplesamlphp_auth_message'])) {
@@ -433,7 +437,7 @@ function stanford_simplesamlphp_auth_get_host() {
     'SERVER_ADDR',
   );
   $sourceTransformations = array(
-    "HTTP_X_FORWARDED_HOST" => function($value) {
+    "HTTP_X_FORWARDED_HOST" => function ($value) {
       $elements = explode(',', $value);
       return trim(end($elements));
     }
@@ -495,7 +499,10 @@ function stanford_simplesamlphp_auth_valid_username($name = "") {
 }
 
 /**
- * Generates a unique name for the user if it already exists by appending an integer.
+ * Generates a unique name.
+ *
+ *  Generates a unique name for the user if it already exists by appending an
+ *  integer.
  *
  * @param string $name
  *   The name.
@@ -532,7 +539,7 @@ function stanford_simplesamlphp_auth_is_enabled($show_inactive_msg = FALSE) {
 
   if ($is_activated) {
     // Make sure we know where SimpleSAMLphp is.
-    if (!file_exists($basedir)) {
+    if (!is_dir($basedir)) {
       $failure = t('SimpleSAMLphp could not be found at %basedir . The simplesamlphp_auth module cannot function until the path to the local SimpleSAMLphp instance is configured.', array('%basedir' => $basedir));
       watchdog('stanford_simplesamlphp_auth', $failure, NULL, WATCHDOG_WARNING);
     }

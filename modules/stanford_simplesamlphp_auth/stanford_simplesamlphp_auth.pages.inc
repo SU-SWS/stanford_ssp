@@ -50,49 +50,4 @@ function stanford_simplesamlphp_auth_loginpage() {
 
   // And redirect to somewhere.
   drupal_goto("user/" . $user->uid);
-
-  return;
-
-// The user is not logged into Drupal.
-//  if ($user->uid == 0) {
-//    stanford_simplesaml_auth_login_register();
-//  }
-//  // The user is already logged into Drupal.
-//  else {
-//    stanford_simplesaml_auth_moderate_local_login();
-//  }
-
-  // Support for deep linking.
-
-  // See if a URL has been explicitly provided in ReturnTo. If so, use it (as
-  // long as it points to this site).
-//  if ((isset($_REQUEST['ReturnTo']) && $_REQUEST['ReturnTo']) &&
-//    (valid_url($_REQUEST['ReturnTo']) && stristr($_REQUEST['ReturnTo'], $base_url))) {
-//
-//    $return_to = $_REQUEST['ReturnTo'];
-//
-//    // If not, see if a REFERER URL is available. If so, use it (as long as it
-//    // points to this site).
-//  }
-//  elseif ((isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER']) &&
-//    (valid_url($_SERVER['HTTP_REFERER']) && stristr($_SERVER['HTTP_REFERER'], $base_url))
-//  ) {
-//
-//    $return_to = $_SERVER['HTTP_REFERER'];
-//  }
-//
-//
-//
-//    // If a ReturnTo has been set.
-//    if ($go_to_url) {
-//      $parsed_gotourl = drupal_parse_url($go_to_url);
-//      drupal_goto($parsed_gotourl['path'], $parsed_gotourl);
-//    }
-//    else {
-//      drupal_goto('user/' . $user->uid);
-//    }
-//
-//  }
-//
-//  return $output;
 }

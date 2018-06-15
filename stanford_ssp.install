@@ -18,7 +18,6 @@ function stanford_ssp_install() {
   variable_set('stanford_simplesamlphp_auth_autoenablesaml', TRUE);
   variable_set('stanford_ssp_prevent_cache', FALSE);
   variable_set('stanford_simplesamlphp_auth_allowsetdrupalpwd', FALSE);
-  variable_set('stanford_simplesamlphp_auth_installdir', '/opt/simplesamlphp');
   variable_set('stanford_simplesamlphp_auth_authsource', 'default-sp');
   variable_set('stanford_simplesamlphp_auth_user_name', 'displayName');
   variable_set('stanford_simplesamlphp_auth_unique_id', 'uid');
@@ -80,6 +79,10 @@ function stanford_ssp_uninstall() {
   variable_del('stanford_ssp_show_sso_login');
   variable_del('stanford_ssp_sso_link_text');
   variable_del('stanford_ssp_debug');
+  variable_del('stanford_ssp_role_map_source');
+  variable_del('stanford_ssp_workgroup_api_cert');
+  variable_del('stanford_ssp_workgroup_api_key');
+  variable_del('stanford_ssp_workgroup_api_endpoint');
 }
 
 /**
