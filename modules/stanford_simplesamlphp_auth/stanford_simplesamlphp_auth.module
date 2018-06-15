@@ -411,7 +411,7 @@ function stanford_simplesamlphp_auth_api_evaluaterolerule(array $roleruleevaluat
 /**
  * Evaluate whether a user is in a workgroup through a SAML attribute.
  *
- * This evaluation is used when eduPersonEntitlement has not been released with
+ * This evaluation is used when eduPersonEntitlement property is released with
  * all of the private and normal workgroups that need to be available.
  *
  * @param array $roleruleevaluation
