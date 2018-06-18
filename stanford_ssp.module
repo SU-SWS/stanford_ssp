@@ -147,9 +147,9 @@ function stanford_ssp_access_login_page() {
     drupal_goto($goto);
   }
 
-  if (isset($_COOKIE['stanford_ssp_goto']) && $_COOKIE['stanford_ssp_goto'] !== FALSE) {
+  if (isset($_COOKIE['stanford_ssp_goto']) && $_COOKIE['stanford_ssp_goto'] !== 'FALSE') {
     $goto = check_plain(($_COOKIE['stanford_ssp_goto']));
-    setcookie("stanford_ssp_goto", FALSE, -1);
+    setcookie("stanford_ssp_goto", 'FALSE', -1);
     drupal_goto($goto);
   }
 }
@@ -204,9 +204,9 @@ function stanford_ssp_user_login() {
     $redir = $goto;
   }
 
-  if (isset($_COOKIE['stanford_ssp_goto']) && $_COOKIE['stanford_ssp_goto'] !== FALSE) {
+  if (isset($_COOKIE['stanford_ssp_goto']) && $_COOKIE['stanford_ssp_goto'] !== 'FALSE') {
     $redir = check_plain(($_COOKIE['stanford_ssp_goto']));
-    setcookie("stanford_ssp_goto", FALSE, -1);
+    setcookie("stanford_ssp_goto", 'FALSE', -1);
   }
 
   if (!empty($redir)) {
