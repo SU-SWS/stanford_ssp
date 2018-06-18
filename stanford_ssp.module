@@ -929,7 +929,7 @@ function stanford_ssp_validate_workgroup_by_api($sunet, array $groups) {
  * Get an array of sunet ids in a workgroup.
  *
  * @param string $group
- *   The workgroup name. eg: "helpdesk:consultants"..
+ *   The workgroup name. eg: "helpdesk:consultants".
  *
  * @return array
  *   An array of members for the passed in workgroup.
