@@ -34,6 +34,14 @@ function stanford_simplesamlphp_auth_loginpage() {
   // If a Drupal user is not available and there is no SAML information then we
   // need to kick off the request.
   if (user_is_anonymous() && empty($saml['attributes'])) {
+
+    // If goto is set then create a cookie we can use to redirect the user
+    // after login. We cannot use SAML's ReturnTo option as we need to hit
+    // the endpoint again to log the user in with Drupal. After we log the user
+    // in we can redirect them to the correct destination.
+    if (isset($_GET['goto'])) {
+      setcookie("stanford_ssp_goto", check_plain($_GET['goto']), time() + 120);  /* expire in 2 min */
+    }
     // Fire up a request to the IDP. This leaves Drupal and ends here.
     $saml['source']->requireAuth();
   }

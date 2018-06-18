@@ -144,9 +144,13 @@ function stanford_ssp_access_login_page() {
   // If the user is already logged in and a goto is set then do the redirect.
   if (isset($_GET['goto'])) {
     $goto = check_plain($_GET['goto']);
-    if (drupal_valid_path($goto)) {
-      drupal_goto($goto);
-    }
+    drupal_goto($goto);
+  }
+
+  if (isset($_COOKIE['stanford_ssp_goto']) && $_COOKIE['stanford_ssp_goto'] !== 'FALSE') {
+    $goto = check_plain($_COOKIE['stanford_ssp_goto']);
+    setcookie("stanford_ssp_goto", 'FALSE', -1);
+    drupal_goto($goto);
   }
 }
 
@@ -154,7 +158,11 @@ function stanford_ssp_access_login_page() {
  * Redirect saml_login to sso/login.
  */
 function stanford_ssp_redirect() {
-  drupal_goto('sso/login', array(), '301');
+  $dest = drupal_get_destination();
+  // If we don't unset the destination we get a redirect loop.
+  unset($_GET['destination']);
+  // Need to go to here to log in.
+  drupal_goto("sso/login", array('query' => array('goto' => $dest['destination'])), '301');
 }
 
 /**
@@ -193,9 +201,12 @@ function stanford_ssp_user_login() {
   // parameter.
   if (!$redir && isset($_GET['goto'])) {
     $goto = check_plain($_GET['goto']);
-    if (drupal_valid_path($goto)) {
-      $redir = $goto;
-    }
+    $redir = $goto;
+  }
+
+  if (isset($_COOKIE['stanford_ssp_goto']) && $_COOKIE['stanford_ssp_goto'] !== 'FALSE') {
+    $redir = check_plain($_COOKIE['stanford_ssp_goto']);
+    setcookie("stanford_ssp_goto", 'FALSE', -1);
   }
 
   if (!empty($redir)) {
