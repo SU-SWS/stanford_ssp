@@ -461,7 +461,7 @@ function stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets(array $sune
 }
 
 /**
- * Validates wether a user is in a group.
+ * Validates whether a user is in a group.
  *
  * @param array $groups
  *   An array of groups. Both priv and workgroup.
