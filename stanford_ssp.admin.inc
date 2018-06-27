@@ -758,14 +758,28 @@ function stanford_ssp_mail($key, &$message, $params) {
   $subject = t('An administrator created an account for you at [site:name]', array(), array('langcode' => $langcode));
   $body = t("[user:name],
 
-An account has been created for you at [site:name]. You may now log in with Stanford Web Login by clicking this link or copying and pasting it to your browser:
+An account has been created for you at [site:name]. You may now log in with your SUNetID by clicking this link or copying and pasting it to your browser:
 
-[site:url]sso/login?goto=admin/content
+[site:url]sso/login
 
 --  [site:name] team", array(), array('langcode' => $langcode));
 
-  $subject = token_replace($subject, $params, array('language' => $language, 'callback' => 'user_mail_tokens', 'sanitize' => FALSE, 'clear' => TRUE));
-  $body = token_replace($body, $params, array('language' => $language, 'callback' => 'user_mail_tokens', 'sanitize' => FALSE, 'clear' => TRUE));
+  $subject = token_replace($subject, $params,
+    array(
+      'language' => $language,
+      'callback' => 'user_mail_tokens',
+      'sanitize' => FALSE,
+      'clear' => TRUE,
+    )
+  );
+  $body = token_replace($body, $params,
+    array(
+      'language' => $language,
+      'callback' => 'user_mail_tokens',
+      'sanitize' => FALSE,
+      'clear' => TRUE
+    )
+  );
 
   $message['subject'] = $subject;
   $message['body'][] = $body;
