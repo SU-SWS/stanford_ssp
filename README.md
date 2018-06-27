@@ -53,6 +53,13 @@ Role mappings allow for Drupal administrators to automatically assign roles to u
 
 Users that successfully authenticate will automatically receive one or more roles as everyone who authenticates will receive the `SSO User` role. Additional roles may be added if the user is a 'Student', 'Faculty', 'Staff', or some other type of account.
 
+##### Using the eduPersonEntitlement Attribute to Map Workgroups to Roles
+The default mechanism to retrieve a user's Workgroup membership information is to get that from the `eduPersonEntitlement` SAML attribute. However, you **must** request that attribute be released to your SAML Service Provider (SP). See [https://uit.stanford.edu/service/saml/arp](https://uit.stanford.edu/service/saml/arp) for details.
+
+##### Using the Workgroup API to Map Workgroups to Roles
+An alternative mechanism to retrieve a user's Workgroup membership information is to get that from the Workgroup API. You will need to configure your Drupal site and server to connect; see [https://uit.stanford.edu/developers/apis/workgroup](https://uit.stanford.edu/developers/apis/workgroup) for details.
+
+
 #### Login Block & Forms  
 `/admin/config/stanford/stanford_ssp/login-block-forms`
 
