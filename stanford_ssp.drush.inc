@@ -32,7 +32,7 @@ function stanford_ssp_drush_command() {
       'name' => 'The user\'s name',
       'email' => 'The user\'s email',
       'roles' => 'Comma separated list of role names',
-      'notify' => 'Send email to the user (boolean)?',
+      'notify-user' => 'Send email to the user (boolean)?',
     ),
     'aliases' => array('ssp-au'),
   );
@@ -118,7 +118,7 @@ function drush_stanford_ssp_saml_add_user($sunet) {
   }
 
   // @todo: Make this an option.
-  $notify = drush_get_option("notify");
+  $notify = drush_get_option("notify-user");
   if (!empty($notify) && ($notify == "true" || (int) $notify == 1)) {
     $form_state["values"]["notify"] = TRUE;
   }

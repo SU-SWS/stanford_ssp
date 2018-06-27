@@ -378,7 +378,8 @@ function stanford_ssp_user_insert(&$edit, $account, $category) {
   }
 
   // If the new account and the current user don't have matching emails then
-  // the account must have been created by a form instead of through login.
+  // the account must have been created by a form or drush instead of through
+  // the user actually doing a login themselves.
   if (isset($attributes['email'][0]) && ($attributes['email'][0] !== $account->init)) {
     return;
   }

@@ -730,7 +730,8 @@ function stanford_ssp_add_sso_user_submit(array &$form, array &$form_state) {
 
   // Was the notify checkbox checked?
   if ($form_state["values"]["notify"] && $account) {
-    _user_mail_notify('status_activated', $account);
+    global $language;
+    drupal_mail('stanford_ssp', 'new_account', $account->mail, $language, ['account' => $account, 'user' => $account]);
     drupal_set_message(t("Email sent to user"), "status");
   }
 
@@ -741,6 +742,50 @@ function stanford_ssp_add_sso_user_submit(array &$form, array &$form_state) {
   );
 
   drupal_write_record("stanford_ssp_sunetid", $record);
+}
+
+/**
+ * Implements hook_mail().
+ */
+function stanford_ssp_mail($key, &$message, $params) {
+
+  if ($key !== "new_account") {
+    return;
+  }
+
+  $language = $message['language'];
+  $langcode = isset($language->language) ? $language->language : NULL;
+  $subject = t('An administrator created an account for you on the [site:name] website', array(), array('langcode' => $langcode));
+  $body = t("[user:name],
+
+An account has been created for you on the [site:name] website. You may now log in with your SUNetID by clicking this link or copying and pasting it to your browser:
+
+[site:url]sso/login?goto=user
+
+Sincerely,
+
+[site:name] web team", array(), array('langcode' => $langcode));
+
+  $subject = token_replace($subject, $params,
+    array(
+      'language' => $language,
+      'callback' => 'user_mail_tokens',
+      'sanitize' => FALSE,
+      'clear' => TRUE,
+    )
+  );
+  $body = token_replace($body, $params,
+    array(
+      'language' => $language,
+      'callback' => 'user_mail_tokens',
+      'sanitize' => FALSE,
+      'clear' => TRUE,
+    )
+  );
+
+  $message['subject'] = $subject;
+  $message['body'][] = $body;
+
 }
 
 /**
