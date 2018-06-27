@@ -18,6 +18,7 @@ Stanford SimpleSAML PHP 7.x-2.2-alpha1  2018-06-27
 - Added role mapping by Workgroup API instead of SAML attribute
 - Updated default location for simplesaml php library
 - Set Workgroup API as the default option for role mapping
+- Update user-facing language about workgroups to be more generic
 
 Stanford SimpleSAML PHP 7.x-2.1         2016-10-13
 --------------------------------------------------
