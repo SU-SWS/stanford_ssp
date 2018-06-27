@@ -762,7 +762,7 @@ An account has been created for you on the [site:name] website. You may now log 
 
 [site:url]sso/login?goto=user
 
---  [site:name] team", array(), array('langcode' => $langcode));
+--  [site:name] web team", array(), array('langcode' => $langcode));
 
   $subject = token_replace($subject, $params,
     array(
