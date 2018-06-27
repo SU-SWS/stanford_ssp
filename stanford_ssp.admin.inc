@@ -777,7 +777,7 @@ An account has been created for you at [site:name]. You may now log in with your
       'language' => $language,
       'callback' => 'user_mail_tokens',
       'sanitize' => FALSE,
-      'clear' => TRUE
+      'clear' => TRUE,
     )
   );
 
