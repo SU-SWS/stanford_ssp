@@ -755,12 +755,12 @@ function stanford_ssp_mail($key, &$message, $params) {
 
   $language = $message['language'];
   $langcode = isset($language->language) ? $language->language : NULL;
-  $subject = t('An administrator created an account for you at [site:name]', array(), array('langcode' => $langcode));
+  $subject = t('An administrator created an account for you on the [site:name] website', array(), array('langcode' => $langcode));
   $body = t("[user:name],
 
-An account has been created for you at [site:name]. You may now log in with your SUNetID by clicking this link or copying and pasting it to your browser:
+An account has been created for you on the [site:name] website. You may now log in with your SUNetID by clicking this link or copying and pasting it to your browser:
 
-[site:url]sso/login
+[site:url]sso/login?goto=user
 
 --  [site:name] team", array(), array('langcode' => $langcode));
 
