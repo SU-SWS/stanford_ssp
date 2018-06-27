@@ -3,6 +3,7 @@ Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 
 Stanford SimpleSAML PHP 7.x-2.2-alpha1  2018-06-27
 --------------------------------------------------
+- Updated codeclimate.yml
 - Added composer.json
 - Added stanford_ssp_update_7202: Enable two new dependencies: switch and stanford_simplesamlphp_auth
 - Added stanford_ssp_update_7203: Add 4 new roles.
@@ -11,12 +12,12 @@ Stanford SimpleSAML PHP 7.x-2.2-alpha1  2018-06-27
 - Added stanford_ssp_update_7206: Grant permission for administrator role to administer stanford_ssp.
 - Added stanford_ssp_update_7207: Set the default path for the simplesamlphp library if it hasnt been changed.
 - Add redirect from sites/default/webauth/login to sso/login
-- allow custom block to appear in configuration page
-- Added upgrade path and drush functions from Webauth
+- Bug fix: Allow custom block to appear in configuration page
+- Added upgrade path and drush functions from WebAuth Module for Drupal (WMD)
 - Added configuration for entitlement formatting options
-- Added role mapping by workgroup API instead of SAML attribute
+- Added role mapping by Workgroup API instead of SAML attribute
 - Updated default location for simplesaml php library
-- Set workgroup api as the default option for role mapping
+- Set Workgroup API as the default option for role mapping
 
 Stanford SimpleSAML PHP 7.x-2.1         2016-10-13
 --------------------------------------------------
