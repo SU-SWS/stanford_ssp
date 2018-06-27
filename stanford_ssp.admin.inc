@@ -756,7 +756,6 @@ function stanford_ssp_mail($key, &$message, $params) {
   $language = $message['language'];
   $langcode = isset($language->language) ? $language->language : NULL;
   $subject = t('An administrator created an account for you on the [site:name] website', array(), array('langcode' => $langcode));
-  // TODO: Figure out why this wraps.
   $body = t("[user:name],
 
 An account has been created for you on the [site:name] website. You may now log in with your SUNetID by clicking this link or copying and pasting it to your browser:
