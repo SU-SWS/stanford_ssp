@@ -1,5 +1,5 @@
 # [Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
-##### Version: 7.x-2.1-dev
+##### Version: 7.x-2.2-alpha1
 
 Maintainers: [jbickar](https://github.com/jbickar),  [sherakama](https://github.com/sherakama)
 
@@ -52,6 +52,13 @@ These are the configuration options to let your Drupal website communicate with 
 Role mappings allow for Drupal administrators to automatically assign roles to users who authenticate through SimpleSAMLPHP. This can be useful to assigning groups of people to specific roles. To do this select a Drupal role that already exists from the drop down menu, discover and copy and paste the workgroup you want to grant the Drupal role to and press the Add Mapping button. Be sure to copy and paste the workgroup name exactly as it needs to be an exact match.
 
 Users that successfully authenticate will automatically receive one or more roles as everyone who authenticates will receive the `SSO User` role. Additional roles may be added if the user is a 'Student', 'Faculty', 'Staff', or some other type of account.
+
+##### Using the eduPersonEntitlement Attribute to Map Workgroups to Roles
+The default mechanism to retrieve a user's Workgroup membership information is to get that from the `eduPersonEntitlement` SAML attribute. However, you **must** request that attribute be released to your SAML Service Provider (SP). See [https://uit.stanford.edu/service/saml/arp](https://uit.stanford.edu/service/saml/arp) for details.
+
+##### Using the Workgroup API to Map Workgroups to Roles
+An alternative mechanism to retrieve a user's Workgroup membership information is to get that from the Workgroup API. You will need to configure your Drupal site and server to connect; see [https://uit.stanford.edu/developers/apis/workgroup](https://uit.stanford.edu/developers/apis/workgroup) for details.
+
 
 #### Login Block & Forms  
 `/admin/config/stanford/stanford_ssp/login-block-forms`
