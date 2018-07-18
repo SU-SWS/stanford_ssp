@@ -550,6 +550,12 @@ function stanford_ssp_stanford_simplesamlphp_auth_user_roles_alter($user) {
     $userinfo['roles'][$sso_user_role->rid] = $sso_user_role->name;
   }
 
+  // Always add the SUNet User role if it exists.
+    $sunet_user_role = user_role_load_by_name("SUNet User");
+    if ($sunet_user_role) {
+      $userinfo['roles'][$sunet_user_role->rid] = $sunet_user_role->name;
+  }
+
   // Save the new roles.
   $user = user_save($user, $userinfo);
 }
