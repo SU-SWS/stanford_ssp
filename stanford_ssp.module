@@ -659,6 +659,8 @@ function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
       '#type' => 'fieldset',
       '#title' => "SUNet Login",
       '#weight' => -10,
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
     );
     $link_text = variable_get("stanford_ssp_sso_link_text", t("Log in with your SUNet ID »"));
     $form['saml_auth']['saml_link'] = array(
@@ -675,7 +677,21 @@ function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
       '#type' => 'fieldset',
       '#title' => "Drupal Login",
       '#weight' => 0,
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      // Ensure that the name and pass fields are not
+      // nested on validate and submit.
+      '#tree' => FALSE,
     );
+
+    // Move the form items inside.
+    $form['drupal_auth']['actions'] = $form['actions'];
+    $form['drupal_auth']['name'] = $form['name'];
+    $form['drupal_auth']['pass'] = $form['pass'];
+    unset($form['actions']);
+    unset($form['name']);
+    unset($form['pass']);
+
   }
 
   // If not showing local we need to unset the login form items.
