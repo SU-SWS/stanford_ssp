@@ -550,6 +550,15 @@ function stanford_ssp_stanford_simplesamlphp_auth_user_roles_alter($user) {
     $userinfo['roles'][$sso_user_role->rid] = $sso_user_role->name;
   }
 
+  $add_sunet_user_role = variable_get('stanford_ssp_grant_sunet_user_role', FALSE);
+  if ($add_sunet_user_role) {
+    // Always add the SUNet User role if it exists.
+    $sunet_user_role = user_role_load_by_name("SUNet User");
+    if ($sunet_user_role) {
+      $userinfo['roles'][$sunet_user_role->rid] = $sunet_user_role->name;
+    }
+  }
+
   // Save the new roles.
   $user = user_save($user, $userinfo);
 }
@@ -862,6 +871,10 @@ function stanford_ssp_import_webauth_settings() {
   variable_set('stanford_simplesamlphp_auth_autoenablesaml', TRUE);
   variable_set('stanford_ssp_prevent_cache', FALSE);
   variable_set('stanford_ssp_show_sso_login', TRUE);
+  // Grant all the "SUNet User" role to all users who log in with stanford_ssp.
+  // We are assuming that we want this
+  // if we are upgrading from WMD to stanford_ssp.
+  variable_set('stanford_ssp_grant_sunet_user_role', TRUE);
 
   // Convert our WMD role mappings to Stanford SSP.
   stanford_ssp_convert_webauth_role_mappings();
