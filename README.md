@@ -76,6 +76,26 @@ You may also modify the default behaviour of the Local Drupal accounts and preve
 
 Use this form to add user accounts that may authenticate with SAML. This is useful for adding users and granting them roles prior to their first log in.
 
+Migrating from the WebAuth Module for Drupal (WMD) to Stanford SimpleSAMLphp (Stanford SSP)
+---
+There is a drush command (`drush stanford-ssp-migrate-wmd` or `drush sspwmd`) to help migrate from WMD to Stanford SimpleSAMLphp.
+
+That command:
+1. Enables the `stanford_ssp_block` module (to place the "SUNetID Login" block)
+2. Transfers permissions from the "SUNet User" role to the "SSO User" role
+3. If set, sets the destination for redirecting the user upon successful login
+4. If WMD allowed local Drupal logins, configures Stanford SSP similarly
+5. If the WMD login link text has been customized, sets that link text
+6. If WMD has restrictions on which users or workgroups can log in, sets those options similarly in Stanford SSP
+7. Updates the `authmap` table so that existing WMD users can log in with Stanford SSP
+8. Adds the "SSO User" role to all existing WMD users
+9. Converts WMD workgroup role mappings to Stanford SSP equivalents
+10. Configures Stanford SSP so that users logging in with this module automatically get the "SUNet User" role
+11. Disables and uninstalls WMD
+
+#### The "SUNet User" role
+By default, users logging in with Stanford SimpleSAMLphp do **not** get the "SUNet User" role. If you are upgrading a site from WMD to Stanford SSP, and you want users who log in to get the "SUNet User" role, you **must** run `drush sspwmd`. 
+
 Troubleshooting
 ---
 
