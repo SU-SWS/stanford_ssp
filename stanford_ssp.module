@@ -683,8 +683,10 @@ function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
     );
 
     // Move the form items inside.
+    $form['drupal_auth']['actions'] = $form['actions'];
     $form['drupal_auth']['name'] = $form['name'];
     $form['drupal_auth']['pass'] = $form['pass'];
+    unset($form['actions']);
     unset($form['name']);
     unset($form['pass']);
 
