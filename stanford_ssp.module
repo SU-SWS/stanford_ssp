@@ -678,7 +678,7 @@ function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
       '#title' => "Drupal Login",
       '#weight' => 0,
       '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
+      '#collapsed' => FALSE,
       // Ensure that the name and pass fields are not nested on validate and submit.
       '#tree' => FALSE,
     );
