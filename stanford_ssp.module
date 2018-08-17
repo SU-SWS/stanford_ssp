@@ -1011,8 +1011,7 @@ function stanford_ssp_fetch_from_workgroup_api($group = "") {
   // UAT server is at: https://workgroupsvc-uat.stanford.edu/v1/workgroups/
   // Old production server: https://workgroupsvc.stanford.edu/v1/workgroups/
   // New production server: https://aswsweb.stanford.edu/mais/workgroupsvc/v1/workgroups/
-  // $endpoint = variable_get('stanford_ssp_workgroup_api_endpoint', 'https://aswsweb.stanford.edu/mais/workgroupsvc/v1/workgroups/');
-  $endpoint = variable_get('stanford_ssp_workgroup_api_endpoint', 'https://workgroupsvc.stanford.edu/v1/workgroups/');
+  $endpoint = variable_get('stanford_ssp_workgroup_api_endpoint', 'https://aswsweb.stanford.edu/mais/workgroupsvc/v1/workgroups/');
   $endpoint .= $group;
 
   // In order to make this request openssl has to be available to php.
@@ -1023,8 +1022,8 @@ function stanford_ssp_fetch_from_workgroup_api($group = "") {
   // Add the SSL certificate paths.
   $openssl_defaults = openssl_get_cert_locations();
   $default_path = $openssl_defaults['default_cert_dir'];
-  $cert_filename = variable_get('stanford_ssp_workgroup_api_cert', $default_path . "/stanford-ssp.cert");
-  $key_filename = variable_get('stanford_ssp_workgroup_api_key', $default_path . "/stanford-ssp.key");
+  $cert_filename = variable_get('stanford_ssp_workgroup_api_cert', $default_path . "/stanford_ssp.cert");
+  $key_filename = variable_get('stanford_ssp_workgroup_api_key', $default_path . "/stanford_ssp.key");
 
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $endpoint);
