@@ -16,27 +16,14 @@ function stanford_ssp_menu() {
     'description' => "Authentication endpoint.",
     'page callback' => 'stanford_ssp_sso_auth',
     'access callback' => "stanford_ssp_access_login_page",
+    'type' => MENU_SUGGESTED_ITEM,
   );
 
   $items['sso/denied-test'] = array(
     'title' => "Always denied",
     'description' => "Authentication endpoint test.",
     'page callback' => 'stanford_ssp_sso_auth',
-  );
-
-  $items['sso/workgroup-test'] = array(
-    'title' => "Workgroup XML sample response",
-    'description' => "Workgroup data test.",
-    'page callback' => 'stanford_ssp_sample_workgroup_response',
-    // Just a test page. Nothing doing here.
-    'access callback' => TRUE,
-  );
-
-  $items['sso/test-test'] = array(
-    'title' => 'title title',
-    'page callback' => 'stanford_ssp_get_workgroup_members_by_api',
-    // Just a test page. Nothing doing here.
-    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
   );
 
   // Configuration Forms
@@ -114,6 +101,7 @@ function stanford_ssp_menu() {
     'description' => "Redirect from saml_login to sso/login.",
     'page callback' => 'stanford_ssp_redirect',
     'access callback' => "stanford_ssp_access_login_page",
+    'type' => MENU_CALLBACK,
   );
 
   return $items;
@@ -1074,42 +1062,4 @@ function stanford_ssp_get_api_members_from_xml_array(array $member) {
     throw new Exception("Invalid member attribute data");
   }
   return $member['@attributes']['id'];
-}
-
-/**
- * Fake or test workgroup api response.
- *
- * This fake endpoint response is derived from the example found at:
- * https://web.stanford.edu/dept/as/mais/applications/workgroupapi/api.html.
- *
- * This should only be used for testing and not real authentication.
- */
-function stanford_ssp_sample_workgroup_response() {
-
-  drupal_add_http_header('Content-Type', 'text/xml;charset=UTF-8');
-
-  $response = <<<EOD
-<?xml version="1.0" encoding="UTF-8"?>
-<workgroup>
-    <description>Test workgroup</description>
-    <filter>FACULTY_STAFF_STUDENT</filter>
-    <visibility>PRIVATE</visibility>
-    <reusable>TRUE</reusable>
-    <privgroup>TRUE</privgroup>
-    <members>
-        <member id="sunet1" name="user1" url="https://workgroupsvc.stanford.edu/v1/users/user1"/>
-        <member id="sunet2" name="user2" url="https://workgroupsvc.stanford.edu/v1/users/user2"/>
-        <workgroup name="workgroup:mais" url="https://workgroupsvc.stanford.edu/v1/workgroups/workgroup:mais"/>
-        <workgroup name="workgroup:mais-dev" url="https://workgroupsvc.stanford.edu/v1/workgroups/workgroup:mais-dev"/>
-    </members>
-    <administrators>
-        <member id="sunet3" name="user3" url="https://workgroupsvc.stanford.edu/v1/users/user3"/>
-        <member id="sunet4" name="user4" url="https://workgroupsvc.stanford.edu/v1/users/user4"/>
-        <workgroup name="mais-staff" url="https://workgroupsvc.stanford.edu/v1/workgroups/mais-staff"/>
-    </administrators>
-</workgroup>
-EOD;
-
-  print($response);
-  drupal_exit();
 }
