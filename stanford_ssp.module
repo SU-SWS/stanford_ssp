@@ -365,16 +365,11 @@ function stanford_ssp_user_insert(&$edit, $account, $category) {
     watchdog('stanford_ssp_user_insert', 'Could not load SAML information', array(), WATCHDOG_DEBUG);
   }
 
-  // If the new account and the current user don't have matching emails then
-  // the account must have been created by a form or drush instead of through
-  // the user actually doing a login themselves.
-  if (isset($attributes['email'][0]) && ($attributes['email'][0] !== $account->init)) {
-    return;
-  }
-
-  // Different SPs have different values for this...
-  if (isset($attributes['mail'][0]) && ($attributes['mail'][0] !== $account->init)) {
-    return;
+  // Some SPs and users do not provide mail or email attributes. Use something
+  // else to try and validate that the created user is not the current user. The
+  // best thing we can try to use is the sunet id.
+  if (isset($attributes['uid'][0]) && ($attributes['uid'][0] !== str_replace("@stanford", "", $account->init))) {
+    return FALSE;
   }
 
   // Act on the current user.
