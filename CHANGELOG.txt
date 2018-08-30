@@ -1,6 +1,16 @@
 Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 -------------------------------------------
 
+Stanford SimpleSAML PHP 7.x-2.2-alpha2  2018-08-30
+--------------------------------------------------
+- Bug fix: hide menu items that should not be exposed
+- Bug fix: PDO exception on "Create SSO User" form
+- Usability fix to the "Drupal Login" fieldset at /user
+- Upgrade path from the WebAuth Module for Drupal: Grant the "SUNet User" role to all users who log in with stanford_ssp
+- Update to point to production endpoint for Workgroup API
+- Bug fix: paths to certificate/key for Workgroup API
+- Remove test Workgroup API endpoint
+
 Stanford SimpleSAML PHP 7.x-2.2-alpha1  2018-06-27
 --------------------------------------------------
 - Updated codeclimate.yml
