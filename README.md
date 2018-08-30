@@ -1,5 +1,5 @@
 # [Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
-##### Version: 7.x-2.2-dev
+##### Version: 7.x-2.2-alpha2
 
 Maintainers: [jbickar](https://github.com/jbickar),  [sherakama](https://github.com/sherakama)
 
@@ -94,7 +94,7 @@ That command:
 11. Disables and uninstalls WMD
 
 #### The "SUNet User" role
-By default, users logging in with Stanford SimpleSAMLphp do **not** get the "SUNet User" role. If you are upgrading a site from WMD to Stanford SSP, and you want users who log in to get the "SUNet User" role, you **must** run `drush sspwmd`. 
+By default, users logging in with Stanford SimpleSAMLphp do **not** get the "SUNet User" role. If you are upgrading a site from WMD to Stanford SSP, and you want users who log in to get the "SUNet User" role, you **must** run `drush sspwmd`.
 
 Troubleshooting
 ---

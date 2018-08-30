@@ -859,7 +859,7 @@ function stanford_ssp_import_webauth_settings() {
   variable_set('stanford_simplesamlphp_auth_autoenablesaml', TRUE);
   variable_set('stanford_ssp_prevent_cache', FALSE);
   variable_set('stanford_ssp_show_sso_login', TRUE);
-  // Grant all the "SUNet User" role to all users who log in with stanford_ssp.
+  // Grant the "SUNet User" role to all users who log in with stanford_ssp.
   // We are assuming that we want this
   // if we are upgrading from WMD to stanford_ssp.
   variable_set('stanford_ssp_grant_sunet_user_role', TRUE);
