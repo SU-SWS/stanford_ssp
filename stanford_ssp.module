@@ -368,7 +368,7 @@ function stanford_ssp_user_insert(&$edit, $account, $category) {
   // Some SPs and users do not provide mail or email attributes. Use something
   // else to try and validate that the created user is not the current user. The
   // best thing we can try to use is the sunet id.
-  if (isset($attributes['uid'][0]) && ($attributes['uid'][0] !== str_replace("@stanford", "", $account->init))) {
+  if (isset($attributes['uid'][0]) && ($attributes['uid'][0] !== str_replace("@stanford.edu", "", $account->init))) {
     return FALSE;
   }
 
