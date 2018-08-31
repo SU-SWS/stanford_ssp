@@ -1,6 +1,10 @@
 Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 -------------------------------------------
 
+Stanford SimpleSAML PHP 7.x-2.2-alpha3  2018-08-31
+--------------------------------------------------
+- Bugfix with str_replace and full email address format.
+
 Stanford SimpleSAML PHP 7.x-2.2-alpha2  2018-08-30
 --------------------------------------------------
 - Bug fix: hide menu items that should not be exposed

@@ -3,4 +3,4 @@ description = Allows users to authenticate to a remote SAML identity provider (I
 core = 7.x
 project = "stanford_simplesamlphp_auth"
 package = Stanford
-version = 7.x-2.2-dev
+version = 7.x-2.2-alpha3
