@@ -362,7 +362,7 @@ function stanford_ssp_user_insert(&$edit, $account, $category) {
     $attributes = stanford_simplesamlphp_auth_get_saml_attributes();
   }
   catch (Exception $e) {
-    watchdog('stanford_ssp_user_insert', 'Could not load SAML information', array(), WATCHDOG_DEBUG);
+    watchdog('stanford_ssp_user_insert', 'Could not load SAML information.', array(), WATCHDOG_DEBUG);
   }
 
   // Some SPs and users do not provide mail or email attributes. Use something
@@ -966,6 +966,7 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
   }
   catch (Exception $e) {
     // Return nothing.
+    drupal_set_message($e->getMessage(), 'error');
     return array();
   }
 
@@ -1030,13 +1031,18 @@ function stanford_ssp_fetch_from_workgroup_api($group = "") {
   $curl_info = curl_getinfo($ch);
   curl_close($ch);
 
+  if ($curl_info['http_code'] == 404) {
+    watchdog('stanford_ssp', 'Invalid workgroup. Not found in API. %err', array('%err' => $errmsg), WATCHDOG_ERROR);
+    throw new Exception("Invalid workgroup.");
+  }
+
   if ($curl_info['http_code'] !== 200) {
-    watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
+    watchdog('stanford_ssp', 'Failed to fetch workgroup information from api. %err', array('%err' => $errmsg), WATCHDOG_ERROR);
     throw new Exception("Error fetching workgroup api information.");
   }
 
   if (empty($response) || ($err == 0 && !empty($errmsg))) {
-    watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
+    watchdog('stanford_ssp', 'Failed to fetch workgroup information from api. %err', array('%err' => $errmsg), WATCHDOG_ERROR);
     throw new Exception($errmsg);
   }
 
