@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Code for the Stanford Jumpstart Login feature.
@@ -63,9 +64,15 @@ function stanford_saml_block_block_view($delta = '') {
         return $block;
       }
       $stanford_ssp_link_text = variable_get('stanford_ssp_link_text', 'SUNetID Login');
+      $params = [
+        'query' => [
+          'destination' => check_plain(current_path()),
+        ],
+      ];
+
       $block = array(
         'subject' => t('SUNetID Login'),
-        'content' => l($stanford_ssp_link_text, 'sso/login'),
+        'content' => l($stanford_ssp_link_text, 'sso/login', $params),
       );
       break;
   }
