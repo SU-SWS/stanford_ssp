@@ -1,6 +1,12 @@
 Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 -------------------------------------------
 
+Stanford SimpleSAML PHP 7.x-2.2-alpha4  2018-09-12
+--------------------------------------------------
+- Bug fix: hide exposed menu callback
+- Bug fix: add destination parameter to login link to preserve user's current path
+- Bug fix: Change default workgroup api endpoint to workgroupsvc from aswsweb due to firewall issues.
+
 Stanford SimpleSAML PHP 7.x-2.2-alpha3  2018-08-31
 --------------------------------------------------
 - Bugfix with str_replace and full email address format.
