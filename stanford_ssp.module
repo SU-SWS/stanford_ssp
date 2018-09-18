@@ -144,6 +144,17 @@ function stanford_ssp_access_login_page() {
 }
 
 /**
+ * Implement hook_menu_site_status_alter().
+ *
+ * Allow access to log in when site is in maintenance mode.
+ */
+function stanford_ssp_menu_site_status_alter(&$menu_site_status, $path) {
+  if ($menu_site_status == MENU_SITE_OFFLINE && $path == 'sso/login') {
+    $menu_site_status = MENU_SITE_ONLINE;
+  }
+}
+
+/**
  * Redirect saml_login to sso/login.
  */
 function stanford_ssp_redirect() {
