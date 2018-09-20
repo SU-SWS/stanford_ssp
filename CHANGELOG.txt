@@ -1,6 +1,10 @@
 Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 -------------------------------------------
 
+Stanford SimpleSAML PHP 7.x-2.2-alpha4  2018-09-19
+--------------------------------------------------
+- Bug fix: Allow privileged users to log in when site is in Maintenance Mode.
+
 Stanford SimpleSAML PHP 7.x-2.2-alpha4  2018-09-12
 --------------------------------------------------
 - Bug fix: hide exposed menu callback
