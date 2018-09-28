@@ -772,6 +772,15 @@ function stanford_ssp_import_webauth_settings() {
   if (!module_exists("stanford_saml_block")) {
     module_enable(array("stanford_saml_block"));
     drush_log("Enabled stanford_saml_block", "success");
+
+    // Update the webauth block settings to be saml block settings.
+    db_update("block")
+      ->fields([
+        'module' => 'stanford_saml_block',
+        'delta' => 'stanford_saml_block_login_block',
+      ])
+      ->condition('module', 'webauth')
+      ->execute();
   }
 
   $sso_role = user_role_load_by_name('SSO User');
