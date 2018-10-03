@@ -1,6 +1,10 @@
 Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 -------------------------------------------
 
+Stanford SimpleSAML PHP 7.x-2.2-alpha6  2018-10-03
+--------------------------------------------------
+- Bug fix: Show SUNet Login block wherever WebAuth Module for Drupal login block appeared.
+
 Stanford SimpleSAML PHP 7.x-2.2-alpha5  2018-09-19
 --------------------------------------------------
 - Bug fix: Allow privileged users to log in when site is in Maintenance Mode.
