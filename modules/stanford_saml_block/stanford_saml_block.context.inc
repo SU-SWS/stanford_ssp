@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * stanford_webauth_block.context.inc
+ * stanford_saml_block.context.inc
  */
 
 /**
