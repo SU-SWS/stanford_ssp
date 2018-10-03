@@ -1,5 +1,5 @@
 # [Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
-##### Version: 7.x-2.2-alpha5
+##### Version: 7.x-2.2-alpha6
 
 Maintainers: [jbickar](https://github.com/jbickar),  [sherakama](https://github.com/sherakama)
 
