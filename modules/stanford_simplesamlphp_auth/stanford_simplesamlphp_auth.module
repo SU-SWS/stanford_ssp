@@ -493,6 +493,12 @@ function stanford_simplesamlphp_auth_rolepopulation($rolemap) {
   $rolerules = explode('|', $rolemap);
   foreach ($rolerules as $rolerule) {
 
+    // Something is not right here.
+    if (empty($rolerule)) {
+      watchdog('stanford_simplesamlphp_auth', 'Empty role rule. Could not process.', array(), WATCHDOG_NOTICE);
+      continue;
+    }
+
     $roleruledecompose = explode(':', $rolerule, 2);
     $roleid = $roleruledecompose[0];
     $roleruleevaluations = explode(';', $roleruledecompose[1]);

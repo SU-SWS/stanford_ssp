@@ -1051,13 +1051,23 @@ function stanford_ssp_fetch_from_workgroup_api($group = "") {
   $curl_info = curl_getinfo($ch);
   curl_close($ch);
 
-  if ($curl_info['http_code'] !== 200) {
-    watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
+  if ($curl_info['http_code'] == 404 && strpos($group, "stanford:") !== 0) {
+    watchdog('stanford_ssp', 'Workgroup %group not found. <code>!code</code>', ["!code" => serialize($curl_info), '%group' => $group], WATCHDOG_ERROR);
+    throw new Exception("Error: Workgroup not found.");
+  }
+
+  if ($curl_info['http_code'] !== 200 && strpos($group, "stanford:") !== 0) {
+    watchdog('stanford_ssp', 'Failed to fetch workgroup information from api. <code>!code</code>', array("!code" => serialize($curl_info)), WATCHDOG_ERROR);
     throw new Exception("Error fetching workgroup api information.");
   }
 
+  // Not allowed. These are special.
+  if (strpos($group, "stanford:") == 0) {
+    throw new Exception("Cannot evaluate stanford:* groups in workgroup api.");
+  }
+
   if (empty($response) || ($err == 0 && !empty($errmsg))) {
-    watchdog('stanford_ssp', 'Failed to fetch workgroup information from api.', array(), WATCHDOG_ERROR);
+    watchdog('stanford_ssp', '%msg <code>!code</code>', ["!code" => serialize($curl_info), '%msg' => $errmsg], WATCHDOG_ERROR);
     throw new Exception($errmsg);
   }
 
