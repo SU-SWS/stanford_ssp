@@ -1062,7 +1062,7 @@ function stanford_ssp_fetch_from_workgroup_api($group = "") {
   }
 
   // Not allowed. These are special.
-  if (strpos($group, "stanford:") == 0) {
+  if (strpos($group, "stanford:") === 0) {
     throw new Exception("Cannot evaluate stanford:* groups in workgroup api.");
   }
 
