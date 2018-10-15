@@ -426,6 +426,19 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
         '#value' => $index,
       );
 
+      // Something went wrong.
+      if (empty($rule)) {
+        drupal_set_message(t('Empty rule string. Please remove it below.'), 'error');
+        watchdog('stanford_ssp', 'Empty rule string. Please navigate to !link and delete it.', array('!link' => l(t('role mappings'), 'admin/config/stanford/stanford_ssp/role-mappings')), WATCHDOG_ERROR);
+        $row = [
+          "<span style=\"color:red\">Broken or missing rule.</span>",
+          "<span style=\"color:red\">Broken Rule. Remove me.</span>",
+          drupal_render($form[$button_id]),
+        ];
+        $table[] = $row;
+        continue;
+      }
+
       // $rule = rid:expression.
       $bits = explode(':', $rule, 2);
       $role = user_role_load($bits[0]);

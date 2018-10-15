@@ -161,6 +161,9 @@ function stanford_simplesamlphp_auth_user_register() {
   // Add to the authmap table.
   user_set_authmaps($account, array("authname_stanford_simplesamlphp_auth" => $authname));
 
+  // Always do type evaluation.
+  stanford_ssp_auth_role_map_person_affiliation($account);
+
   // Allow others to alter the default roles of the new user.
   drupal_alter('stanford_simplesamlphp_auth_user_roles', $account);
 
