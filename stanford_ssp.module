@@ -434,8 +434,8 @@ function stanford_ssp_stanford_simplesamlphp_auth_allow_login(array $attributes)
     $isok = stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets($sunets, $attributes);
   }
 
-  // If the sunets are ok we should check the groups.
-  if (!empty($groups) && $isok) {
+  // If the sunets are not ok we should check the groups.
+  if (!empty($groups) && !$isok) {
     $groups = explode(",", $groups);
     $groups = array_map("trim", $groups);
     $isok = stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $attributes);
