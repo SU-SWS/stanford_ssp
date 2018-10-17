@@ -1,6 +1,12 @@
 Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 -------------------------------------------
 
+Stanford SimpleSAML PHP 7.x-2.2-alpha7  2018-10-17
+--------------------------------------------------
+- Bug fix: Better error handling.
+- Bug fix: Handling for stanford: stems.
+- Bug fix: Change authorization logic to allow logins from specified SUNetIDs _OR_ workgroups
+
 Stanford SimpleSAML PHP 7.x-2.2-alpha6  2018-10-03
 --------------------------------------------------
 - Bug fix: Show SUNet Login block wherever WebAuth Module for Drupal login block appeared.
