@@ -878,8 +878,8 @@ function stanford_ssp_import_webauth_settings() {
       if (isset($sso_role->rid) && is_numeric($sso_role->rid)) {
         user_multiple_role_edit(array($entry->uid), 'add_role', $sso_role->rid);
       }
-      
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       // Duplicate user detected.
       echo 'Caught exception: ', $e->getMessage(), "\n";
     }
