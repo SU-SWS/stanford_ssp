@@ -879,8 +879,9 @@ function stanford_ssp_import_webauth_settings() {
         user_multiple_role_edit(array($entry->uid), 'add_role', $sso_role->rid);
       }
     } catch (Exception $e) {
+
       // Duplicate user detected.
-      echo 'Caught exception: ',  $e->getMessage(), "\n";
+      echo 'Caught exception: ', $e->getMessage(), "\n";
     }
   }
 
