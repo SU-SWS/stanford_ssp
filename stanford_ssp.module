@@ -881,7 +881,10 @@ function stanford_ssp_import_webauth_settings() {
     }
     catch (Exception $e) {
       // Duplicate user detected.
-      echo 'Caught exception: ', $e->getMessage(), "\n";
+      watchdog('stanford_ssp', $e->getMessage(), array(), WATCHDOG_DEBUG);
+      if (function_exists('drush_log')) {
+        drush_log($e->getMessage(), 'warning');
+      }
     }
   }
 
