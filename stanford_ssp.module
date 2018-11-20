@@ -788,7 +788,12 @@ function stanford_ssp_import_webauth_settings() {
   if ($sunet_role) {
     drush_log("Transferring SUNet User permissions to SSO User.", "success");
     $sunet_role_permissions = user_role_permissions(array($sunet_role->rid => $sunet_role->name));
-    user_role_grant_permissions($sso_role->rid, array_keys($sunet_role_permissions[$sunet_role->rid]));
+
+    // Ignore permissions that are still in the DB but not in a module anywhere.
+    $permissions = array_keys(array_shift($sunet_role_permissions));
+    $module_permissions = array_keys(user_permission_get_modules());
+    $valid_permissions = array_intersect($permissions, $module_permissions);
+    user_role_grant_permissions($sso_role->rid, $valid_permissions);
   }
 
   drush_log("Beginning webauth config settings to ssp settings conversion.", "success");
@@ -861,16 +866,25 @@ function stanford_ssp_import_webauth_settings() {
 
   // Loop through the authmaps and add them to the map table.
   while ($entry = $authmaps->fetchObject()) {
-    db_insert("stanford_ssp_sunetid")
-      ->fields([
-        'sunet' => array_shift(explode("@", $entry->authname)),
-        'uid' => $entry->uid,
-      ])
-      ->execute();
+    try {
+      db_insert("stanford_ssp_sunetid")
+        ->fields([
+          'sunet' => array_shift(explode("@", $entry->authname)),
+          'uid' => $entry->uid,
+        ])
+        ->execute();
 
-    // Also grant the new SSO USER role.
-    if (isset($sso_role->rid) && is_numeric($sso_role->rid)) {
-      user_multiple_role_edit(array($entry->uid), 'add_role', $sso_role->rid);
+      // Also grant the new SSO USER role.
+      if (isset($sso_role->rid) && is_numeric($sso_role->rid)) {
+        user_multiple_role_edit(array($entry->uid), 'add_role', $sso_role->rid);
+      }
+    }
+    catch (Exception $e) {
+      // Duplicate user detected.
+      watchdog('stanford_ssp', $e->getMessage(), array(), WATCHDOG_DEBUG);
+      if (function_exists('drush_log')) {
+        drush_log($e->getMessage(), 'warning');
+      }
     }
   }
 
@@ -1058,7 +1072,7 @@ function stanford_ssp_fetch_from_workgroup_api($group = "") {
     throw new Exception("Error: Workgroup not found.");
   }
 
-  // If the rest did not reply with a 200 and is not a stem workgroup, there 
+  // If the rest did not reply with a 200 and is not a stem workgroup, there
   // must have been an error connecting with the API.
   if ($curl_info['http_code'] !== 200 && strpos($group, "stanford:") !== 0) {
     watchdog('stanford_ssp', 'Failed to fetch workgroup information from api. <code>!code</code>', array("!code" => serialize($curl_info)), WATCHDOG_ERROR);
