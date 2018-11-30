@@ -1,6 +1,11 @@
 Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 -------------------------------------------
 
+Stanford SimpleSAML PHP 7.x-2.2-alpha8  2018-11-30
+--------------------------------------------------
+- Bug fix: Do not attempt to assign permissions that no longer exist
+- Bug fix: Catch exceptions for duplicate users
+
 Stanford SimpleSAML PHP 7.x-2.2-alpha7  2018-10-17
 --------------------------------------------------
 - Bug fix: Better error handling.
