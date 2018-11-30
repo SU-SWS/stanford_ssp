@@ -390,7 +390,7 @@ function stanford_simplesamlphp_auth_api_evaluaterolerule(array $roleruleevaluat
   $operation = $roleruleevaluation[1];
 
   // If formatting is on we need to change it back for the API.
-  if (variable_get("stanford_ssp_format_entitlements", TRUE)) {
+  if (variable_get("stanford_ssp_format_entitlements", FALSE)) {
     $workgroup = str_replace("_", ":", $workgroup);
   }
 
