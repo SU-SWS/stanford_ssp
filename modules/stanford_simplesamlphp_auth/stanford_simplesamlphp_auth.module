@@ -390,8 +390,13 @@ function stanford_simplesamlphp_auth_api_evaluaterolerule(array $roleruleevaluat
   $operation = $roleruleevaluation[1];
 
   // If formatting is on we need to change it back for the API.
-  if (variable_get("stanford_ssp_format_entitlements", TRUE)) {
-    $workgroup = str_replace("_", ":", $workgroup);
+  if (variable_get("stanford_ssp_format_entitlements", FALSE)) {
+    // Sometimes the formatting gets turned on with legacy information in the DB
+    // This is a safety check to make sure we don't format something that is
+    // already formatted.
+    if (!strpos($workgroup, ":")) {
+      $workgroup = preg_replace("/_/", ":", $workgroup, 1);
+    }
   }
 
   // Unless you were crafty and drush set a special evaluation rule in to the
