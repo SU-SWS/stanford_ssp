@@ -1,138 +1,48 @@
 <?php
+
 /**
  * @file
- * Schema definitions. Install/update/uninstall hooks.
+ * stanford_ssp.install
  */
 
 /**
  * Implements hook_install().
  */
 function stanford_ssp_install() {
-  variable_set('stanford_simplesamlphp_auth_activate', TRUE);
-  variable_set('stanford_simplesamlphp_auth_allowdefaultlogin', TRUE);
-  variable_set('stanford_ssp_automagic_login', TRUE);
-  variable_set('stanford_ssp_force_https', FALSE);
-  variable_set('stanford_ssp_redirect_on_login', FALSE);
-  variable_set('stanford_simplesamlphp_auth_registerusers', TRUE);
-  variable_set('stanford_simplesamlphp_auth_autoenablesaml', TRUE);
-  variable_set('stanford_ssp_prevent_cache', FALSE);
-  variable_set('stanford_simplesamlphp_auth_allowsetdrupalpwd', FALSE);
-  variable_set('stanford_simplesamlphp_auth_installdir', '/opt/simplesamlphp');
-  variable_set('stanford_simplesamlphp_auth_authsource', 'default-sp');
-  variable_set('stanford_simplesamlphp_auth_user_name', 'displayName');
-  variable_set('stanford_simplesamlphp_auth_unique_id', 'uid');
-  variable_set('stanford_simplesamlphp_auth_mailattr', 'mail');
-  variable_set('stanford_ssp_auth_restrictions', 'any');
-  variable_set('stanford_ssp_auth_restriction_sunet', '');
-  variable_set('stanford_ssp_auth_restriction_group', '');
-  variable_set('stanford_ssp_auth_role_map', 'grant');
-  variable_set('stanford_ssp_show_local_login', TRUE);
-  variable_set('stanford_ssp_show_sso_login', TRUE);
 
-  // Add default roles.
-  $roles = array(
-    'SSO User',
-    'Stanford Student',
-    'Stanford Staff',
-    'Stanford Faculty',
-  );
-
-  foreach ($roles as $role) {
-    $role_exists = (bool) db_query("SELECT COUNT(*) FROM {role} WHERE name = :name", array(':name' => $role))->fetchField();
-    if (!$role_exists) {
-      db_insert('role')
-        ->fields(array(
-          'name' => $role,
-        ))
-        ->execute();
-      drupal_set_message(st('Added Role @role', array('@role' => $role)));
-    }
-  }
-
-}
-
-/**
- * Implements hook_uninstall().
- */
-function stanford_ssp_uninstall() {
-  variable_del('stanford_simplesamlphp_auth_activate');
-  variable_del('stanford_simplesamlphp_auth_allowdefaultlogin');
-  variable_del('stanford_ssp_automagic_login');
-  variable_del('stanford_ssp_force_https');
-  variable_del('stanford_ssp_redirect_on_login');
-  variable_del('stanford_simplesamlphp_auth_registerusers');
-  variable_del('stanford_simplesamlphp_auth_autoenablesaml');
-  variable_del('stanford_ssp_prevent_cache');
-  variable_del('stanford_simplesamlphp_auth_allowsetdrupalpwd');
-  variable_del('stanford_simplesamlphp_auth_installdir');
-  variable_del('stanford_simplesamlphp_auth_authsource');
-  variable_del('stanford_simplesamlphp_auth_user_name');
-  variable_del('stanford_simplesamlphp_auth_unique_id');
-  variable_del('stanford_simplesamlphp_auth_mailattr');
-  variable_del('stanford_ssp_auth_restrictions');
-  variable_del('stanford_ssp_auth_restriction_sunet', '');
-  variable_del('stanford_ssp_auth_restriction_group');
-  variable_del('stanford_simplesamlphp_auth_allowdefaultloginroles');
-  variable_del('stanford_simplesamlphp_auth_allowdefaultloginusers');
-  variable_del('stanford_ssp_auth_role_map');
-  variable_del('stanford_ssp_show_local_login');
-  variable_del('stanford_ssp_show_sso_login');
-  variable_del('stanford_ssp_sso_link_text');
-  variable_del('stanford_ssp_debug');
 }
 
 /**
  * Implements hook_schema().
  */
 function stanford_ssp_schema() {
-  $schema['stanford_ssp_sunetid'] = array(
+  $schema['stanford_ssp_sunetid'] = [
     'description' => 'mapping sunet to user',
-    'fields' => array(
-      'sunet' => array(
+    'fields' => [
+      'sunet' => [
         'description' => 'the users sunetid',
         'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,
         'default' => '',
-      ),
-      'uid' => array(
+      ],
+      'uid' => [
         'description' => 'The user id on this website.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'default' => 0
-      ),
-    ),
-    'indexes' => array(
-      'suuid' => array('sunet', 'uid'),
-    ),
-    'unique keys' => array(
-      'uid' => array('uid')
-    ),
-    'foreign keys' => array(
-      'uid' => array(
-        'table' => 'user',
-        'columns' => array('uid' => 'uid'),
-      ),
-    ),
-    'primary key' => array('sunet'),
-  );
+        'default' => 0,
+      ],
+    ],
+    'indexes' => ['suuid' => ['sunet', 'uid']],
+    'unique keys' => ['uid' => ['uid']],
+    'foreign keys' => [
+      'uid' => [
+        'table' => 'users',
+        'columns' => ['uid' => 'uid'],
+      ],
+    ],
+    'primary key' => ['sunet'],
+  ];
   return $schema;
-}
-
-/**
- * Implements hook_update_N().
- */
-function stanford_ssp_update_7200(&$sandbox) {
-  drupal_install_schema("stanford_ssp");
-}
-
-/**
- * Update any existing authmaps from left over systems.
- */
-function stanford_ssp_update_7201(&$sandbox) {
-  db_update("authmap")
-    ->fields(array("module" => "stanford_simplesamlphp_auth"))
-    ->condition("module", "simplesamlphp_auth")
-    ->execute();
 }
