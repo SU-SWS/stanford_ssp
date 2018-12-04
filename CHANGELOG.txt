@@ -1,6 +1,10 @@
 Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 -------------------------------------------
 
+Stanford SimpleSAML PHP 7.x-2.2-alpha9  2018-11-30
+--------------------------------------------------
+- Bug fix: workgroups with underscores in them were not mapping to roles
+
 Stanford SimpleSAML PHP 7.x-2.2-alpha8  2018-11-30
 --------------------------------------------------
 - Bug fix: Do not attempt to assign permissions that no longer exist
