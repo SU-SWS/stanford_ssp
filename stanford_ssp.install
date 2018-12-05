@@ -16,7 +16,7 @@ function stanford_ssp_install() {
  * Implements hook_schema().
  */
 function stanford_ssp_schema() {
-  $schema['stanford_ssp_sunetid'] = [
+  $schema['stanford_ssp'] = [
     'description' => 'mapping sunet to user',
     'fields' => [
       'sunet' => [

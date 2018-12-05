@@ -1,0 +1,7 @@
+stanford_ssp.add_user:
+  path: '/admin/config/people/simplesamlphp_auth/add-sso-user'
+  defaults:
+    _form: '\Drupal\stanford_ssp\Form\AddUser'
+    _title: 'Add User'
+  requirements:
+    _permission: 'administer simplesamlphp authentication'
