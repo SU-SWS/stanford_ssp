@@ -5,6 +5,7 @@ namespace Drupal\stanford_ssp\Form;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\simplesamlphp_auth\Form\SyncingSettingsForm;
+use Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth;
 use Drupal\user\Entity\Role;
 
 /**
@@ -56,6 +57,14 @@ class RoleSyncForm extends SyncingSettingsForm {
     foreach ($form_state->get('mappings', []) as $role_mapping) {
       $form['user_info']['role_population'][$role_mapping] = $this->buildRoleRow($role_mapping);
     }
+
+    $form['user_info']['role_eval_every_time']['#type'] = 'radios';
+    $form['user_info']['role_eval_every_time']['#options'] = [
+      0 => $this->t('Do not adjust roles. Allow local administration of roles only.'),
+      StanfordSSPDrupalAuth::ROLE_REEVALUATE => $this->t('Re-evaluate roles on every log in. This will grant and remove roles.'),
+      StanfordSSPDrupalAuth::ROLE_ADDITIVE => $this->t('Grant new roles only. Will only add roles based on role assignments.'),
+    ];
+
     return $form;
   }
 

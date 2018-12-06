@@ -1,7 +1,20 @@
 <?php
 
 /**
+ * @file
+ * stanford_ssp.module
+ */
+
+/**
+ * Implements hook_config_schema_info_alter().
+ */
+function stanford_ssp_config_schema_info_alter(&$definitions) {
+  $definitions['simplesamlphp_auth.settings']['mapping']['role']['mapping']['eval_every_time']['type'] = 'integer';
+}
+
+/**
  * Maps the affiliations to the user roles.
+ *
  * @param object $user
  *   The user to check the attributes on. Probably should be the currently
  *   logged in user as the attributes come from that user anyhow.
@@ -13,17 +26,17 @@ function stanford_ssp_auth_role_map_person_affiliation(&$user) {
 
   // Role mapping array goes as such:
   // regex => role name.
-  $maps = array(
+  $maps = [
     '/faculty/i' => 'Stanford Faculty',
     '/staff/i' => 'Stanford Staff',
     '/postdoc/i' => 'Stanford Student',
     '/student/i' => 'Stanford Student',
     // '/member/' => 'SSO User',
     // '/affiliate/' => 'SSO User',
-  );
+  ];
 
   // Loop through the expressions looking for matches in the maps array.
-  $matches = array();
+  $matches = [];
   foreach ($maps as $expression => $role_name) {
     $has_matches = preg_grep($expression, $affiliations);
 
@@ -42,7 +55,7 @@ function stanford_ssp_auth_role_map_person_affiliation(&$user) {
   // If anything was matched save the user.
   if (count($matches)) {
     $final_roles = $user->roles + $matches;
-    $user = user_save($user, array('roles' => $final_roles));
+    $user = user_save($user, ['roles' => $final_roles]);
   }
 
 }
@@ -55,8 +68,10 @@ function stanford_ssp_auth_role_map_person_affiliation(&$user) {
 
 /**
  * User account form.
+ *
  * @param  [type] &$form       [description]
  * @param  [type] &$form_state [description]
+ *
  * @return [type]              [description]
  */
 function stanford_ssp_form_user_profile_form_alter(&$form, &$form_state) {
@@ -79,11 +94,13 @@ function stanford_ssp_form_user_profile_form_alter(&$form, &$form_state) {
   }
 
 }
+
 /**
  * Implements hook_form_FORMID_alter().
  *
  * @param  [type] &$form       [description]
  * @param  [type] &$form_state [description]
+ *
  * @return [type]              [description]
  */
 function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
@@ -103,27 +120,27 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
 
   // Display (or not) the login link for SSO (SAML).
   if ($show_sso && $sso_on) {
-    $form['saml_auth'] = array(
+    $form['saml_auth'] = [
       '#type' => 'fieldset',
       '#title' => "SUNet Login",
       '#weight' => -10,
-    );
+    ];
     $link_text = variable_get("stanford_ssp_sso_link_text", t("Log in with your SUNet ID »"));
-    $form['saml_auth']['saml_link'] = array(
+    $form['saml_auth']['saml_link'] = [
       '#prefix' => "<p>",
       '#markup' => l($link_text, "sso/login"),
       '#suffix' => "</p>",
-    );
+    ];
   }
 
   // If local login form is enabled add a fieldset to title it.
   if ($show_local && $local_on) {
     // Add the fieldset for the Drupal login form.
-    $form['drupal_auth'] = array(
+    $form['drupal_auth'] = [
       '#type' => 'fieldset',
       '#title' => "Drupal Login",
       '#weight' => 0,
-    );
+    ];
   }
 
   // If not showing local we need to unset the login form items.
@@ -139,10 +156,13 @@ function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
   }
 
 }
+
 /**
  * Implements hook form alter.
+ *
  * @param  [type] $form       [description]
  * @param  [type] $form_state [description]
+ *
  * @return [type]             [description]
  */
 function stanford_ssp_form_user_pass_alter(&$form, &$form_state) {
@@ -151,8 +171,10 @@ function stanford_ssp_form_user_pass_alter(&$form, &$form_state) {
 
 /**
  * Prevent password reset from working if local accounts turned off.
+ *
  * @param  [type] $form       [description]
  * @param  [type] $form_state [description]
+ *
  * @return [type]             [description]
  */
 function stanford_ssp_form_user_pass_alter_validate($form, $form_state) {
@@ -161,19 +183,3 @@ function stanford_ssp_form_user_pass_alter_validate($form, $form_state) {
   }
 }
 
-/**
- * Formats workgroup entitlment.
- *
- * Eg: anchorage:humanbiology-admins to anchorage_humanbiology-admins.
- *
- * @param string $entitlement
- *   Eg: anchorage:humanbiology-admins.
- *
- * @return string
- *   eg: anchorage_humanbiology-admins
- */
-function stanford_ssp_format_entitlement($entitlement) {
-  $entitlement = strtolower($entitlement);
-  $entitlement = str_replace(":", "_", $entitlement);
-  return $entitlement;
-}
