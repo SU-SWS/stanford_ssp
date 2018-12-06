@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: stanford_staff
+label: 'Stanford Staff'
+weight: 7
+is_admin: null
+permissions: {  }

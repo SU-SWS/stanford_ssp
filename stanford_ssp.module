@@ -5,6 +5,9 @@
  * stanford_ssp.module
  */
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+
 /**
  * Implements hook_config_schema_info_alter().
  */
@@ -13,173 +16,48 @@ function stanford_ssp_config_schema_info_alter(&$definitions) {
 }
 
 /**
- * Maps the affiliations to the user roles.
- *
- * @param object $user
- *   The user to check the attributes on. Probably should be the currently
- *   logged in user as the attributes come from that user anyhow.
+ * Implements hook_form_FORM_ID_alter().
  */
-function stanford_ssp_auth_role_map_person_affiliation(&$user) {
-  $roles = user_roles();
-  $attributes = stanford_simplesamlphp_auth_get_attributes();
-  $affiliations = $attributes['eduPersonAffiliation'];
+function stanford_ssp_form_user_login_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (isset($form['simplesamlphp_auth_login_link'])) {
+    $form['simplesamlphp_auth_login_link']['#attributes']['class'][] = 'decanter-button';
+    $saml_config = \Drupal::config('simplesamlphp_auth.settings');
 
-  // Role mapping array goes as such:
-  // regex => role name.
+    // If configured to disallow local login, hide the local login form parts.
+    if (!$saml_config->get('allow.default_login')) {
+      unset($form['name'], $form['pass'], $form['actions']);
+      return;
+    }
+    // Moves the original form elements into a collapsed group.
+    $form['simplesamlphp_auth_login_link']['#weight'] = -99;
+    $form['manual'] = [
+      '#type' => 'details',
+      '#title' => t('Drupal Login'),
+      '#open' => FALSE,
+    ];
+    $form['manual']['name'] = $form['name'];
+    $form['manual']['pass'] = $form['pass'];
+    $form['manual']['actions'] = $form['actions'];
+    $form['manual']['actions']['reset'] = Link::createFromRoute(t('Reset Password'), 'user.pass')
+      ->toRenderable();
+    unset($form['name'], $form['pass'], $form['actions']);
+  }
+}
+
+/**
+ * Implements hook_simplesamlphp_auth_user_roles_alter().
+ */
+function stanford_ssp_simplesamlphp_auth_user_roles_alter(&$roles, $attributes) {
   $maps = [
-    '/faculty/i' => 'Stanford Faculty',
-    '/staff/i' => 'Stanford Staff',
-    '/postdoc/i' => 'Stanford Student',
-    '/student/i' => 'Stanford Student',
-    // '/member/' => 'SSO User',
-    // '/affiliate/' => 'SSO User',
+    '/faculty/i' => 'stanford_faculty',
+    '/staff/i' => 'stanford_staff',
+    '/postdoc/i' => 'stanford_student',
+    '/student/i' => 'stanford_student',
   ];
 
-  // Loop through the expressions looking for matches in the maps array.
-  $matches = [];
-  foreach ($maps as $expression => $role_name) {
-    $has_matches = preg_grep($expression, $affiliations);
-
-    // If any of the affiliations match the pattern add it to the matches array
-    // keying by id so that we don't get duplicates.
-    if (count($has_matches)) {
-      // Check to see if the role exist. It may have been deleted.
-      $role = user_role_load_by_name($role_name);
-      if ($role) {
-        $matches[$role->rid] = $role->name;
-      }
+  foreach ($maps as $expression => $role_id) {
+    if (count(preg_grep($expression, $attributes['eduPersonAffiliation']))) {
+      $roles[$role_id] = $role_id;
     }
-
-  }
-
-  // If anything was matched save the user.
-  if (count($matches)) {
-    $final_roles = $user->roles + $matches;
-    $user = user_save($user, ['roles' => $final_roles]);
-  }
-
-}
-
-/**
- * *****************************************
- * FORM ALTERS
- * *****************************************
- */
-
-/**
- * User account form.
- *
- * @param  [type] &$form       [description]
- * @param  [type] &$form_state [description]
- *
- * @return [type]              [description]
- */
-function stanford_ssp_form_user_profile_form_alter(&$form, &$form_state) {
-
-  // Check for editing a user. If we don't have a user we can end.
-  $account = isset($form["#user"]) ? $form["#user"] : FALSE;
-  if (!$account) {
-    return;
-  }
-
-  // Check to see if user is a SAML user.
-  $sunet = stanford_ssp_get_sunetid_by_uid($account->uid);
-  if (!$sunet) {
-    return;
-  }
-
-  // If a saml user check to see if they can use the password fields.
-  if (!variable_get("stanford_simplesamlphp_auth_allowsetdrupalpwd", FALSE)) {
-    $form["account"]['pass']['#access'] = FALSE;
-  }
-
-}
-
-/**
- * Implements hook_form_FORMID_alter().
- *
- * @param  [type] &$form       [description]
- * @param  [type] &$form_state [description]
- *
- * @return [type]              [description]
- */
-function stanford_ssp_form_user_login_alter(&$form, &$form_state) {
-
-  // Check for https forcing:
-  stanford_ssp_force_https();
-
-  // Remove the Federated login link because it is ugly.
-  if (isset($form["links"])) {
-    unset($form["links"]);
-  }
-
-  $show_sso = variable_get("stanford_ssp_show_sso_login", TRUE);
-  $show_local = variable_get("stanford_ssp_show_local_login", TRUE);
-  $sso_on = variable_get("stanford_simplesamlphp_auth_activate", FALSE);
-  $local_on = variable_get("stanford_simplesamlphp_auth_allowdefaultlogin", TRUE);
-
-  // Display (or not) the login link for SSO (SAML).
-  if ($show_sso && $sso_on) {
-    $form['saml_auth'] = [
-      '#type' => 'fieldset',
-      '#title' => "SUNet Login",
-      '#weight' => -10,
-    ];
-    $link_text = variable_get("stanford_ssp_sso_link_text", t("Log in with your SUNet ID »"));
-    $form['saml_auth']['saml_link'] = [
-      '#prefix' => "<p>",
-      '#markup' => l($link_text, "sso/login"),
-      '#suffix' => "</p>",
-    ];
-  }
-
-  // If local login form is enabled add a fieldset to title it.
-  if ($show_local && $local_on) {
-    // Add the fieldset for the Drupal login form.
-    $form['drupal_auth'] = [
-      '#type' => 'fieldset',
-      '#title' => "Drupal Login",
-      '#weight' => 0,
-    ];
-  }
-
-  // If not showing local we need to unset the login form items.
-  if (!$show_local || !$local_on) {
-    unset($form['name']);
-    unset($form['pass']);
-    unset($form['actions']);
-  }
-
-  // If nothing available print out a message.
-  if (!$show_local && !$show_sso) {
-    $form["nothingtoseehere"]["#markup"] = "<h3>No login options available.</h3>";
-  }
-
-}
-
-/**
- * Implements hook form alter.
- *
- * @param  [type] $form       [description]
- * @param  [type] $form_state [description]
- *
- * @return [type]             [description]
- */
-function stanford_ssp_form_user_pass_alter(&$form, &$form_state) {
-  $form["#validate"][] = "stanford_ssp_form_user_pass_alter_validate";
-}
-
-/**
- * Prevent password reset from working if local accounts turned off.
- *
- * @param  [type] $form       [description]
- * @param  [type] $form_state [description]
- *
- * @return [type]             [description]
- */
-function stanford_ssp_form_user_pass_alter_validate($form, $form_state) {
-  if (!variable_get("stanford_simplesamlphp_auth_allowdefaultlogin", TRUE)) {
-    form_set_error("", t("We're sorry but local account login has been disabled. Password reset is not available at this time."));
   }
 }
-
