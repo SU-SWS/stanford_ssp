@@ -1,0 +1,5 @@
+services:
+  stanford_ssp.route_subscriber:
+    class: Drupal\stanford_ssp\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

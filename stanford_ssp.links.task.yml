@@ -1,0 +1,4 @@
+stanford_ssp.add_user:
+  title: Add User
+  route_name: stanford_ssp.add_user
+  parent_id: simplesamlphp_auth.admin_settings_tab

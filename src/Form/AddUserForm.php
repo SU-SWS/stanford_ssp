@@ -12,11 +12,11 @@ use Egulias\EmailValidator\EmailValidatorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class AddUser
+ * Class AddUser to add a SSP user without them logging in first.
  *
  * @package Drupal\stanford_ssp\Form
  */
-class AddUser extends FormBase {
+class AddUserForm extends FormBase {
 
   /**
    * External authmap service.
@@ -54,7 +54,7 @@ class AddUser extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'stanford_ssp_add_user';
+    return 'stanford_ssp_add_user_form';
   }
 
   /**
