@@ -13,8 +13,14 @@ use Drupal\externalauth\ExternalAuthInterface;
 
 class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
 
+  /**
+   * Fully re-evaluate user role on every login.
+   */
   const ROLE_REEVALUATE = 1;
 
+  /**
+   * Evaluate and only add new roles to the user on every login.
+   */
   const ROLE_ADDITIVE = 2;
 
   /**
@@ -87,17 +93,22 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
   }
 
   /**
-   * Completely resync all roles on the user account.
+   * Completely re-sync all roles on the user account.
    *
    * @param \Drupal\user\UserInterface $account
    *   The Drupal user to sync roles to.
    */
   public function roleMatchSync(UserInterface $account) {
+    // If the user doesn't have roles to begin with, there's no reason to force
+    // the saving of the user account.
+    $roles_removed = FALSE;
+
     // Remove all the user's current roles before adding the matching roles.
     foreach ($account->getRoles(TRUE) as $role_id) {
       $account->removeRole($role_id);
+      $roles_removed = TRUE;
     }
-    $this->roleMatchAdd($account, TRUE);
+    $this->roleMatchAdd($account, $roles_removed);
   }
 
 }

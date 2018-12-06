@@ -5,11 +5,28 @@
  * stanford_ssp.install
  */
 
+use Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth;
+
 /**
  * Implements hook_install().
  */
 function stanford_ssp_install() {
-
+  $config = \Drupal::configFactory()
+    ->getEditable('simplesamlphp_auth.settings');
+  $config->set('active', TRUE);
+  $config->set('mail_attr', 'mail');
+  $config->set('unique_id', 'uid');
+  $config->set('user_name', 'displayName');
+  $config->set('auth_source', 'default-sp');
+  $config->set('secure', TRUE);
+  $config->set('httponly', FALSE);
+  $config->set('register_users', TRUE);
+  $config->set('autoenablesaml', TRUE);
+  $config->set('header_no_cache', TRUE);
+  $config->set('role.eval_every_time', StanfordSSPDrupalAuth::ROLE_ADDITIVE);
+  $config->set('allow.default_login', TRUE);
+  $config->set('allow.set_drupal_pwd', FALSE);
+  $config->save();
 }
 
 /**
@@ -44,5 +61,7 @@ function stanford_ssp_schema() {
     ],
     'primary key' => ['sunet'],
   ];
+  // Unset schema until we find out that we need it.
+  $schema = [];
   return $schema;
 }
