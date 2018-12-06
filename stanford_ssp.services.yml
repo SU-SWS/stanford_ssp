@@ -1,4 +1,7 @@
 services:
+  stanford_ssp.workgroup_api:
+    class: Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApi
+    arguments: ['@config.factory', '@entity_type.manager']
   stanford_ssp.route_subscriber:
     class: Drupal\stanford_ssp\Routing\RouteSubscriber
     tags:

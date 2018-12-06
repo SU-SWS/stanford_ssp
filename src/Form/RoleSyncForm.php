@@ -3,10 +3,16 @@
 namespace Drupal\stanford_ssp\Form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+use Drupal\key\Entity\Key;
 use Drupal\simplesamlphp_auth\Form\SyncingSettingsForm;
 use Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth;
 use Drupal\user\Entity\Role;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class RoleSyncForm overrides simplesamlphp_auth form for easier UI.
@@ -18,8 +24,27 @@ class RoleSyncForm extends SyncingSettingsForm {
   /**
    * {@inheritdoc}
    */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('module_handler')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler) {
+    parent::__construct($config_factory);
+    $this->moduleHandler = $module_handler;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
+    $config = $this->config('simplesamlphp_auth.settings');
 
     if (!$form_state->get('mappings')) {
       $mappings = explode('|', $form['user_info']['role_population']['#default_value']);
@@ -65,6 +90,49 @@ class RoleSyncForm extends SyncingSettingsForm {
       StanfordSSPDrupalAuth::ROLE_ADDITIVE => $this->t('Grant new roles only. Will only add roles based on role assignments.'),
     ];
 
+    $form['user_info']['use_workgroup_api'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Source to validate role mapping groups against.'),
+      '#default_value' => $config->get('role.use_workgroup_api') ?: 0,
+      '#options' => [
+        $this->t('SAML Attribute'),
+        $this->t('Workgroup API'),
+      ],
+    ];
+
+    if (!$this->moduleHandler->moduleExists('key')) {
+      $form['user_info']['use_workgroup_api']['#attributes']['disabled'] = TRUE;
+      $form['user_info']['workgroup_api']['#markup'] = $this->t('To use workgroup API as a mapping source, please install the <a href="https://www.drupal.org/project/key">Key module</a>.');
+      return $form;
+    }
+
+    $keys = Key::loadMultiple();
+    // Change the key object into just the label for use in the select elements.
+    foreach ($keys as &$key) {
+      $key = $key->label();
+    }
+
+    $form['user_info']['workgroup_api_cert'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Key to Workgroup API SSL Certificate.'),
+      '#description' => $this->t('Choose an available key. If the desired key is not listed, <a href=":link">create a new key</a>.<br>For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates.', [
+        ':link' => Url::fromRoute('entity.key.add_form')
+          ->toString(),
+      ]),
+      '#options' => $keys,
+      '#default_value' => $config->get('role.workgroup_api_cert'),
+    ];
+
+    $form['user_info']['workgroup_api_key'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Key to Workgroup API SSL Key.'),
+      '#description' => $this->t('Choose an available key. If the desired key is not listed, <a href=":link">create a new key</a>.<br>For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates.', [
+        ':link' => Url::fromRoute('entity.key.add_form')
+          ->toString(),
+      ]),
+      '#options' => $keys,
+      '#default_value' => $config->get('role.workgroup_api_key'),
+    ];
     return $form;
   }
 

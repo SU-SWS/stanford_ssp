@@ -20,6 +20,20 @@ function stanford_ssp_config_schema_info_alter(&$definitions) {
     'type' => 'boolean',
     'label' => 'Hide local Login',
   ];
+
+  $definitions['simplesamlphp_auth.settings']['mapping']['role']['mapping']['use_workgroup_api']['type']= [
+    'type' => 'boolean',
+    'label' => 'Use workgroup API instead of attributes',
+  ];
+
+  $definitions['simplesamlphp_auth.settings']['mapping']['role']['mapping']['workgroup_api_cert']['type'] = [
+    'type' => 'string',
+    'label' => 'Workgroup API certificate',
+  ];
+  $definitions['simplesamlphp_auth.settings']['mapping']['role']['mapping']['workgroup_api_key']['type'] = [
+    'type' => 'string',
+    'label' => 'Workgroup API SSL Key',
+  ];
 }
 
 /**
