@@ -72,13 +72,12 @@ Class StanfordSSPEventSubscriber implements EventSubscriberInterface {
     ) {
       $origin = $event->getRequest()->getPathInfo();
 
-      // If the site allows local login, push the user to the core login page.
-      // If not, we can allow users to log in autolmatically.
-      if ($this->config->get('allow.default_login') && $this->config->get('activate')) {
-        $url = Url::fromRoute('user.login', [], ['query' => ['destination' => $origin]]);
+
+      if ($this->config->get('activate') && $this->config->get('hide_local_login')) {
+        $url = Url::fromRoute('simplesamlphp_auth.saml_login', [], ['query' => ['destination' => trim($origin, '/')]]);
       }
       else {
-        $url = Url::fromRoute('simplesamlphp_auth.saml_login', [], ['query' => ['destination' => trim($origin, '/')]]);
+        $url = Url::fromRoute('user.login', [], ['query' => ['destination' => $origin]]);
       }
 
       // Redirect anonymous users to login portal.

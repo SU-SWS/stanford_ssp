@@ -12,7 +12,14 @@ use Drupal\Core\Link;
  * Implements hook_config_schema_info_alter().
  */
 function stanford_ssp_config_schema_info_alter(&$definitions) {
+  // Change the eval_every_time from boolean to integer so we can have addtional
+  // functionality when evaluating roles.
   $definitions['simplesamlphp_auth.settings']['mapping']['role']['mapping']['eval_every_time']['type'] = 'integer';
+
+  $definitions['simplesamlphp_auth.settings']['mapping']['hide_local_login'] = [
+    'type' => 'boolean',
+    'label' => 'Hide local Login',
+  ];
 }
 
 /**
@@ -24,7 +31,7 @@ function stanford_ssp_form_user_login_form_alter(&$form, FormStateInterface $for
     $saml_config = \Drupal::config('simplesamlphp_auth.settings');
 
     // If configured to disallow local login, hide the local login form parts.
-    if (!$saml_config->get('allow.default_login')) {
+    if ($saml_config->get('hide_local_login')) {
       unset($form['name'], $form['pass'], $form['actions']);
       return;
     }
