@@ -81,4 +81,7 @@ function stanford_ssp_simplesamlphp_auth_user_roles_alter(&$roles, $attributes) 
       $roles[$role_id] = $role_id;
     }
   }
+
+  /** @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface $workgroup_api */
+  $workgroup_api = \Drupal::service('stanford_ssp.workgroup_api');
 }

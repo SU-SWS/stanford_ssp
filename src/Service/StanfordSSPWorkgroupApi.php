@@ -10,7 +10,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
  *
  * @package Drupal\stanford_ssp\Service
  */
-class StanfordSSPWorkgroupApi {
+class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
 
   /**
    * Config factory service.
