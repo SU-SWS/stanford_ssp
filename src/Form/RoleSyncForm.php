@@ -23,7 +23,7 @@ class RoleSyncForm extends SyncingSettingsForm {
 
     if (!$form_state->get('mappings')) {
       $mappings = explode('|', $form['user_info']['role_population']['#default_value']);
-      $form_state->set('mappings', array_combine($mappings, $mappings));
+      $form_state->set('mappings', array_filter(array_combine($mappings, $mappings)));
     }
 
     $form['user_info']['role_population'] = [
@@ -90,9 +90,25 @@ class RoleSyncForm extends SyncingSettingsForm {
   protected function buildRoleRow($role_mapping_string) {
     list($role_id, $comparison) = explode(':', $role_mapping_string, 2);
     list(, , $value) = explode(',', $comparison);
-    $role = Role::load($role_id);
+    if ($role = Role::load($role_id)) {
+      return [
+        ['#markup' => $role->label()],
+        ['#markup' => $value],
+        [
+          '#type' => 'submit',
+          '#value' => $this->t('Remove Mapping'),
+          '#name' => $role_mapping_string,
+          '#submit' => ['::removeMappingCallback'],
+          '#mapping' => $role_mapping_string,
+          '#ajax' => [
+            'callback' => '::addMapping',
+            'wrapper' => 'role-mapping-table',
+          ],
+        ],
+      ];
+    }
     return [
-      ['#markup' => $role->label()],
+      ['#markup' => $this->t('Broken @id', ['@id' => $role_id])],
       ['#markup' => $value],
       [
         '#type' => 'submit',

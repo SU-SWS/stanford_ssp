@@ -8,3 +8,8 @@ services:
     public: false
     decorates: simplesamlphp_auth.drupalauth
     arguments: ['@stanford_ssp.drupalauth.inner', '@simplesamlphp_auth.manager', '@config.factory', '@entity_type.manager', '@logger.channel.simplesamlphp_auth', '@externalauth.externalauth', '@current_user']
+  stanford_ssp.event_subscriber:
+    class: Drupal\stanford_ssp\EventSubscriber\StanfordSSPEventSubscriber
+    arguments: ['@config.factory', '@current_user']
+    tags:
+      - { name: event_subscriber }

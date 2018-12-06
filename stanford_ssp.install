@@ -13,7 +13,8 @@ use Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth;
 function stanford_ssp_install() {
   $config = \Drupal::configFactory()
     ->getEditable('simplesamlphp_auth.settings');
-  $config->set('active', TRUE);
+  $config->set('activate', TRUE);
+  $config->set('login_link_display_name', 'SUNetID Login');
   $config->set('mail_attr', 'mail');
   $config->set('unique_id', 'uid');
   $config->set('user_name', 'displayName');
@@ -27,6 +28,11 @@ function stanford_ssp_install() {
   $config->set('allow.default_login', TRUE);
   $config->set('allow.set_drupal_pwd', FALSE);
   $config->save();
+
+  \Drupal::configFactory()
+    ->getEditable('system.site')
+    ->set('page.403', '/saml_login')
+    ->save();
 }
 
 /**
