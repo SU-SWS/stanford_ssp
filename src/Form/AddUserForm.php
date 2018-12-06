@@ -67,7 +67,6 @@ class AddUserForm extends FormBase {
       '#title' => $this->t('SUNetID'),
       '#description' => $this->t('Enter the SUNetID of the user you wish to add.'),
       '#required' => TRUE,
-      '#default_value' => 'pookmish',
     ];
     $form['name'] = [
       '#type' => 'textfield',
@@ -106,6 +105,9 @@ class AddUserForm extends FormBase {
     return $form;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
     $sunet = strtolower(trim(Html::escape(($form_state->getValue('sunetid')))));
