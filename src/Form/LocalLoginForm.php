@@ -41,7 +41,7 @@ class LocalLoginForm extends LocalSettingsForm {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-    $this->config('simplesamlphp_auth.settings')
+    $this->config('stanford_ssp.settings')
       ->set('hide_local_login', $form_state->getValue('hide_local_login'))
       ->save();
   }

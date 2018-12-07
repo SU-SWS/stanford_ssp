@@ -1,7 +1,7 @@
 services:
   stanford_ssp.workgroup_api:
     class: Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApi
-    arguments: ['@config.factory', '@entity_type.manager']
+    arguments: ['@config.factory', '@entity_type.manager', '@http_client', '@logger.factory']
   stanford_ssp.route_subscriber:
     class: Drupal\stanford_ssp\Routing\RouteSubscriber
     tags:
@@ -10,7 +10,7 @@ services:
     class: Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth
     public: false
     decorates: simplesamlphp_auth.drupalauth
-    arguments: ['@stanford_ssp.drupalauth.inner', '@simplesamlphp_auth.manager', '@config.factory', '@entity_type.manager', '@logger.channel.simplesamlphp_auth', '@externalauth.externalauth', '@current_user']
+    arguments: ['@simplesamlphp_auth.manager', '@config.factory', '@entity_type.manager', '@logger.channel.simplesamlphp_auth', '@externalauth.externalauth', '@current_user', '@stanford_ssp.workgroup_api']
   stanford_ssp.event_subscriber:
     class: Drupal\stanford_ssp\EventSubscriber\StanfordSSPEventSubscriber
     arguments: ['@config.factory', '@current_user']

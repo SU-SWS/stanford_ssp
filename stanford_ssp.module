@@ -15,25 +15,6 @@ function stanford_ssp_config_schema_info_alter(&$definitions) {
   // Change the eval_every_time from boolean to integer so we can have addtional
   // functionality when evaluating roles.
   $definitions['simplesamlphp_auth.settings']['mapping']['role']['mapping']['eval_every_time']['type'] = 'integer';
-
-  $definitions['simplesamlphp_auth.settings']['mapping']['hide_local_login'] = [
-    'type' => 'boolean',
-    'label' => 'Hide local Login',
-  ];
-
-  $definitions['simplesamlphp_auth.settings']['mapping']['role']['mapping']['use_workgroup_api']['type']= [
-    'type' => 'boolean',
-    'label' => 'Use workgroup API instead of attributes',
-  ];
-
-  $definitions['simplesamlphp_auth.settings']['mapping']['role']['mapping']['workgroup_api_cert']['type'] = [
-    'type' => 'string',
-    'label' => 'Workgroup API certificate',
-  ];
-  $definitions['simplesamlphp_auth.settings']['mapping']['role']['mapping']['workgroup_api_key']['type'] = [
-    'type' => 'string',
-    'label' => 'Workgroup API SSL Key',
-  ];
 }
 
 /**
@@ -42,10 +23,10 @@ function stanford_ssp_config_schema_info_alter(&$definitions) {
 function stanford_ssp_form_user_login_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (isset($form['simplesamlphp_auth_login_link'])) {
     $form['simplesamlphp_auth_login_link']['#attributes']['class'][] = 'decanter-button';
-    $saml_config = \Drupal::config('simplesamlphp_auth.settings');
+    $config = \Drupal::config('stanford_ssp.settings');
 
     // If configured to disallow local login, hide the local login form parts.
-    if ($saml_config->get('hide_local_login')) {
+    if ($config->get('hide_local_login')) {
       unset($form['name'], $form['pass'], $form['actions']);
       return;
     }
@@ -63,25 +44,4 @@ function stanford_ssp_form_user_login_form_alter(&$form, FormStateInterface $for
       ->toRenderable();
     unset($form['name'], $form['pass'], $form['actions']);
   }
-}
-
-/**
- * Implements hook_simplesamlphp_auth_user_roles_alter().
- */
-function stanford_ssp_simplesamlphp_auth_user_roles_alter(&$roles, $attributes) {
-  $maps = [
-    '/faculty/i' => 'stanford_faculty',
-    '/staff/i' => 'stanford_staff',
-    '/postdoc/i' => 'stanford_student',
-    '/student/i' => 'stanford_student',
-  ];
-
-  foreach ($maps as $expression => $role_id) {
-    if (count(preg_grep($expression, $attributes['eduPersonAffiliation']))) {
-      $roles[$role_id] = $role_id;
-    }
-  }
-
-  /** @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface $workgroup_api */
-  $workgroup_api = \Drupal::service('stanford_ssp.workgroup_api');
 }

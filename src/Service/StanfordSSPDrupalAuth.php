@@ -24,24 +24,38 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
   const ROLE_ADDITIVE = 2;
 
   /**
-   * Original Simplesamlphp_auth service.
+   * Workgroup api service.
    *
-   * @var \Drupal\simplesamlphp_auth\Service\SimplesamlphpDrupalAuth
+   * @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface
    */
-  protected $samlAuth;
+  protected $workgroupAPI;
+
+  /**
+   * Config factory service.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * @var string
+   */
+  protected $authname;
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(SimplesamlphpDrupalAuth $saml_auth, SimplesamlphpAuthManager $simplesaml_auth, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, ExternalAuthInterface $externalauth, AccountInterface $account) {
-    $this->samlAuth = $saml_auth;
+  public function __construct(SimplesamlphpAuthManager $simplesaml_auth, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, ExternalAuthInterface $externalauth, AccountInterface $account, StanfordSSPWorkgroupApiInterface $workgroup_api) {
     parent::__construct($simplesaml_auth, $config_factory, $entity_type_manager, $logger, $externalauth, $account);
+    $this->configFactory = $config_factory;
+    $this->workgroupAPI = $workgroup_api;
   }
 
   /**
    * {@inheritdoc}
    */
   public function externalLoginRegister($authname) {
+    $this->authname = $authname;
     $account = $this->externalauth->login($authname, 'simplesamlphp_auth');
     if (!$account) {
       $account = $this->externalRegister($authname);
@@ -109,6 +123,33 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
       $roles_removed = TRUE;
     }
     $this->roleMatchAdd($account, $roles_removed);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMatchingRoles() {
+    $roles = parent::getMatchingRoles();
+    if ($this->configFactory->get('stanford_ssp.settings')
+      ->get('use_workgroup_api')) {
+      $roles = $this->workgroupAPI->getRolesFromAuthname($this->authname);
+    }
+
+    $maps = [
+      '/faculty/i' => 'stanford_faculty',
+      '/staff/i' => 'stanford_staff',
+      '/postdoc/i' => 'stanford_student',
+      '/student/i' => 'stanford_student',
+    ];
+
+    $attributes = $this->simplesamlAuth->getAttributes();
+    foreach ($maps as $expression => $role_id) {
+      if (count(preg_grep($expression, $attributes['eduPersonAffiliation']))) {
+        $roles[$role_id] = $role_id;
+      }
+    }
+
+    return $roles;
   }
 
 }

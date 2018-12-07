@@ -6,11 +6,11 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\key\Entity\Key;
 use Drupal\simplesamlphp_auth\Form\SyncingSettingsForm;
 use Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth;
+use Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface;
 use Drupal\user\Entity\Role;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -22,21 +22,37 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class RoleSyncForm extends SyncingSettingsForm {
 
   /**
+   * Module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * Workgroup API service.
+   *
+   * @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface
+   */
+  protected $workgroupApi;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('stanford_ssp.workgroup_api')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler) {
+  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler, StanfordSSPWorkgroupApiInterface $workgroup_api) {
     parent::__construct($config_factory);
     $this->moduleHandler = $module_handler;
+    $this->workgroupApi = $workgroup_api;
   }
 
   /**
@@ -98,6 +114,7 @@ class RoleSyncForm extends SyncingSettingsForm {
         $this->t('SAML Attribute'),
         $this->t('Workgroup API'),
       ],
+      '#attributes' => ['disabled' => TRUE],
     ];
 
     if (!$this->moduleHandler->moduleExists('key')) {
@@ -110,6 +127,7 @@ class RoleSyncForm extends SyncingSettingsForm {
     // Change the key object into just the label for use in the select elements.
     foreach ($keys as &$key) {
       $key = $key->label();
+      unset($form['user_info']['use_workgroup_api']['#attributes']['disabled']);
     }
 
     $form['user_info']['workgroup_api_cert'] = [
@@ -121,6 +139,11 @@ class RoleSyncForm extends SyncingSettingsForm {
       ]),
       '#options' => $keys,
       '#default_value' => $config->get('role.workgroup_api_cert'),
+      '#states' => [
+        'visible' => [
+          'input[name="use_workgroup_api"]' => ['value' => 1],
+        ]
+      ],
     ];
 
     $form['user_info']['workgroup_api_key'] = [
@@ -131,7 +154,13 @@ class RoleSyncForm extends SyncingSettingsForm {
           ->toString(),
       ]),
       '#options' => $keys,
+      '#empty_option' => $this->t('- None -'),
       '#default_value' => $config->get('role.workgroup_api_key'),
+      '#states' => [
+        'visible' => [
+          'input[name="use_workgroup_api"]' => ['value' => 1],
+        ]
+      ],
     ];
     return $form;
   }
@@ -247,6 +276,47 @@ class RoleSyncForm extends SyncingSettingsForm {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $form_state->setValue('role_population', implode('|', $form_state->get('mappings')));
     parent::validateForm($form, $form_state);
+
+    // If using SAML attributes, unset api settings.
+    if (!$form_state->getValue('use_workgroup_api')) {
+      $form_state->setValue('workgroup_api_cert', '');
+      $form_state->setValue('workgroup_api_key', '');
+      return;
+    }
+
+    $cert_key_id = $form_state->getValue('workgroup_api_cert');
+    $key_id = $form_state->getValue('workgroup_api_key');
+
+    // Both cert and Key have to be selected.
+    if (!$cert_key_id || !$key_id) {
+      $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert and Key are required if using workgroup API.'));
+    }
+
+    $cert = Key::load($cert_key_id);
+    if (!is_file($cert->getKeyValue())) {
+      $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert must be a file path.'));
+    }
+
+    $key = Key::load($key_id);
+    if (!is_file($key->getKeyValue())) {
+      $form_state->setError($form['user_info']['workgroup_api_key'], $this->t('Cert must be a file path.'));
+    }
+
+    if (!$this->workgroupApi->connectionSuccessful($cert->getKeyValue(), $key->getKeyValue())) {
+      $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert information invalid. See database logs for more information.'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    parent::submitForm($form, $form_state);
+    $this->config('stanford_ssp.settings')
+      ->set('use_workgroup_api', $form_state->getValue('use_workgroup_api'))
+      ->set('workgroup_api_cert', $form_state->getValue('workgroup_api_cert'))
+      ->set('workgroup_api_key', $form_state->getValue('workgroup_api_key'))
+      ->save();
   }
 
 }

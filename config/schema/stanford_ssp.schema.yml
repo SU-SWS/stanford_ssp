@@ -1,0 +1,18 @@
+stanford_ssp.settings:
+  type: mapping
+  mapping:
+    workgroup_api_url:
+      type: string
+      label: 'Workgroup API Base URL'
+    hide_local_login:
+      type: boolean
+      label: 'Hide core local login form on user page'
+    use_workgroup_api:
+      type: boolean
+      label: 'Use workgroup mapping instead of saml attributes'
+    workgroup_api_cert:
+      type: string
+      label: 'Workgroup API Cert Entity ID'
+    workgroup_api_key:
+      type: string
+      label: 'Workgroup API Key Entity ID'
