@@ -13,4 +13,3 @@ stanford_ssp.create_user:
     _title: 'Add SAML User'
   requirements:
     _permission: 'administer users'
-  
