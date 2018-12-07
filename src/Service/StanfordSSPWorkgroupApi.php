@@ -44,6 +44,13 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   protected $logger;
 
   /**
+   * Keyed array of workgroup responses with the group as the key.
+   *
+   * @var array
+   */
+  protected $workgroupResponses;
+
+  /**
    * Path to cert file.
    *
    * @var string
@@ -93,6 +100,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     $config = $this->configFactory->get('stanford_ssp.settings');
     $cert_entity_id = $config->get('workgroup_api_cert');
     $key_entity_id = $config->get('workgroup_api_key');
+
     if (!$cert_entity_id || !$key_entity_id) {
       return;
     }
@@ -101,11 +109,12 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     $cert_entities = $this->entityTypeManager->getStorage('key')
       ->loadMultiple([$cert_entity_id, $key_entity_id]);
 
-    if (count($cert_entities) != 2) {
-      return;
+    // If either or both of the entities no longer exist, dont set the
+    // properties.
+    if (count($cert_entities) == 2) {
+      $this->cert = $cert_entities[$cert_entity_id]->getKeyValue();
+      $this->key = $cert_entities[$key_entity_id]->getKeyValue();
     }
-    $this->cert = $cert_entities[$cert_entity_id]->getKeyValue();
-    $this->key = $cert_entities[$key_entity_id]->getKeyValue();
   }
 
   /**
@@ -113,7 +122,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    */
   public function connectionSuccessful($cert, $key) {
     $response = $this->getWorkgroupApiResponse('itservices:webservices', $cert, $key);
-    return $response->getStatusCode() == 200;
+    return $response && $response->getStatusCode() == 200;
   }
 
   /**
@@ -126,8 +135,13 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     }
     $config = $this->configFactory->get('simplesamlphp_auth.settings');;
     $workgroup_mappings = array_filter(explode('|', $config->get('role.population') ?: ''));
+
+    // Loop through each workgroup mapping and find out if the given user exists within each group.
     foreach ($workgroup_mappings as $workgroup_mapping) {
       list($role, $mapping) = explode(':', $workgroup_mapping, 2);
+
+      // We ignore the eduEntitlement equation since its only a yes or no if the
+      // user is in the group.
       $workgroup = substr($mapping, strrpos($mapping, ',') + 1);
       if ($this->userInGroup($workgroup, $authname)) {
         $roles[] = $role;
@@ -153,6 +167,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
       $dom->loadXML((string) $response->getBody());
       $xpath = new \DOMXPath($dom);
 
+      // Use xpath to find if the sunetid is one of the members.
       return $xpath->query("//member[@id='$name']")->length > 0;
     }
     return FALSE;
@@ -172,17 +187,24 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    *   API response or false if fails.
    */
   protected function getWorkgroupApiResponse($workgroup, $cert, $key) {
+    // We've already called the API for this group, use that result.
+    if (isset($this->workgroupResponses[$workgroup])) {
+      return $this->workgroupResponses[$workgroup];
+    }
     $options = [
       'cert' => $cert,
       'ssl_key' => $key,
       'verify' => TRUE,
       'timeout' => 5,
     ];
+
     $base_url = $this->configFactory->get('stanford_ssp.settings')
       ->get('workgroup_api_url');
     $base_url = trim($base_url, '/') ?: 'https://workgroupsvc.stanford.edu/v1/workgroups';
+
     try {
       $result = $this->guzzle->request('GET', "$base_url/$workgroup", $options);
+      $this->workgroupResponses[$workgroup] = $result;
       return $result;
     }
     catch (GuzzleException $e) {

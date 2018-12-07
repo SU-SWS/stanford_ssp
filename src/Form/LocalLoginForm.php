@@ -15,6 +15,15 @@ class LocalLoginForm extends LocalSettingsForm {
   /**
    * {@inheritdoc}
    */
+  protected function getEditableConfigNames() {
+    $names = parent::getEditableConfigNames();
+    $names[] = 'stanford_ssp.settings';
+    return $names;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     $config = $this->config('simplesamlphp_auth.settings');

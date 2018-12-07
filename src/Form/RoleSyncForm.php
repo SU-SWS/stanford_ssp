@@ -58,9 +58,18 @@ class RoleSyncForm extends SyncingSettingsForm {
   /**
    * {@inheritdoc}
    */
+  protected function getEditableConfigNames() {
+    $names = parent::getEditableConfigNames();
+    $names[] = 'stanford_ssp.settings';
+    return $names;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
-    $config = $this->config('simplesamlphp_auth.settings');
+    $stanford_config = $this->config('stanford_ssp.settings');
 
     if (!$form_state->get('mappings')) {
       $mappings = explode('|', $form['user_info']['role_population']['#default_value']);
@@ -109,7 +118,7 @@ class RoleSyncForm extends SyncingSettingsForm {
     $form['user_info']['use_workgroup_api'] = [
       '#type' => 'radios',
       '#title' => $this->t('Source to validate role mapping groups against.'),
-      '#default_value' => $config->get('role.use_workgroup_api') ?: 0,
+      '#default_value' => $stanford_config->get('use_workgroup_api') ?: 0,
       '#options' => [
         $this->t('SAML Attribute'),
         $this->t('Workgroup API'),
@@ -138,11 +147,12 @@ class RoleSyncForm extends SyncingSettingsForm {
           ->toString(),
       ]),
       '#options' => $keys,
-      '#default_value' => $config->get('role.workgroup_api_cert'),
+      '#empty_option' => $this->t('- None -'),
+      '#default_value' => $stanford_config->get('workgroup_api_cert'),
       '#states' => [
         'visible' => [
           'input[name="use_workgroup_api"]' => ['value' => 1],
-        ]
+        ],
       ],
     ];
 
@@ -155,11 +165,11 @@ class RoleSyncForm extends SyncingSettingsForm {
       ]),
       '#options' => $keys,
       '#empty_option' => $this->t('- None -'),
-      '#default_value' => $config->get('role.workgroup_api_key'),
+      '#default_value' => $stanford_config->get('workgroup_api_key'),
       '#states' => [
         'visible' => [
           'input[name="use_workgroup_api"]' => ['value' => 1],
-        ]
+        ],
       ],
     ];
     return $form;
