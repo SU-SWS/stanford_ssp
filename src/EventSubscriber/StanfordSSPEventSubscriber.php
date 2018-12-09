@@ -9,6 +9,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -19,7 +20,14 @@ Class StanfordSSPEventSubscriber implements EventSubscriberInterface {
    *
    * @var \Drupal\Core\Config\ImmutableConfig
    */
-  protected $config;
+  protected $samlConfig;
+
+  /**
+   * A config object with stanford_ssp settings.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $stanfordConfig;
 
   /**
    * Current user account.
@@ -37,7 +45,8 @@ Class StanfordSSPEventSubscriber implements EventSubscriberInterface {
    *   Current user object.
    */
   public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $user_account) {
-    $this->config = $config_factory->get('simplesamlphp_auth.settings');
+    $this->samlConfig = $config_factory->get('simplesamlphp_auth.settings');
+    $this->stanfordConfig = $config_factory->get('stanford_ssp.settings');
     $this->userAccount = $user_account;
   }
 
@@ -45,8 +54,29 @@ Class StanfordSSPEventSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   static public function getSubscribedEvents() {
+    $events[KernelEvents::REQUEST] = ['requestHandler'];
     $events[KernelEvents::RESPONSE] = ['responseHandler'];
     return $events;
+  }
+
+  /**
+   * Redirect users to SAML endpoint if no local login is available.
+   *
+   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   */
+  public function requestHandler(GetResponseEvent $event) {
+    $url = Url::fromUserInput($event->getRequest()->getPathInfo());
+
+    if (
+      $this->samlConfig->get('activate') &&
+      $this->stanfordConfig->get('hide_local_login') &&
+      $url->isRouted() &&
+      $url->getRouteName() == 'user.login'
+    ) {
+      $url = Url::fromRoute('simplesamlphp_auth.saml_login');
+      $response = new RedirectResponse($url->toString(), 301);
+      $response->send();
+    }
   }
 
   /**
@@ -72,15 +102,8 @@ Class StanfordSSPEventSubscriber implements EventSubscriberInterface {
     ) {
       $origin = $event->getRequest()->getPathInfo();
 
-
-      if ($this->config->get('activate') && $this->config->get('hide_local_login')) {
-        $url = Url::fromRoute('simplesamlphp_auth.saml_login', [], ['query' => ['destination' => trim($origin, '/')]]);
-      }
-      else {
-        $url = Url::fromRoute('user.login', [], ['query' => ['destination' => $origin]]);
-      }
-
       // Redirect anonymous users to login portal.
+      $url = Url::fromRoute('user.login', [], ['query' => ['destination' => $origin]]);
       $response = new RedirectResponse($url->toString());
       $response->send();
     }
