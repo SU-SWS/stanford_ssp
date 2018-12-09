@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -54,29 +55,9 @@ Class StanfordSSPEventSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   static public function getSubscribedEvents() {
-    $events[KernelEvents::REQUEST] = ['requestHandler'];
-    $events[KernelEvents::RESPONSE] = ['responseHandler'];
+    $events = [];
+    $events[KernelEvents::RESPONSE][] = ['responseHandler'];
     return $events;
-  }
-
-  /**
-   * Redirect users to SAML endpoint if no local login is available.
-   *
-   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
-   */
-  public function requestHandler(GetResponseEvent $event) {
-    $url = Url::fromUserInput($event->getRequest()->getPathInfo());
-
-    if (
-      $this->samlConfig->get('activate') &&
-      $this->stanfordConfig->get('hide_local_login') &&
-      $url->isRouted() &&
-      $url->getRouteName() == 'user.login'
-    ) {
-      $url = Url::fromRoute('simplesamlphp_auth.saml_login');
-      $response = new RedirectResponse($url->toString(), 301);
-      $response->send();
-    }
   }
 
   /**
@@ -86,17 +67,8 @@ Class StanfordSSPEventSubscriber implements EventSubscriberInterface {
    *   Response event object..
    */
   public function responseHandler(FilterResponseEvent $event) {
-    if ($event->getResponse()->getStatusCode() != Response::HTTP_FORBIDDEN) {
-      return;
-    }
-
-    // Disable cache on 403 pages to allow redirect responses to function
-    // correctly.
-    $response = new Response($event->getResponse()
-      ->getContent(), 403, ['Cache-Control' => 'no-cache']);
-    $event->setResponse($response);
-
     if (
+      $event->getResponse()->getStatusCode() == Response::HTTP_FORBIDDEN &&
       $event->getRequestType() == HttpKernelInterface::MASTER_REQUEST &&
       $this->userAccount->isAnonymous()
     ) {
@@ -104,8 +76,12 @@ Class StanfordSSPEventSubscriber implements EventSubscriberInterface {
 
       // Redirect anonymous users to login portal.
       $url = Url::fromRoute('user.login', [], ['query' => ['destination' => $origin]]);
+      if ($this->samlConfig->get('activate') && $this->stanfordConfig->get('hide_local_login')) {
+        $url = Url::fromRoute('simplesamlphp_auth.saml_login', [], ['query' => ['destination' => trim($origin, '/')]]);
+      }
       $response = new RedirectResponse($url->toString());
       $response->send();
+      $event->stopPropagation();
     }
   }
 
