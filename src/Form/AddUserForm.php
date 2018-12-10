@@ -81,7 +81,8 @@ class AddUserForm extends FormBase {
       '#description' => $this->t('If you wish to specify an alternate email address (instead of sunetid@stanford.edu), enter it here.'),
     ];
 
-    if ($this->config('simplesamlphp_auth.settings')->get('allow.set_drupal_pwd')) {
+    if ($this->config('simplesamlphp_auth.settings')
+      ->get('allow.set_drupal_pwd')) {
       $form['pass'] = [
         '#type' => 'password_confirm',
         '#size' => 25,
@@ -122,7 +123,7 @@ class AddUserForm extends FormBase {
     }
 
     // If no name is specified, use the default name (sunetid + @stanford.edu).
-    $name = trim(Html::escape($form_state->getValue('name', $sunet)));
+    $name = trim(Html::escape($form_state->getValue('name'))) ?: $sunet;
     $form_state->setValue('name', $name);
 
     // Check that there is no user with the same name.
@@ -132,7 +133,7 @@ class AddUserForm extends FormBase {
 
     // If no email was specified, we use the default ([sunetid]@stanford.edu).
     $default_email = $sunet . '@stanford.edu';
-    $email = strtolower(trim($form_state->getValue('email', $default_email)));
+    $email = strtolower(trim($form_state->getValue('email'))) ?: $default_email;
     $form_state->setValue('email', $email);
 
     if (!$this->emailValidator->isValid($email)) {
