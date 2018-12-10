@@ -71,7 +71,7 @@ class AddUserForm extends FormBase {
     $form['name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Name'),
-      '#description' => $this->t('If you wish to specify the user\'s preferred name (instead of sunetid@stanford.edu), enter it here.'),
+      '#description' => $this->t("If you wish to specify the user's preferred name (instead of sunetid), enter it here."),
     ];
     $form['email'] = [
       '#type' => 'email',
@@ -126,13 +126,13 @@ class AddUserForm extends FormBase {
       $form_state->setError($form['name'], $this->t('Could not create user. Username %name already exists.', ['%name' => $name]));
     }
 
-    // If no email was specified, we'll use the default (sunetid + @stanford.edu).
+    // If no email was specified, we use the default ([sunetid]@stanford.edu).
     $default_email = $sunet . '@stanford.edu';
     $email = strtolower(trim($form_state->getValue('email'))) ?: $default_email;
     $form_state->setValue('email', $email);
 
     if (!$this->emailValidator->isValid($email)) {
-      $form_state->setError($form['email'], t('The e-mail address %email is not valid.', ['%email' => $email]));
+      $form_state->setError($form['email'], $this->t('The e-mail address %email is not valid.', ['%email' => $email]));
     }
 
     // Check that there is no user with the same email

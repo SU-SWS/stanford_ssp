@@ -11,6 +11,11 @@ use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 
+/**
+ * Decorated service class to change how roles are evaluated.
+ *
+ * @package Drupal\stanford_ssp\Service
+ */
 class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
 
   /**

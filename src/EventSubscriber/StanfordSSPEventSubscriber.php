@@ -9,12 +9,15 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-Class StanfordSSPEventSubscriber implements EventSubscriberInterface {
+/**
+ * Kernel event subscriber to redirect anonymous users to saml login.
+ *
+ * @package Drupal\stanford_ssp\EventSubscriber
+ */
+class StanfordSSPEventSubscriber implements EventSubscriberInterface {
 
   /**
    * A config object with saml settings.
@@ -54,7 +57,7 @@ Class StanfordSSPEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  static public function getSubscribedEvents() {
+  public static function getSubscribedEvents() {
     $events = [];
     $events[KernelEvents::RESPONSE][] = ['responseHandler'];
     return $events;

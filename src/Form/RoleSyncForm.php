@@ -143,34 +143,24 @@ class RoleSyncForm extends SyncingSettingsForm {
       '#type' => 'select',
       '#title' => $this->t('Key to Workgroup API SSL Certificate.'),
       '#description' => $this->t('Choose an available key. If the desired key is not listed, <a href=":link">create a new key</a>.<br>For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates.', [
-        ':link' => Url::fromRoute('entity.key.add_form')
-          ->toString(),
+        ':link' => Url::fromRoute('entity.key.add_form')->toString(),
       ]),
       '#options' => $keys,
       '#empty_option' => $this->t('- None -'),
       '#default_value' => $stanford_config->get('workgroup_api_cert'),
-      '#states' => [
-        'visible' => [
-          'input[name="use_workgroup_api"]' => ['value' => 1],
-        ],
-      ],
+      '#states' => ['visible' => ['input[name="use_workgroup_api"]' => ['value' => 1]]],
     ];
 
     $form['user_info']['workgroup_api_key'] = [
       '#type' => 'select',
       '#title' => $this->t('Key to Workgroup API SSL Key.'),
       '#description' => $this->t('Choose an available key. If the desired key is not listed, <a href=":link">create a new key</a>.<br>For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates.', [
-        ':link' => Url::fromRoute('entity.key.add_form')
-          ->toString(),
+        ':link' => Url::fromRoute('entity.key.add_form')->toString(),
       ]),
       '#options' => $keys,
       '#empty_option' => $this->t('- None -'),
       '#default_value' => $stanford_config->get('workgroup_api_key'),
-      '#states' => [
-        'visible' => [
-          'input[name="use_workgroup_api"]' => ['value' => 1],
-        ],
-      ],
+      '#states' => ['visible' => ['input[name="use_workgroup_api"]' => ['value' => 1]]],
     ];
     return $form;
   }
@@ -190,9 +180,13 @@ class RoleSyncForm extends SyncingSettingsForm {
   }
 
   /**
+   * Build the table row for the role mapping string.
+   *
    * @param $role_mapping_string
+   *   Formatted role mapping string.
    *
    * @return array
+   *   Table render array.
    */
   protected function buildRoleRow($role_mapping_string) {
     list($role_id, $comparison) = explode(':', $role_mapping_string, 2);

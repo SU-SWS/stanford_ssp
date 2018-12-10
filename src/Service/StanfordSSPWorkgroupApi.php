@@ -136,7 +136,8 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     $config = $this->configFactory->get('simplesamlphp_auth.settings');;
     $workgroup_mappings = array_filter(explode('|', $config->get('role.population') ?: ''));
 
-    // Loop through each workgroup mapping and find out if the given user exists within each group.
+    // Loop through each workgroup mapping and find out if the given user exists
+    // within each group.
     foreach ($workgroup_mappings as $workgroup_mapping) {
       list($role, $mapping) = explode(':', $workgroup_mapping, 2);
 

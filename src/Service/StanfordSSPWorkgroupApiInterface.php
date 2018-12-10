@@ -17,7 +17,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * @param string $key
    *   Absolute path to key file.
    *
-   * @return boolean
+   * @return bool
    *   If the connection was successful.
    */
   public function connectionSuccessful($cert, $key);

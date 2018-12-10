@@ -3,6 +3,8 @@
 namespace Drupal\stanford_ssp\Commands;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\externalauth\AuthmapInterface;
@@ -30,22 +32,32 @@ class StanfordSspCommands extends DrushCommands {
   protected $formBuilder;
 
   /**
+   * Config object of SAML settings.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $samlConfig;
+
+  /**
    * StanfordSspCommands constructor.
    *
    * @param \Drupal\externalauth\AuthmapInterface $auth_map
    *   Authmap service.
+   * @param \Drupal\Core\Form\FormBuilderInterface
+   *   Form builder service.
    */
-  public function __construct(AuthmapInterface $auth_map, FormBuilderInterface $form_builder) {
+  public function __construct(AuthmapInterface $auth_map, FormBuilderInterface $form_builder, ConfigFactoryInterface $config_factory) {
     $this->authmap = $auth_map;
     $this->formBuilder = $form_builder;
+    $this->samlConfig = $config_factory->getEditable('simplesamlphp_auth.settings');
   }
 
   /**
-   * Map a SAML entitlement to a role
+   * Map a SAML entitlement to a role.
    *
-   * @param $entitlement
+   * @param string $entitlement
    *   A value from eduPersonEntitlement, e.g., "anchorage_support"
-   * @param $role_id
+   * @param string $role_id
    *   The name of the role, e.g., "stanford_staff"
    *
    * @command saml:entitlement-role
@@ -53,14 +65,13 @@ class StanfordSspCommands extends DrushCommands {
    */
   public function entitlementRole($entitlement, $role_id) {
     $role_id = Html::escape($role_id);
-    if (!Role::load($role_id)) {
+    $existing_roles = user_roles(TRUE);
+    if (!isset($existing_roles[$role_id])) {
       $this->logger->error(dt('No role exists with the ID "%role_id".', ['%role_id' => $role_id]));
       return;
     }
 
-    $saml_config = \Drupal::configFactory()
-      ->getEditable('simplesamlphp_auth.settings');
-    $role_mappings = $saml_config->get('role.population') ?: '';
+    $role_mappings = $this->samlConfig->get('role.population') ?: '';
 
     // To prevent duplication, we'll use an array of mappings.
     $role_mappings = array_filter(explode('|', $role_mappings));
@@ -69,7 +80,7 @@ class StanfordSspCommands extends DrushCommands {
     $new_mapping = "$role_id:eduPersonEntitlement,=,$entitlement";
     $combined_mappings[$new_mapping] = $new_mapping;
 
-    $saml_config->set('role.population', implode('|', $combined_mappings))
+    $this->samlConfig->set('role.population', implode('|', $combined_mappings))
       ->save();
 
     $message = dt('Mapped the "@entitlement" entitlement to the "@role" role.', [
@@ -81,12 +92,12 @@ class StanfordSspCommands extends DrushCommands {
   }
 
   /**
-   * Add a SSO enabled user
+   * Add a SSO enabled user.
    *
-   * @param $sunetid
+   * @param string $sunetid
    *   A sunet id
-   * @param array $options An associative array of options whose values come
-   *   from cli, aliases, config, etc.
+   * @param array $options
+   *   An associative array of options
    *
    * @option name
    *   The user's name
