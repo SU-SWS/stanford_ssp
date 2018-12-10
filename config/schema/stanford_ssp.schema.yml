@@ -12,7 +12,7 @@ stanford_ssp.settings:
       label: 'Use workgroup mapping instead of saml attributes'
     workgroup_api_cert:
       type: string
-      label: 'Workgroup API Cert Entity ID'
+      label: 'Workgroup API Cert file path'
     workgroup_api_key:
       type: string
-      label: 'Workgroup API Key Entity ID'
+      label: 'Workgroup API Key file path'

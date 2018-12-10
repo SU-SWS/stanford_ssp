@@ -7,7 +7,6 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\key\Entity\Key;
 use Drupal\simplesamlphp_auth\Form\SyncingSettingsForm;
 use Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth;
 use Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface;
@@ -69,7 +68,6 @@ class RoleSyncForm extends SyncingSettingsForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
-    $stanford_config = $this->config('stanford_ssp.settings');
 
     if (!$form_state->get('mappings')) {
       $mappings = explode('|', $form['user_info']['role_population']['#default_value']);
@@ -115,6 +113,20 @@ class RoleSyncForm extends SyncingSettingsForm {
       StanfordSSPDrupalAuth::ROLE_ADDITIVE => $this->t('Grant new roles only. Will only add roles based on role assignments.'),
     ];
 
+    $this->buildWorkgroupApiForm($form, $form_state);
+    return $form;
+  }
+
+  /**
+   * Build the workgroup api form portion.
+   *
+   * @param array $form
+   *   Complete form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   Current form state.
+   */
+  protected function buildWorkgroupApiForm(array &$form, FormStateInterface $form_state) {
+    $stanford_config = $this->config('stanford_ssp.settings');
     $form['user_info']['use_workgroup_api'] = [
       '#type' => 'radios',
       '#title' => $this->t('Source to validate role mapping groups against.'),
@@ -123,46 +135,27 @@ class RoleSyncForm extends SyncingSettingsForm {
         $this->t('SAML Attribute'),
         $this->t('Workgroup API'),
       ],
-      '#attributes' => ['disabled' => TRUE],
     ];
 
-    if (!$this->moduleHandler->moduleExists('key')) {
-      $form['user_info']['use_workgroup_api']['#attributes']['disabled'] = TRUE;
-      $form['user_info']['workgroup_api']['#markup'] = $this->t('To use workgroup API as a mapping source, please install the <a href="https://www.drupal.org/project/key">Key module</a>.');
-      return $form;
-    }
-
-    $keys = Key::loadMultiple();
-    // Change the key object into just the label for use in the select elements.
-    foreach ($keys as &$key) {
-      $key = $key->label();
-      unset($form['user_info']['use_workgroup_api']['#attributes']['disabled']);
-    }
-
     $form['user_info']['workgroup_api_cert'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Key to Workgroup API SSL Certificate.'),
-      '#description' => $this->t('Choose an available key. If the desired key is not listed, <a href=":link">create a new key</a>.<br>For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates.', [
+      '#type' => 'textfield',
+      '#title' => $this->t('Path to Workgroup API SSL Certificate.'),
+      '#description' => $this->t('For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates.', [
         ':link' => Url::fromRoute('entity.key.add_form')->toString(),
       ]),
-      '#options' => $keys,
-      '#empty_option' => $this->t('- None -'),
       '#default_value' => $stanford_config->get('workgroup_api_cert'),
       '#states' => ['visible' => ['input[name="use_workgroup_api"]' => ['value' => 1]]],
     ];
 
     $form['user_info']['workgroup_api_key'] = [
-      '#type' => 'select',
+      '#type' => 'textfield',
       '#title' => $this->t('Key to Workgroup API SSL Key.'),
-      '#description' => $this->t('Choose an available key. If the desired key is not listed, <a href=":link">create a new key</a>.<br>For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates.', [
+      '#description' => $this->t('For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates.', [
         ':link' => Url::fromRoute('entity.key.add_form')->toString(),
       ]),
-      '#options' => $keys,
-      '#empty_option' => $this->t('- None -'),
       '#default_value' => $stanford_config->get('workgroup_api_key'),
       '#states' => ['visible' => ['input[name="use_workgroup_api"]' => ['value' => 1]]],
     ];
-    return $form;
   }
 
   /**
@@ -288,25 +281,25 @@ class RoleSyncForm extends SyncingSettingsForm {
       return;
     }
 
-    $cert_key_id = $form_state->getValue('workgroup_api_cert');
-    $key_id = $form_state->getValue('workgroup_api_key');
+    $cert_path = $form_state->getValue('workgroup_api_cert');
+    $key_path = $form_state->getValue('workgroup_api_key');
 
     // Both cert and Key have to be selected.
-    if (!$cert_key_id || !$key_id) {
+    if (!$cert_path || !$key_path) {
       $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert and Key are required if using workgroup API.'));
     }
 
-    $cert = Key::load($cert_key_id);
-    if (!is_file($cert->getKeyValue())) {
+    if (!is_file($cert_path)) {
       $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert must be a file path.'));
     }
 
-    $key = Key::load($key_id);
-    if (!is_file($key->getKeyValue())) {
+    if (!is_file($key_path)) {
       $form_state->setError($form['user_info']['workgroup_api_key'], $this->t('Cert must be a file path.'));
     }
 
-    if (!$this->workgroupApi->connectionSuccessful($cert->getKeyValue(), $key->getKeyValue())) {
+    $this->workgroupApi->setCert($cert_path);
+    $this->workgroupApi->setKey($key_path);
+    if (!$this->workgroupApi->connectionSuccessful()) {
       $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert information invalid. See database logs for more information.'));
     }
   }

@@ -23,13 +23,6 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   protected $configFactory;
 
   /**
-   * Entity type manager service.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
    * Guzzle client service.
    *
    * @var \GuzzleHttp\ClientInterface
@@ -69,59 +62,45 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   Config factory service.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   Entity type manager service.
    * @param \GuzzleHttp\ClientInterface $guzzle
    *   Http client guzzle service.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger
    *   Logger channel factory service.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, ClientInterface $guzzle, LoggerChannelFactoryInterface $logger) {
+  public function __construct(ConfigFactoryInterface $config_factory, ClientInterface $guzzle, LoggerChannelFactoryInterface $logger) {
     $this->configFactory = $config_factory;
-    $this->entityTypeManager = $entity_type_manager;
     $this->guzzle = $guzzle;
     $this->logger = $logger->get('stanford_ssp');
 
-    if ($this->entityTypeManager->hasDefinition('key')) {
-      $this->setCertProperties();
-    }
-  }
-
-  /**
-   * Set the cert and key properties based on settings for the config.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   */
-  protected function setCertProperties() {
     $config = $this->configFactory->get('stanford_ssp.settings');
-    $cert_entity_id = $config->get('workgroup_api_cert');
-    $key_entity_id = $config->get('workgroup_api_key');
+    $cert_path = $config->get('workgroup_api_cert');
+    $key_path = $config->get('workgroup_api_key');
 
-    if (!$cert_entity_id || !$key_entity_id) {
-      return;
-    }
-
-    /** @var \Drupal\key\Entity\Key[] $cert_entities */
-    $cert_entities = $this->entityTypeManager->getStorage('key')
-      ->loadMultiple([$cert_entity_id, $key_entity_id]);
-
-    // If either or both of the entities no longer exist, dont set the
-    // properties.
-    if (count($cert_entities) == 2) {
-      $this->cert = $cert_entities[$cert_entity_id]->getKeyValue();
-      $this->key = $cert_entities[$key_entity_id]->getKeyValue();
+    if ($cert_path && is_file($cert_path) && $key_path && is_file($key_path)) {
+      $this->setCert($cert_path);
+      $this->setKey($key_path);
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function connectionSuccessful($cert, $key) {
-    $response = $this->getWorkgroupApiResponse('itservices:webservices', $cert, $key);
+  public function setCert($cert_path) {
+    $this->cert = $cert_path;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setKey($key_path) {
+    $this->key = $key_path;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function connectionSuccessful() {
+    $response = $this->getWorkgroupApiResponse('itservices:webservices', $this->cert, $this->key);
     return $response && $response->getStatusCode() == 200;
   }
 

@@ -10,17 +10,28 @@ namespace Drupal\stanford_ssp\Service;
 interface StanfordSSPWorkgroupApiInterface {
 
   /**
-   * Check if a given cert and key will connect to the workgroup api.
+   * Set the certificate path.
    *
-   * @param string $cert
-   *   Absolute path to the cert file.
-   * @param string $key
-   *   Absolute path to key file.
+   * @param string $cert_path
+   *   Path to file.
+   */
+  public function setCert($cert_path);
+
+  /**
+   * Set the key file path.
+   *
+   * @param string $key_path
+   *   Path to file.
+   */
+  public function setKey($key_path);
+
+  /**
+   * Check if a given cert and key will connect to the workgroup api.
    *
    * @return bool
    *   If the connection was successful.
    */
-  public function connectionSuccessful($cert, $key);
+  public function connectionSuccessful();
 
   /**
    * Get an array of roles for the user based on the saml role mapping.
