@@ -4,12 +4,10 @@ namespace Drupal\stanford_ssp\Commands;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\externalauth\AuthmapInterface;
 use Drupal\stanford_ssp\Form\AddUserForm;
-use Drupal\user\Entity\Role;
 use Drush\Commands\DrushCommands;
 
 /**
@@ -43,8 +41,10 @@ class StanfordSspCommands extends DrushCommands {
    *
    * @param \Drupal\externalauth\AuthmapInterface $auth_map
    *   Authmap service.
-   * @param \Drupal\Core\Form\FormBuilderInterface
+   * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
    *   Form builder service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   Config factory service.
    */
   public function __construct(AuthmapInterface $auth_map, FormBuilderInterface $form_builder, ConfigFactoryInterface $config_factory) {
     $this->authmap = $auth_map;
@@ -56,9 +56,9 @@ class StanfordSspCommands extends DrushCommands {
    * Map a SAML entitlement to a role.
    *
    * @param string $entitlement
-   *   A value from eduPersonEntitlement, e.g., "anchorage_support"
+   *   A value from eduPersonEntitlement, e.g., "anchorage_support".
    * @param string $role_id
-   *   The name of the role, e.g., "stanford_staff"
+   *   The name of the role, e.g., "stanford_staff".
    *
    * @command saml:entitlement-role
    * @aliases ssp-ser,saml-entitlement-role
@@ -95,16 +95,16 @@ class StanfordSspCommands extends DrushCommands {
    * Add a SSO enabled user.
    *
    * @param string $sunetid
-   *   A sunet id
+   *   A sunet id.
    * @param array $options
-   *   An associative array of options
+   *   An associative array of options.
    *
    * @option name
-   *   The user's name
+   *   The user's name.
    * @option email
-   *   The user's email
+   *   The user's email.
    * @option roles
-   *   Comma separated list of role names
+   *   Comma separated list of role names.
    * @option send-email
    *   Send email to the user?
    *

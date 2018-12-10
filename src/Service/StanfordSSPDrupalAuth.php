@@ -43,6 +43,8 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
   protected $configFactory;
 
   /**
+   * User's authname, normally their SUnetID.
+   *
    * @var string
    */
   protected $authname;

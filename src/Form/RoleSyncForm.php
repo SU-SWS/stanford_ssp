@@ -182,7 +182,7 @@ class RoleSyncForm extends SyncingSettingsForm {
   /**
    * Build the table row for the role mapping string.
    *
-   * @param $role_mapping_string
+   * @param string $role_mapping_string
    *   Formatted role mapping string.
    *
    * @return array
