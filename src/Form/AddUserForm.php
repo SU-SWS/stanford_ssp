@@ -7,7 +7,6 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\externalauth\AuthmapInterface;
 use Drupal\user\Entity\User;
-use Drupal\user\RoleInterface;
 use Egulias\EmailValidator\EmailValidatorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
