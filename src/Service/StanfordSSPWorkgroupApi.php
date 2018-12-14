@@ -147,7 +147,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
       $xpath = new \DOMXPath($dom);
 
       // Use xpath to find if the sunetid is one of the members.
-      return $xpath->query("//member[@id='$name']")->length > 0;
+      return $xpath->query("//members/member[@id='$name']")->length > 0;
     }
     return FALSE;
   }
