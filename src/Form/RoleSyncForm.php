@@ -246,7 +246,10 @@ class RoleSyncForm extends SyncingSettingsForm {
     $role_id = $user_input['role_population']['add']['role_id'];
     $workgroup = trim(Html::escape($user_input['role_population']['add']['workgroup']));
     if ($role_id && $workgroup) {
-      $mapping_string = "$role_id:eduPersonEntitlement,=,$workgroup";
+      $attribute = $this->config('stanford_ssp.settings')
+        ->get('saml_attribute') ?: 'eduPersonEntitlement';
+
+      $mapping_string = "$role_id:$attribute,=,$workgroup";
       $form_state->set(['mappings', $mapping_string], $mapping_string);
     }
     $form_state->setRebuild();

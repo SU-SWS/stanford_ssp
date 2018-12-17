@@ -150,8 +150,15 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
     ];
 
     $attributes = $this->simplesamlAuth->getAttributes();
+
+    $attribute_key = $this->configFactory->get('stanford_ssp.settings')
+      ->get('saml_attribute') ?: 'eduPersonAffiliation';
+
+    if (!isset($attributes[$attribute_key])) {
+      return $roles;
+    }
     foreach ($maps as $expression => $role_id) {
-      if (count(preg_grep($expression, $attributes['eduPersonAffiliation']))) {
+      if (count(preg_grep($expression, $attributes[$attribute_key]))) {
         $roles[$role_id] = $role_id;
       }
     }

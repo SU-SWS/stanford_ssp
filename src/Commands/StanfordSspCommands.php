@@ -37,6 +37,13 @@ class StanfordSspCommands extends DrushCommands {
   protected $samlConfig;
 
   /**
+   * A config object with stanford_ssp settings.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $stanfordConfig;
+
+  /**
    * StanfordSspCommands constructor.
    *
    * @param \Drupal\externalauth\AuthmapInterface $auth_map
@@ -50,6 +57,7 @@ class StanfordSspCommands extends DrushCommands {
     $this->authmap = $auth_map;
     $this->formBuilder = $form_builder;
     $this->samlConfig = $config_factory->getEditable('simplesamlphp_auth.settings');
+    $this->stanfordConfig = $config_factory->getEditable('stanford_ssp.settings');
   }
 
   /**
@@ -77,7 +85,8 @@ class StanfordSspCommands extends DrushCommands {
     $role_mappings = array_filter(explode('|', $role_mappings));
     $combined_mappings = array_combine($role_mappings, $role_mappings);
 
-    $new_mapping = "$role_id:eduPersonEntitlement,=,$entitlement";
+    $attribute = $this->stanfordConfig->get('saml_attribute') ?: 'eduPersonEntitlement';
+    $new_mapping = "$role_id:$attribute,=,$entitlement";
     $combined_mappings[$new_mapping] = $new_mapping;
 
     $this->samlConfig->set('role.population', implode('|', $combined_mappings))

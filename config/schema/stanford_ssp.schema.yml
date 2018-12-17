@@ -1,6 +1,9 @@
 stanford_ssp.settings:
   type: mapping
   mapping:
+    saml_attribute:
+      type: string
+      label: 'Attribute in SAML that contains the role mapping values'
     workgroup_api_url:
       type: string
       label: 'Workgroup API Base URL'
