@@ -12,8 +12,8 @@ use Drupal\Core\Session\AccountInterface;
  * Provides a 'SamlLoginBlock' block.
  *
  * @Block(
- *  id = "saml_login_block",
- *  admin_label = @Translation("Saml login block"),
+ *  id = "stanford_ssp_login_block",
+ *  admin_label = @Translation("Weblogin Block"),
  * )
  */
 class SamlLoginBlock extends BlockBase {
@@ -22,7 +22,7 @@ class SamlLoginBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return ['link_text' => 'SUNetID Login'] + parent::defaultConfiguration();
+    return ['link_text' => 'Weblogin Login'] + parent::defaultConfiguration();
   }
 
   /**
@@ -31,8 +31,8 @@ class SamlLoginBlock extends BlockBase {
   public function blockForm($form, FormStateInterface $form_state) {
     $form['link_text'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Text of the SimpleSAML PHP login link'),
-      '#description' => $this->t('Here you can replace the text of the SimpleSAML PHP link.'),
+      '#title' => $this->t('Text of the Weblogin link'),
+      '#description' => $this->t('Here you can replace the text of the Weblogin link.'),
       '#default_value' => $this->configuration['link_text'],
       '#required' => TRUE,
     ];

@@ -60,6 +60,10 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
 
   /**
    * {@inheritdoc}
+   *
+   * We override the decorated service to allow us the ability to do a complete
+   * re-evaluation or a simple role addition to users. The original service
+   * only allows for re-evaluation.
    */
   public function externalLoginRegister($authname) {
     $this->authname = $authname;
@@ -134,6 +138,10 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
 
   /**
    * {@inheritdoc}
+   *
+   * Override decorated service to add in the ability to call the workgroup API
+   * and check if the user exists in the role mapping workgroups. Also add
+   * some simple role mapping for basic user roles based on affiliation
    */
   public function getMatchingRoles() {
     $roles = parent::getMatchingRoles();
@@ -151,14 +159,12 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
 
     $attributes = $this->simplesamlAuth->getAttributes();
 
-    $attribute_key = $this->configFactory->get('stanford_ssp.settings')
-      ->get('saml_attribute') ?: 'eduPersonAffiliation';
-
-    if (!isset($attributes[$attribute_key])) {
+    if (empty($attributes['eduPersonAffiliation'])) {
       return $roles;
     }
+
     foreach ($maps as $expression => $role_id) {
-      if (count(preg_grep($expression, $attributes[$attribute_key]))) {
+      if (count(preg_grep($expression, $attributes['eduPersonAffiliation']))) {
         $roles[$role_id] = $role_id;
       }
     }

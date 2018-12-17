@@ -137,24 +137,26 @@ class RoleSyncForm extends SyncingSettingsForm {
       ],
     ];
 
+    $states = [
+      'visible' => [
+        'input[name="use_workgroup_api"]' => ['value' => 1],
+      ],
+    ];
+
     $form['user_info']['workgroup_api_cert'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Path to Workgroup API SSL Certificate.'),
-      '#description' => $this->t('For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates.', [
-        ':link' => Url::fromRoute('entity.key.add_form')->toString(),
-      ]),
+      '#description' => $this->t('For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates.'),
       '#default_value' => $stanford_config->get('workgroup_api_cert'),
-      '#states' => ['visible' => ['input[name="use_workgroup_api"]' => ['value' => 1]]],
+      '#states' => $states,
     ];
 
     $form['user_info']['workgroup_api_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Key to Workgroup API SSL Key.'),
-      '#description' => $this->t('For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates.', [
-        ':link' => Url::fromRoute('entity.key.add_form')->toString(),
-      ]),
+      '#description' => $this->t('For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates.'),
       '#default_value' => $stanford_config->get('workgroup_api_key'),
-      '#states' => ['visible' => ['input[name="use_workgroup_api"]' => ['value' => 1]]],
+      '#states' => $states,
     ];
   }
 
@@ -183,7 +185,9 @@ class RoleSyncForm extends SyncingSettingsForm {
    */
   protected function buildRoleRow($role_mapping_string) {
     list($role_id, $comparison) = explode(':', $role_mapping_string, 2);
-    list(, , $value) = explode(',', $comparison);
+
+    $exploded_comparison = explode(',', $comparison, 3);
+    $value = end($exploded_comparison);
     if ($role = Role::load($role_id)) {
       return [
         ['#markup' => $role->label()],
@@ -292,12 +296,22 @@ class RoleSyncForm extends SyncingSettingsForm {
       $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert and Key are required if using workgroup API.'));
     }
 
+    // User error when they put in the same path for both cert and key.
+    if ($cert_path == $key_path) {
+      $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert and Key must be different.'));
+    }
+
     if (!is_file($cert_path)) {
       $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert must be a file path.'));
     }
 
     if (!is_file($key_path)) {
       $form_state->setError($form['user_info']['workgroup_api_key'], $this->t('Cert must be a file path.'));
+    }
+
+    // Dont bother testing the workgroup api connection if there are any errors.
+    if ($form_state::hasAnyErrors()) {
+      return;
     }
 
     $this->workgroupApi->setCert($cert_path);
