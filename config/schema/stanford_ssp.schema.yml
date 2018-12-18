@@ -19,3 +19,18 @@ stanford_ssp.settings:
     workgroup_api_key:
       type: string
       label: 'Workgroup API Key file path'
+    restriction:
+      type: string
+      label: 'Login restrictions'
+    whitelist_groups:
+      type: sequence
+      label: 'Allowed Groups'
+      sequence:
+        type: string
+        label: 'Allowed Group'
+    whitelist_users:
+      type: sequence
+      label: 'Allowed Users'
+      sequence:
+        type: string
+        label: 'Allowed User'

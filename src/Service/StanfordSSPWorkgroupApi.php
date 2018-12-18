@@ -130,17 +130,9 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   }
 
   /**
-   * Check if the given name is part of the workgroup provided.
-   *
-   * @param string $workgroup
-   *   Workgroup name like itservices:webservices.
-   * @param string $name
-   *   User's sunetid.
-   *
-   * @return bool
-   *   If the user is part of the group.
+   * {@inheritdoc}
    */
-  protected function userInGroup($workgroup, $name) {
+  public function userInGroup($workgroup, $name) {
     if ($response = $this->getWorkgroupApiResponse($workgroup, $this->cert, $this->key)) {
       $dom = new \DOMDocument();
       $dom->loadXML((string) $response->getBody());
@@ -150,6 +142,30 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
       return $xpath->query("//members/member[@id='$name']")->length > 0;
     }
     return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function userInAnyGroup(array $workgroups, $name) {
+    foreach ($workgroups as $workgroup) {
+      if ($this->userInGroup($workgroup, $name)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function userInAllGroups(array $workgroups, $name) {
+    foreach ($workgroups as $workgroup) {
+      if (!$this->userInGroup($workgroup)) {
+        return FALSE;
+      }
+    }
+    return TRUE;
   }
 
   /**

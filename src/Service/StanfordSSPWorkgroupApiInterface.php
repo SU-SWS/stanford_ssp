@@ -44,4 +44,43 @@ interface StanfordSSPWorkgroupApiInterface {
    */
   public function getRolesFromAuthname($authname);
 
+  /**
+   * Check if the given name is part of the workgroup provided.
+   *
+   * @param string $workgroup
+   *   Workgroup name like itservices:webservices.
+   * @param string $name
+   *   User's sunetid.
+   *
+   * @return bool
+   *   If the user is part of the group.
+   */
+  public function userInGroup($workgroup, $name);
+
+  /**
+   * Check if the given name is part of any workgroup provided.
+   *
+   * @param array $workgroups
+   *   Array of Workgroups name like itservices:webservices.
+   * @param string $name
+   *   User's sunetid.
+   *
+   * @return bool
+   *   If the user is part of any group.
+   */
+  public function userInAnyGroup(array $workgroups, $name);
+
+  /**
+   * Check if the given name is part of all workgroups provided.
+   *
+   * @param array $workgroups
+   *   Array of Workgroups name like itservices:webservices.
+   * @param string $name
+   *   User's sunetid.
+   *
+   * @return bool
+   *   If the user is part of all groups.
+   */
+  public function userInAllGroups(array $workgroups, $name);
+
 }

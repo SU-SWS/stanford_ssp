@@ -45,3 +45,36 @@ function stanford_ssp_form_user_login_form_alter(&$form, FormStateInterface $for
     unset($form['name'], $form['pass'], $form['actions']);
   }
 }
+
+/**
+ * Implements hook_simplesamlphp_auth_allow_login().
+ */
+function stanford_ssp_simplesamlphp_auth_allow_login($attributes) {
+  $config = \Drupal::config('stanford_ssp.settings');
+  if ($config->get('restriction') == \Drupal\stanford_ssp\Form\AuthorizationsForm::ALLOW_ALL) {
+    return TRUE;
+  }
+
+  /** @var \Drupal\simplesamlphp_auth\Service\SimplesamlphpAuthManager $auth_manager */
+  $auth_manager = \Drupal::service('simplesamlphp_auth.manager');
+  $authname = $auth_manager->getAuthname();
+
+  if (in_array($authname, $config->get('whitelist_users'))) {
+    return TRUE;
+  }
+
+  if ($config->get('use_workgroup_api')) {
+    /** @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface $workgroup_api */
+    $workgroup_api = \Drupal::service('stanford_ssp.workgroup_api');
+    return $workgroup_api->userInAnyGroup($config->get('whitelist_groups'), $authname);
+  }
+
+  $saml_attribute = $config->get('saml_attribute') ?: 'eduPersonEntitlement';
+  foreach ($config->get('whitelist_groups') as $group) {
+    if (!empty($attributes[$saml_attribute]) && in_array($group, $attributes[$saml_attribute])) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
