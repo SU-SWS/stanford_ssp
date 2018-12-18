@@ -161,7 +161,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    */
   public function userInAllGroups(array $workgroups, $name) {
     foreach ($workgroups as $workgroup) {
-      if (!$this->userInGroup($workgroup)) {
+      if (!$this->userInGroup($workgroup, $name)) {
         return FALSE;
       }
     }

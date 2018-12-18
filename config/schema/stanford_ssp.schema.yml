@@ -1,6 +1,8 @@
 stanford_ssp.settings:
   type: mapping
   mapping:
+    _core:
+      type: _core_config_info
     saml_attribute:
       type: string
       label: 'Attribute in SAML that contains the role mapping values'
