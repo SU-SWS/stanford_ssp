@@ -5,6 +5,11 @@ namespace Drupal\stanford_ssp\Form;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
+/**
+ * Class AuthorizationsForm to configure workgroup/user restrictions..
+ *
+ * @package Drupal\stanford_ssp\Form
+ */
 class AuthorizationsForm extends ConfigFormBase {
 
   const ALLOW_ALL = 'all';

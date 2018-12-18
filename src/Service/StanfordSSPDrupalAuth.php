@@ -141,7 +141,7 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
    *
    * Override decorated service to add in the ability to call the workgroup API
    * and check if the user exists in the role mapping workgroups. Also add
-   * some simple role mapping for basic user roles based on affiliation
+   * some simple role mapping for basic user roles based on affiliation.
    */
   public function getMatchingRoles() {
     $roles = parent::getMatchingRoles();
