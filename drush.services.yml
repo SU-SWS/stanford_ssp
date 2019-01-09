@@ -1,0 +1,6 @@
+services:
+  stanford_ssp.commands:
+    class: \Drupal\stanford_ssp\Commands\StanfordSspCommands
+    arguments: ['@externalauth.authmap', '@form_builder', '@config.factory']
+    tags:
+      - { name: drush.command }

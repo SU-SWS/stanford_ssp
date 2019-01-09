@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: stanford_faculty
+label: 'Stanford Faculty'
+weight: 6
+is_admin: null
+permissions: {  }

@@ -5,6 +5,15 @@
   "license": "GPL-2.0+",
   "minimum-stability": "dev",
   "require": {
-      "composer/installers": "^1.2"
+    "php": ">=7.0.0",
+    "composer/installers": "^1.2",
+    "drupal/simplesamlphp_auth": "~3.0"
+  },
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^9"
+      }
+    }
   }
 }

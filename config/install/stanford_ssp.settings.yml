@@ -1,0 +1,9 @@
+saml_attribute: eduPersonEnttitlement
+workgroup_api_url: 'https://workgroupsvc.stanford.edu/v1/workgroups'
+use_workgroup_api: false
+hide_local_login: true
+workgroup_api_cert: ''
+workgroup_api_key: ''
+restriction: all
+whitelist_groups: {  }
+whitelist_users: {  }

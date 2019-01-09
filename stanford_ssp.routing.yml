@@ -1,0 +1,23 @@
+stanford_ssp.add_user:
+  path: '/admin/config/people/simplesamlphp_auth/add-user'
+  defaults:
+    _form: '\Drupal\stanford_ssp\Form\AddUserForm'
+    _title: 'Add User'
+  requirements:
+    _permission: 'administer simpleSAMLphp authentication'
+
+stanford_ssp.authorizations:
+  path: '/admin/config/people/simplesamlphp_auth/authorizations'
+  defaults:
+    _form: '\Drupal\stanford_ssp\Form\AuthorizationsForm'
+    _title: 'Authorizations'
+  requirements:
+    _permission: 'administer simpleSAMLphp authentication'
+
+stanford_ssp.create_user:
+  path: '/admin/people/create/saml'
+  defaults:
+    _form: '\Drupal\stanford_ssp\Form\AddUserForm'
+    _title: 'Add SAML User'
+  requirements:
+    _permission: 'administer users'
