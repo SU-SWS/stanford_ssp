@@ -24,7 +24,6 @@ function stanford_ssp_install() {
   $config->set('register_users', TRUE);
   $config->set('autoenablesaml', TRUE);
   $config->set('header_no_cache', TRUE);
-  $config->set('hide_local_login', TRUE);
   $config->set('role.eval_every_time', StanfordSSPDrupalAuth::ROLE_ADDITIVE);
   $config->set('allow.default_login', TRUE);
   $config->set('allow.set_drupal_pwd', FALSE);
