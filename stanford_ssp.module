@@ -249,11 +249,14 @@ function stanford_ssp_force_https() {
 
   global $is_https;
   // If is https force secure cookies. Mmmmm cookies.
+
   if ($is_https) {
-    // Mandate secure cookies for sessions.
-    ini_set('session.cookie_secure', 1);
-    // Session cookies should be deleted when the browser session ends.
-    ini_set('session.cookie_lifetime', 0);
+    if (session_status() == PHP_SESSION_NONE) {
+      // Mandate secure cookies for sessions.
+      ini_set('session.cookie_secure', 1);
+      // Session cookies should be deleted when the browser session ends.
+      ini_set('session.cookie_lifetime', 0);
+    }
     return;
   }
 
