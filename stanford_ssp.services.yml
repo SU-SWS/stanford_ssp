@@ -16,8 +16,3 @@ services:
     arguments: ['@config.factory', '@current_user']
     tags:
       - { name: event_subscriber }
-  stanford_ssp.auth.manager:
-    class: Drupal\stanford_ssp\Service\StanfordSSPAuthManager
-    public: false
-    decorates: simplesamlphp_auth.manager
-    arguments: ['@config.factory']

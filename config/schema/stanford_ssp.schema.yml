@@ -24,9 +24,6 @@ stanford_ssp.settings:
     restriction:
       type: string
       label: 'Login restrictions'
-    mail_attr_fallback:
-      type: string
-      label: 'Fallback mail attribute'
     whitelist_groups:
       type: sequence
       label: 'Allowed Groups'
