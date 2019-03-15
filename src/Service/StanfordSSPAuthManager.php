@@ -21,6 +21,9 @@ class StanfordSSPAuthManager extends SimplesamlphpAuthManager {
    */
   protected $stanfordConfig;
 
+  /**
+   * {@inheritdoc}
+   */
   public function __construct(ConfigFactoryInterface $config_factory, Simple $instance = NULL, SimpleSAML_Configuration $config = NULL) {
     parent::__construct($config_factory, $instance, $config);
     $this->stanfordConfig = $config_factory->get('stanford_ssp');
