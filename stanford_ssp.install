@@ -15,7 +15,7 @@ function stanford_ssp_install() {
     ->getEditable('simplesamlphp_auth.settings');
   $config->set('activate', TRUE);
   $config->set('login_link_display_name', 'SUNetID Login');
-  $config->set('mail_attr', 'mail');
+  $config->set('mail_attr', 'eduPersonPrincipalName');
   $config->set('unique_id', 'uid');
   $config->set('user_name', 'displayName');
   $config->set('auth_source', 'default-sp');

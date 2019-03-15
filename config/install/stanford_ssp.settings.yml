@@ -7,3 +7,4 @@ workgroup_api_key: ''
 restriction: all
 whitelist_groups: {  }
 whitelist_users: {  }
+mail_attr_fallback: 'mail'
