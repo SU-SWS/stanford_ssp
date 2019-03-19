@@ -249,14 +249,11 @@ function stanford_ssp_force_https() {
 
   global $is_https;
   // If is https force secure cookies. Mmmmm cookies.
-
   if ($is_https) {
-    if (session_status() == PHP_SESSION_NONE) {
-      // Mandate secure cookies for sessions.
-      ini_set('session.cookie_secure', 1);
-      // Session cookies should be deleted when the browser session ends.
-      ini_set('session.cookie_lifetime', 0);
-    }
+    // Mandate secure cookies for sessions.
+    ini_set('session.cookie_secure', 1);
+    // Session cookies should be deleted when the browser session ends.
+    ini_set('session.cookie_lifetime', 0);
     return;
   }
 
@@ -283,9 +280,9 @@ function stanford_ssp_page_build(array &$page) {
   // We don't want to mess with the 403 page setting so we should check the
   // header response on the page build.
   $headers = drupal_get_http_header();
-  if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden") {
-    if (variable_get("stanford_ssp_automagic_login", FALSE)) {
 
+  if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden" && !preg_match('/login\.stanford\.edu/', $_SERVER['HTTP_REFERER'])) {
+    if (variable_get("stanford_ssp_automagic_login", FALSE)) {
       $dest = drupal_get_destination();
 
       // If we don't unset the destination we get a redirect loop.
@@ -1007,17 +1004,28 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
     return array();
   }
 
-  if (empty($values['members'])) {
-    return array();
+  $members = array();
+  // If there are members in this group add them to the allowed list.
+  if (!empty($values['members']['member'])) {
+    foreach ($values['members']['member'] as $member) {
+      try {
+        $members[] = stanford_ssp_get_api_members_from_xml_array($member);
+      }
+      catch (Exception $e) {
+        watchdog('stanford_ssp', $e->getMessage(), array(), WATCHDOG_DEBUG);
+      }
+    }
   }
 
-  $members = array();
-  foreach ($values['members']['member'] as $member) {
-    try {
-      $members[] = stanford_ssp_get_api_members_from_xml_array($member);
-    }
-    catch (Exception $e) {
-      watchdog('stanford_ssp', $e->getMessage(), array(), WATCHDOG_DEBUG);
+  // Add admins to the allowed to log in list.
+  if (!empty($values['administrators']['member'])) {
+    foreach ($values['administrators']['member'] as $member) {
+      try {
+        $members[] = stanford_ssp_get_api_members_from_xml_array($member);
+      }
+      catch (Exception $e) {
+        watchdog('stanford_ssp', $e->getMessage(), array(), WATCHDOG_DEBUG);
+      }
     }
   }
 
