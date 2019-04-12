@@ -115,8 +115,8 @@ class AddUserForm extends FormBase {
    * @return array
    *   Keyed array of role id and role label.
    */
-  protected static function getAvailableRoles(){
-    if(\Drupal::moduleHandler()->moduleExists('role_delegation')) {
+  protected static function getAvailableRoles() {
+    if (\Drupal::moduleHandler()->moduleExists('role_delegation')) {
       /** @var \Drupal\role_delegation\DelegatableRolesInterface $role_delegation */
       $role_delegation = \Drupal::service('delegatable_roles');
       return $role_delegation->getAssignableRoles(\Drupal::currentUser());
