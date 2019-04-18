@@ -93,7 +93,7 @@ class AddUserForm extends FormBase {
       '#type' => 'select',
       '#title' => $this->t('Roles'),
       '#description' => $this->t('Add roles to the new user account.'),
-      '#options' => user_role_names(TRUE),
+      '#options' => self::getAvailableRoles(),
       '#multiple' => TRUE,
     ];
 
@@ -107,6 +107,21 @@ class AddUserForm extends FormBase {
       '#value' => $this->t('Add SSO User'),
     ];
     return $form;
+  }
+
+  /**
+   * Get available roles, limited if the role_delegation module is enabled.
+   *
+   * @return array
+   *   Keyed array of role id and role label.
+   */
+  protected static function getAvailableRoles() {
+    if (\Drupal::moduleHandler()->moduleExists('role_delegation')) {
+      /** @var \Drupal\role_delegation\DelegatableRolesInterface $role_delegation */
+      $role_delegation = \Drupal::service('delegatable_roles');
+      return $role_delegation->getAssignableRoles(\Drupal::currentUser());
+    }
+    return user_role_names(TRUE);
   }
 
   /**
