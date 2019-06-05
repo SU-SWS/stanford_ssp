@@ -1,4 +1,9 @@
 services:
+  stanford_ssp.auth_manager:
+    class: Drupal\stanford_ssp\Service\StanfordSSPAuthManager
+    public: false
+    decorates: simplesamlphp_auth.manager
+    arguments: ['@config.factory', '@logger.factory']
   stanford_ssp.workgroup_api:
     class: Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApi
     arguments: ['@config.factory', '@http_client', '@logger.factory']
