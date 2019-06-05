@@ -9,6 +9,11 @@ use Drupal\simplesamlphp_auth\Service\SimplesamlphpAuthManager;
 use SimpleSAML\Auth\Simple;
 use SimpleSAML_Configuration;
 
+/**
+ * Class StanfordSSPAuthManager to decorate auth manager service.
+ *
+ * @package Drupal\stanford_ssp\Service
+ */
 class StanfordSSPAuthManager extends SimplesamlphpAuthManager {
 
   /**
@@ -40,8 +45,9 @@ class StanfordSSPAuthManager extends SimplesamlphpAuthManager {
       $this->logger->error($e);
 
       // If the `mail` attribute isn't available, build one from the uid.
+      // Authname is normally the `uid` attribute which is the SUNetId.
       if ($attribute == 'mail') {
-        return $this->getAttribute('uid') . '@stanford.edu';
+        return $this->getAuthname() . '@stanford.edu';
       }
     }
   }

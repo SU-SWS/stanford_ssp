@@ -20,7 +20,6 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
    * Tests the user without a mail attribute gets an account created.
    */
   public function testNoAttributeError() {
-    $this->assertEquals(1, 1);
     $saml_config = [
       'simplesamlphp_auth.settings' => [],
     ];
@@ -35,7 +34,6 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
    * Tests the user without a mail attribute gets an account created.
    */
   public function testNoAttributeSuccess() {
-    $this->assertEquals(1, 1);
     $saml_config = [
       'simplesamlphp_auth.settings' => [],
     ];
