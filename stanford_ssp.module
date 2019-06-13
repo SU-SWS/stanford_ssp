@@ -283,7 +283,7 @@ function stanford_ssp_page_build(array &$page) {
   // header response on the page build.
   $headers = drupal_get_http_header();
 
-  if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden" && !preg_match('/login\.stanford\.edu/', $_SERVER['HTTP_REFERER'])) {
+  if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden" && !preg_match('/login(-uat)?\.stanford\.edu/', $_SERVER['HTTP_REFERER'])) {
     if (variable_get("stanford_ssp_automagic_login", FALSE)) {
       $dest = drupal_get_destination();
 
