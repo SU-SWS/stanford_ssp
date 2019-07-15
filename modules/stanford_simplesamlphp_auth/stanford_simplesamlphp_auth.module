@@ -231,7 +231,13 @@ function stanford_simplesamlphp_auth_form_alter(&$form, $form_state, $form_id) {
   $login_path = variable_get('simplesamlphp_auth_login_path', 'saml_login');
   $login_name = variable_get('simplesamlphp_auth_login_link_display_name', t('Federated Log In'));
   $destination = drupal_get_destination();
-  $link = l($login_name, $login_path, array('query' => $destination, 'attributes' => array('rel' => 'nofollow')));
+  $options = [
+    'query' => $destination,
+    'attributes' => [
+      'rel' => 'nofollow',
+    ]
+  ];
+  $link = l($login_name, $login_path, $options);
 
   // Add SAML login link to user login form.
   if ($form_id == 'user_login_block' || $form_id == 'user_account_form') {
@@ -319,7 +325,11 @@ function stanford_simplesamlphp_auth_generate_block_text() {
   else {
     $login_path = variable_get('stanford_simplesamlphp_auth_login_path', 'sso/login');
     $login_name = variable_get('stanford_simplesamlphp_auth_login_link_display_name', t('Federated Log In'));
-    $options = array('attributes' => array('rel' => 'nofollow'));
+    $options = [
+      'attributes' => [
+        'rel' => 'nofollow',
+      ]
+    ];
     $block_content .= '<p>' . l($login_name, $login_path, $options) . '</p>';
   }
 

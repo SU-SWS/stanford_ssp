@@ -680,9 +680,14 @@ function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
       '#collapsed' => FALSE,
     );
     $link_text = variable_get("stanford_ssp_sso_link_text", t("Log in with your SUNet ID »"));
+    $options = [
+      'attributes' => [
+        'rel' => 'nofollow',
+      ]
+    ];
     $form['saml_auth']['saml_link'] = array(
       '#prefix' => "<p>",
-      '#markup' => l($link_text, "sso/login", array('attributes' => array('rel' => 'nofollow'))),
+      '#markup' => l($link_text, "sso/login", $options),
       '#suffix' => "</p>",
     );
   }
