@@ -60,7 +60,7 @@ class SamlLoginBlock extends BlockBase {
    */
   public function build() {
     $build = [];
-    $build['saml_link'] = Link::createFromRoute($this->configuration['link_text'], 'simplesamlphp_auth.saml_login')
+    $build['saml_link'] = Link::createFromRoute($this->configuration['link_text'], 'simplesamlphp_auth.saml_login', [], ['attributes' => ['rel' => 'nofollow']])
       ->toRenderable();
     return $build;
   }
