@@ -230,9 +230,8 @@ function stanford_simplesamlphp_auth_form_alter(&$form, $form_state, $form_id) {
 
   $login_path = variable_get('simplesamlphp_auth_login_path', 'saml_login');
   $login_name = variable_get('simplesamlphp_auth_login_link_display_name', t('Federated Log In'));
-  $destination = drupal_get_destination();
   $options = [
-    'query' => $destination,
+    'query' => drupal_get_destination(),
     'attributes' => [
       'rel' => 'nofollow',
     ]
