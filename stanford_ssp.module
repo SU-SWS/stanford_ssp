@@ -24,6 +24,7 @@ function stanford_ssp_config_schema_info_alter(&$definitions) {
 function stanford_ssp_form_user_login_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (isset($form['simplesamlphp_auth_login_link'])) {
     $form['simplesamlphp_auth_login_link']['#attributes']['class'][] = 'decanter-button';
+    $form['simplesamlphp_auth_login_link']['#attributes']['rel'] = 'nofollow';
     $config = \Drupal::config('stanford_ssp.settings');
 
     // If configured to disallow local login, hide the local login form parts.
