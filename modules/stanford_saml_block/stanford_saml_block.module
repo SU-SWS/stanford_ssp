@@ -68,6 +68,9 @@ function stanford_saml_block_block_view($delta = '') {
         'query' => [
           'destination' => check_plain(current_path()),
         ],
+        'attributes' => [
+          'rel' => 'nofollow',
+        ],
       ];
 
       $block = array(

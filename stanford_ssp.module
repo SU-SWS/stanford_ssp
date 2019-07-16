@@ -17,6 +17,11 @@ function stanford_ssp_menu() {
     'page callback' => 'stanford_ssp_sso_auth',
     'access callback' => "stanford_ssp_access_login_page",
     'type' => MENU_SUGGESTED_ITEM,
+    'options' => [
+      'attributes' => [
+        'rel' => 'nofollow',
+      ]
+    ],
   );
 
   $items['sso/denied-test'] = array(
@@ -675,9 +680,14 @@ function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
       '#collapsed' => FALSE,
     );
     $link_text = variable_get("stanford_ssp_sso_link_text", t("Log in with your SUNet ID »"));
+    $options = [
+      'attributes' => [
+        'rel' => 'nofollow',
+      ]
+    ];
     $form['saml_auth']['saml_link'] = array(
       '#prefix' => "<p>",
-      '#markup' => l($link_text, "sso/login"),
+      '#markup' => l($link_text, "sso/login", $options),
       '#suffix' => "</p>",
     );
   }
