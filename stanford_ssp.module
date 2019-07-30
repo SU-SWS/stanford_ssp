@@ -110,5 +110,5 @@ function stanford_ssp_simplesamlphp_auth_user_attributes(UserInterface $account,
     $account->set('field_user_name', $attributes['displayName']);
     return $account;
   }
-  return FALSE
+  return FALSE;
 }
