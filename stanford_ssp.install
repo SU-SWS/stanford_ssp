@@ -17,7 +17,7 @@ function stanford_ssp_install() {
   $config->set('login_link_display_name', 'SUNetID Login');
   $config->set('mail_attr', 'mail');
   $config->set('unique_id', 'uid');
-  $config->set('user_name', 'displayName');
+  $config->set('user_name', 'uid');
   $config->set('auth_source', 'default-sp');
   $config->set('secure', TRUE);
   $config->set('httponly', FALSE);

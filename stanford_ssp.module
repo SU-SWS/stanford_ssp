@@ -8,6 +8,7 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\stanford_ssp\Form\AuthorizationsForm;
+use Drupal\user\UserInterface;
 
 /**
  * Implements hook_config_schema_info_alter().
@@ -95,4 +96,19 @@ function stanford_ssp_simplesamlphp_auth_existing_user($attributes) {
     return is_array($existing_users) && !empty($existing_users) ? reset($existing_users) : FALSE;
   }
   return FALSE;
+}
+
+/**
+ * Implements hook_simplesamlphp_auth_user_attributes().
+ *
+ * Set the display name field for the user from the attributes.
+ *
+ * @see https://www.drupal.org/node/2935428
+ */
+function stanford_ssp_simplesamlphp_auth_user_attributes(UserInterface $account, $attributes) {
+  if ($account->hasField('field_user_name') && !empty($attributes['displayName'])) {
+    $account->set('field_user_name', $attributes['displayName']);
+    return $account;
+  }
+  return FALSE
 }
