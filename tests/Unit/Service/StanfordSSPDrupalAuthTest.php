@@ -21,7 +21,9 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
    */
   public function testNoAttributeError() {
     $saml_config = [
-      'simplesamlphp_auth.settings' => [],
+      'simplesamlphp_auth.settings' => [
+        'auth_source' => $this->randomMachineName(),
+      ],
     ];
     $config_factory = $this->getConfigFactoryStub($saml_config);
 
@@ -35,7 +37,9 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
    */
   public function testNoAttributeSuccess() {
     $saml_config = [
-      'simplesamlphp_auth.settings' => [],
+      'simplesamlphp_auth.settings' => [
+        'auth_source' => $this->randomMachineName(),
+      ],
     ];
     $config_factory = $this->getConfigFactoryStub($saml_config);
 
@@ -43,6 +47,11 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
     $this->assertEquals('@stanford.edu', $auth_manager->getAttribute('mail'));
   }
 
+  /**
+   * Get a logger factory mock object.
+   *
+   * @return \PHPUnit_Framework_MockObject_MockObject
+   */
   protected function getLoggerFactoryStub() {
     $logger_channel = $this->createMock(LoggerChannel::class);
 
