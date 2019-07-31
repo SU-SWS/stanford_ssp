@@ -106,8 +106,8 @@ function stanford_ssp_simplesamlphp_auth_existing_user($attributes) {
  * @see https://www.drupal.org/node/2935428
  */
 function stanford_ssp_simplesamlphp_auth_user_attributes(UserInterface $account, $attributes) {
-  if ($account->hasField('field_user_name') && !empty($attributes['displayName'])) {
-    $account->set('field_user_name', $attributes['displayName']);
+  if ($account->hasField('field_user_display_name') && !empty($attributes['displayName'])) {
+    $account->set('field_user_display_name', $attributes['displayName']);
     return $account;
   }
   return FALSE;
