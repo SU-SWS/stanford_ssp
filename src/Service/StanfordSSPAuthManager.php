@@ -31,8 +31,8 @@ class StanfordSSPAuthManager extends SimplesamlphpAuthManager {
   /**
    * {@inheritDoc}
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountInterface $current_user, AdminContext $admin_context, ModuleHandlerInterface $module_handler, RequestStack $request_stack, MessengerInterface $messenger,LoggerChannelFactoryInterface $logger_factory, Simple $instance = NULL, Configuration $config = NULL) {
-    parent::__construct($config_factory,  $current_user,  $admin_context,  $module_handler,  $request_stack,  $messenger,  $instance,  $config);
+  public function __construct(ConfigFactoryInterface $config_factory, AccountInterface $current_user, AdminContext $admin_context, ModuleHandlerInterface $module_handler, RequestStack $request_stack, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger_factory, Simple $instance = NULL, Configuration $config = NULL) {
+    parent::__construct($config_factory, $current_user, $admin_context, $module_handler, $request_stack, $messenger, $instance, $config);
     $this->logger = $logger_factory->get('stanford_ssp');
   }
 
