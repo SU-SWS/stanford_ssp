@@ -2,12 +2,17 @@
 
 namespace Drupal\Tests\stanford_ssp\Kernel\Service;
 
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannel;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Routing\AdminContext;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\simplesamlphp_auth\Exception\SimplesamlphpAttributeException;
 use Drupal\simplesamlphp_auth\Service\SimplesamlphpAuthManager;
 use Drupal\stanford_ssp\Service\StanfordSSPAuthManager;
 use Drupal\Tests\UnitTestCase;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Class StanfordSSPDrupalAuthTest
@@ -27,7 +32,13 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
     ];
     $config_factory = $this->getConfigFactoryStub($saml_config);
 
-    $auth_manager = new SimplesamlphpAuthManager($config_factory);
+    $account = $this->createMock(AccountProxyInterface::class);
+    $context = $this->createMock(AdminContext::class);
+    $module_handler = $this->createMock(ModuleHandlerInterface::class);
+    $stack = $this->createMock(RequestStack::class);
+    $messenger = $this->createMock(MessengerInterface::class);
+
+    $auth_manager = new SimplesamlphpAuthManager($config_factory, $account, $context, $module_handler, $stack, $messenger);
     $this->expectException(SimplesamlphpAttributeException::class);
     $auth_manager->getAttribute('mail');
   }
@@ -43,7 +54,13 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
     ];
     $config_factory = $this->getConfigFactoryStub($saml_config);
 
-    $auth_manager = new StanfordSSPAuthManager($config_factory, $this->getLoggerFactoryStub());
+    $account = $this->createMock(AccountProxyInterface::class);
+    $context = $this->createMock(AdminContext::class);
+    $module_handler = $this->createMock(ModuleHandlerInterface::class);
+    $stack = $this->createMock(RequestStack::class);
+    $messenger = $this->createMock(MessengerInterface::class);
+
+    $auth_manager = new StanfordSSPAuthManager($config_factory, $account, $context, $module_handler, $stack, $messenger, $this->getLoggerFactoryStub());
     $this->assertEquals('@stanford.edu', $auth_manager->getAttribute('mail'));
   }
 

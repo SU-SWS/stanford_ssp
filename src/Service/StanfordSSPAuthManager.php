@@ -3,11 +3,16 @@
 namespace Drupal\stanford_ssp\Service;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Routing\AdminContext;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\simplesamlphp_auth\Exception\SimplesamlphpAttributeException;
 use Drupal\simplesamlphp_auth\Service\SimplesamlphpAuthManager;
 use SimpleSAML\Auth\Simple;
-use SimpleSAML_Configuration;
+use SimpleSAML\Configuration;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Class StanfordSSPAuthManager to decorate auth manager service.
@@ -26,8 +31,8 @@ class StanfordSSPAuthManager extends SimplesamlphpAuthManager {
   /**
    * {@inheritDoc}
    */
-  public function __construct(ConfigFactoryInterface $config_factory, LoggerChannelFactoryInterface $logger_factory, Simple $instance = NULL, SimpleSAML_Configuration $config = NULL) {
-    parent::__construct($config_factory, $instance, $config);
+  public function __construct(ConfigFactoryInterface $config_factory, AccountInterface $current_user, AdminContext $admin_context, ModuleHandlerInterface $module_handler, RequestStack $request_stack, MessengerInterface $messenger,LoggerChannelFactoryInterface $logger_factory, Simple $instance = NULL, Configuration $config = NULL) {
+    parent::__construct($config_factory,  $current_user,  $admin_context,  $module_handler,  $request_stack,  $messenger,  $instance,  $config);
     $this->logger = $logger_factory->get('stanford_ssp');
   }
 
