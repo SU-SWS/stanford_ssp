@@ -2,6 +2,8 @@
 
 namespace Drupal\stanford_ssp\Service;
 
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\simplesamlphp_auth\Service\SimplesamlphpAuthManager;
 use Drupal\simplesamlphp_auth\Service\SimplesamlphpDrupalAuth;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -52,8 +54,8 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
   /**
    * {@inheritdoc}
    */
-  public function __construct(SimplesamlphpAuthManager $simplesaml_auth, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, ExternalAuthInterface $externalauth, AccountInterface $account, StanfordSSPWorkgroupApiInterface $workgroup_api) {
-    parent::__construct($simplesaml_auth, $config_factory, $entity_type_manager, $logger, $externalauth, $account);
+  public function __construct(SimplesamlphpAuthManager $simplesaml_auth, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, ExternalAuthInterface $externalauth, AccountInterface $account, MessengerInterface $messenger, ModuleHandlerInterface $module_handler, StanfordSSPWorkgroupApiInterface $workgroup_api) {
+    parent::__construct($simplesaml_auth, $config_factory, $entity_type_manager, $logger, $externalauth, $account, $messenger, $module_handler);
     $this->configFactory = $config_factory;
     $this->workgroupAPI = $workgroup_api;
   }
