@@ -3,7 +3,7 @@ services:
     class: Drupal\stanford_ssp\Service\StanfordSSPAuthManager
     public: false
     decorates: simplesamlphp_auth.manager
-    arguments: ['@config.factory', '@logger.factory']
+    arguments: ['@config.factory', '@current_user', '@router.admin_context', '@module_handler', '@request_stack', '@messenger', '@logger.factory']
   stanford_ssp.workgroup_api:
     class: Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApi
     arguments: ['@config.factory', '@http_client', '@logger.factory']
@@ -15,7 +15,7 @@ services:
     class: Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth
     public: false
     decorates: simplesamlphp_auth.drupalauth
-    arguments: ['@simplesamlphp_auth.manager', '@config.factory', '@entity_type.manager', '@logger.channel.simplesamlphp_auth', '@externalauth.externalauth', '@current_user', '@stanford_ssp.workgroup_api']
+    arguments: ['@simplesamlphp_auth.manager', '@config.factory', '@entity_type.manager', '@logger.channel.simplesamlphp_auth', '@externalauth.externalauth', '@current_user', '@messenger', '@module_handler', '@stanford_ssp.workgroup_api']
   stanford_ssp.event_subscriber:
     class: Drupal\stanford_ssp\EventSubscriber\StanfordSSPEventSubscriber
     arguments: ['@config.factory', '@current_user']

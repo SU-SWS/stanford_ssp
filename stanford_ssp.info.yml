@@ -5,4 +5,4 @@ type: module
 version: 8.x
 package: Stanford
 dependencies:
-  - drupal:simplesamlphp_auth
+  - simplesamlphp_auth:simplesamlphp_auth (>=8.x-3.1)
