@@ -6,6 +6,8 @@
  */
 
 use Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Implements hook_install().
@@ -28,4 +30,43 @@ function stanford_ssp_install() {
   $config->set('allow.default_login', TRUE);
   $config->set('allow.set_drupal_pwd', FALSE);
   $config->save();
+}
+
+/**
+ * Create display name field on user entity type.
+ */
+function stanford_ssp_update_8001() {
+  $set_form = FALSE;
+  if (!FieldStorageConfig::load('user.su_display_name')) {
+    FieldStorageConfig::create([
+      'id' => 'user.su_display_name',
+      'field_name' => 'su_display_name',
+      'entity_type' => 'user',
+      'type' => 'string',
+      'module' => 'core',
+    ])->save();
+    $set_form = TRUE;
+  }
+
+  if (!FieldConfig::load('user.user.su_display_name')) {
+    FieldConfig::create([
+      'id' => 'user.user.su_display_name',
+      'field_name' => 'su_display_name',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'Display Name',
+      'field_type' => 'string',
+    ])->save();
+    $set_form = TRUE;
+  }
+
+  if ($set_form) {
+    entity_get_form_display('user', 'user', 'default')
+      ->setComponent('su_display_name')
+      ->save();
+
+    entity_get_display('user', 'user', 'default')
+      ->setComponent('su_display_name')
+      ->save();
+  }
 }

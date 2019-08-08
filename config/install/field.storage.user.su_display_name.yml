@@ -3,8 +3,8 @@ status: true
 dependencies:
   module:
     - user
-id: user.field_user_display_name
-field_name: field_user_display_name
+id: user.su_display_name
+field_name: su_display_name
 entity_type: user
 type: string
 settings:

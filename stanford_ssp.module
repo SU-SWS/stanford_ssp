@@ -106,9 +106,18 @@ function stanford_ssp_simplesamlphp_auth_existing_user($attributes) {
  * @see https://www.drupal.org/node/2935428
  */
 function stanford_ssp_simplesamlphp_auth_user_attributes(UserInterface $account, $attributes) {
-  if ($account->hasField('field_user_display_name') && !empty($attributes['displayName'])) {
-    $account->set('field_user_display_name', $attributes['displayName']);
-    return $account;
+  $always_sync_name = \Drupal::config('simplesamlphp_auth.settings')
+    ->get('sync.user_name');
+
+  // Make sure the user entity has the field and the display name is available.
+  if ($account->hasField('su_display_name') && !empty($attributes['displayName'])) {
+
+    // Only set the display name if configured to sync the user name every time
+    // or if the display name is empty.
+    if ($always_sync_name || !$account->get('su_display_name')->length()) {
+      $account->set('su_display_name', $attributes['displayName']);
+      return $account;
+    }
   }
   return FALSE;
 }
