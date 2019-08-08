@@ -36,6 +36,11 @@ function stanford_ssp_install() {
  * Create display name field on user entity type.
  */
 function stanford_ssp_update_8001() {
+  \Drupal::configFactory()
+    ->getEditable('simplesamlphp_auth.settings')
+    ->set('user_name', 'uid')
+    ->save();
+
   $set_form = FALSE;
   if (!FieldStorageConfig::load('user.su_display_name')) {
     FieldStorageConfig::create([
