@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\stanford_ssp\Kernel\Service;
+namespace Drupal\Tests\stanford_ssp\Unit\Service;
 
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannel;
@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
  * Class StanfordSSPDrupalAuthTest
  *
  * @group stanford_ssp
+ * @coversDefaultClass \Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth
  */
 class StanfordSSPDrupalAuthTest extends UnitTestCase {
 
