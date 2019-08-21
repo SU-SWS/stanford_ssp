@@ -18,12 +18,26 @@ interface StanfordSSPWorkgroupApiInterface {
   public function setCert($cert_path);
 
   /**
+   * Get the current cert path.
+   *
+   * @return string|null
+   */
+  public function getCert();
+
+  /**
    * Set the key file path.
    *
    * @param string $key_path
    *   Path to file.
    */
   public function setKey($key_path);
+
+  /**
+   * Get the current cert key path.
+   *
+   * @return string|null
+   */
+  public function getKey();
 
   /**
    * Check if a given cert and key will connect to the workgroup api.

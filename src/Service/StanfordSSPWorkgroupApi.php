@@ -98,6 +98,20 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   /**
    * {@inheritdoc}
    */
+  public function getCert() {
+    return $this->cert;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getKey() {
+    return $this->key;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function connectionSuccessful() {
     $response = $this->getWorkgroupApiResponse('itservices:webservices', $this->cert, $this->key);
     return $response && $response->getStatusCode() == 200;
