@@ -16,9 +16,9 @@ defaults: &defaults
 code_coverage: &code_coverage
   <<: *defaults
   steps:
-#    - restore_cache:
-#        keys:
-#          - dependencies-
+    - restore_cache:
+        keys:
+          - dependencies-
     - checkout:
         path: /var/www/test
     - run:
@@ -38,9 +38,9 @@ code_coverage: &code_coverage
 behat: &behat
   <<: *defaults
   steps:
-#    - restore_cache:
-#        keys:
-#          - dependencies-
+    - restore_cache:
+        keys:
+          - dependencies-
     - checkout:
         path: /var/www/test
     - run:
