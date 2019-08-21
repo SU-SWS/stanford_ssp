@@ -12,6 +12,7 @@ use Drupal\simplesamlphp_auth\Exception\SimplesamlphpAttributeException;
 use Drupal\simplesamlphp_auth\Service\SimplesamlphpAuthManager;
 use Drupal\stanford_ssp\Service\StanfordSSPAuthManager;
 use Drupal\Tests\UnitTestCase;
+use SimpleSAML\Auth\Simple;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -39,7 +40,10 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
     $stack = $this->createMock(RequestStack::class);
     $messenger = $this->createMock(MessengerInterface::class);
 
-    $auth_manager = new SimplesamlphpAuthManager($config_factory, $account, $context, $module_handler, $stack, $messenger);
+    $instance = $this->createMock(Simple::class);
+    $instance->method('getAttributes')->willReturn([]);
+
+    $auth_manager = new SimplesamlphpAuthManager($config_factory, $account, $context, $module_handler, $stack, $messenger, $instance);
     $this->expectException(SimplesamlphpAttributeException::class);
     $auth_manager->getAttribute('mail');
   }
@@ -61,7 +65,10 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
     $stack = $this->createMock(RequestStack::class);
     $messenger = $this->createMock(MessengerInterface::class);
 
-    $auth_manager = new StanfordSSPAuthManager($config_factory, $account, $context, $module_handler, $stack, $messenger, $this->getLoggerFactoryStub());
+    $instance = $this->createMock(Simple::class);
+    $instance->method('getAttributes')->willReturn([]);
+
+    $auth_manager = new StanfordSSPAuthManager($config_factory, $account, $context, $module_handler, $stack, $messenger, $this->getLoggerFactoryStub(), $instance);
     $this->assertEquals('@stanford.edu', $auth_manager->getAttribute('mail'));
   }
 
