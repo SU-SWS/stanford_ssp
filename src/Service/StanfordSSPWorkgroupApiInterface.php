@@ -21,6 +21,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * Get the current cert path.
    *
    * @return string|null
+   *   Absolute cert path.
    */
   public function getCert();
 
@@ -36,6 +37,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * Get the current cert key path.
    *
    * @return string|null
+   *   Absolute key path.
    */
   public function getKey();
 
