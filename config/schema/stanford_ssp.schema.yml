@@ -1,6 +1,9 @@
 stanford_ssp.settings:
   type: mapping
   mapping:
+    langcode:
+      type: string
+      label: 'Language code'
     _core:
       type: _core_config_info
     saml_attribute:

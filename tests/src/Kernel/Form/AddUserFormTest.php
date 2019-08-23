@@ -6,7 +6,6 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Mail\MailManager;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\role_delegation\DelegatableRolesInterface;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
@@ -128,12 +127,16 @@ class AddUserFormTest extends KernelTestBase {
     $module_handler = $this->createMock(ModuleHandlerInterface::class);
     $module_handler->method('moduleExists')->willReturn(TRUE);
     \Drupal::getContainer()->set('module_handler', $module_handler);
+    \Drupal::getContainer()->set('delegatable_roles', new TestDelegatableRoles());
+  }
 
+}
+
+class TestDelegatableRoles {
+
+  public function getAssignableRoles() {
     $all_roles = user_role_names(TRUE);
-    $delegatable_roles = $this->createMock(DelegatableRolesInterface::class);
-    $delegatable_roles->method('getAssignableRoles')
-      ->willReturn(array_slice($all_roles, 0, 2));
-    \Drupal::getContainer()->set('delegatable_roles', $delegatable_roles);
+    return array_slice($all_roles, 0, 2);
   }
 
 }
