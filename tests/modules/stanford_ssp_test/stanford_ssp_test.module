@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Contains test_stanford_ssp.module.
+ */
+
+/**
+ * Simulates drush translate.
+ */
+function dt($string, $args = []) {
+  return t($string, $args);
+}

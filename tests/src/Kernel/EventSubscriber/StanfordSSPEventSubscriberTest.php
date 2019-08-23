@@ -45,6 +45,9 @@ class StanfordSSPEventSubscriberTest extends KernelTestBase {
       ->save();
   }
 
+  /**
+   * Check that 403 responses get redirected to log in.
+   */
   public function testKernelResponse() {
     $request = new Request();
     $dispatcher = new EventDispatcher();
