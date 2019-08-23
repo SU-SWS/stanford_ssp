@@ -39,7 +39,7 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
       ],
       'simplesamlphp_auth.settings' => [
         'role' => [
-          'population' => 'valid_role:eduPersonEnttitlement,=,valid:workgroup',
+          'population' => 'valid_role:eduPersonEntitlement,=,valid:workgroup',
         ],
       ],
     ]);
