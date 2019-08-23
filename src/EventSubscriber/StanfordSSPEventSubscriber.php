@@ -70,6 +70,7 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
    *   Response event object..
    */
   public function responseHandler(FilterResponseEvent $event) {
+
     if (
       $event->getResponse()->getStatusCode() == Response::HTTP_FORBIDDEN &&
       $event->getRequestType() == HttpKernelInterface::MASTER_REQUEST &&
@@ -82,9 +83,9 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
       if ($this->samlConfig->get('activate') && $this->stanfordConfig->get('hide_local_login')) {
         $url = Url::fromRoute('simplesamlphp_auth.saml_login', [], ['query' => ['destination' => trim($origin, '/')]]);
       }
+
       $response = new RedirectResponse($url->toString());
-      $response->send();
-      $event->stopPropagation();
+      $event->setResponse($response);
     }
   }
 
