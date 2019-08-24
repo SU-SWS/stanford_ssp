@@ -5,9 +5,12 @@
  * Contains test_stanford_ssp.module.
  */
 
-/**
- * Simulates drush translate.
- */
-function dt($string, $args = []) {
-  return t($string, $args);
+
+if(!function_exists('dt')) {
+  /**
+   * Simulates drush translate.
+   */
+  function dt($string, $args = []) {
+    return t($string, $args);
+  }
 }
