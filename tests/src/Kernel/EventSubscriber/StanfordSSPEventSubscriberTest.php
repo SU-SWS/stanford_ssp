@@ -61,7 +61,7 @@ class StanfordSSPEventSubscriberTest extends KernelTestBase {
     ]);
 
     $response = new Response('', Response::HTTP_FORBIDDEN);
-    $kernel = $this->getMock('Symfony\\Component\\HttpKernel\\HttpKernelInterface');
+    $kernel = $this->createMock('Symfony\\Component\\HttpKernel\\HttpKernelInterface');
     $event = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
     $dispatcher->dispatch(KernelEvents::RESPONSE, $event);
 

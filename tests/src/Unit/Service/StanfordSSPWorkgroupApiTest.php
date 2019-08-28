@@ -17,15 +17,22 @@ use Psr\Http\Message\ResponseInterface;
 class StanfordSSPWorkgroupApiTest extends UnitTestCase {
 
   /**
+   * Workgroup service object.
+   *
    * @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApi
    */
   protected $service;
 
   /**
+   * User authname.
+   *
    * @var string
    */
   protected $authname;
 
+  /**
+   * {@inheritDoc}
+   */
   protected function setUp() {
     parent::setUp();
 
@@ -92,7 +99,10 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
     $this->assertFalse($this->service->userInAnyGroup(['invalid:workgroup'], $this->authname));
     $this->assertTrue($this->service->userInAnyGroup(['valid:workgroup'], $this->authname));
 
-    $this->assertFalse($this->service->userInAllGroups(['invalid:workgroup', 'valid:workgroup'], $this->authname));
+    $this->assertFalse($this->service->userInAllGroups([
+      'invalid:workgroup',
+      'valid:workgroup',
+    ], $this->authname));
     $this->assertTrue($this->service->userInAllGroups(['valid:workgroup'], $this->authname));
   }
 
