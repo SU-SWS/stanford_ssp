@@ -5,8 +5,7 @@
  * Contains test_stanford_ssp.module.
  */
 
-
-if(!function_exists('dt')) {
+if (!function_exists('dt') && isset($_ENV['SIMPLETEST_DB'])) {
   /**
    * Simulates drush translate.
    */
