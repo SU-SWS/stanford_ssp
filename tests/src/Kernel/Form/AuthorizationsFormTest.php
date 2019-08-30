@@ -1,0 +1,72 @@
+<?php
+
+namespace Drupal\Tests\stanford_ssp\Kernel\Form;
+
+use Drupal\Core\Form\FormState;
+use Drupal\KernelTests\KernelTestBase;
+
+/**
+ * Class AuthorizationsFormTest
+ *
+ * @package Drupal\Tests\stanford_ssp\Kernel\Form
+ * @coversDefaultClass \Drupal\stanford_ssp\Form\AuthorizationsForm
+ */
+class AuthorizationsFormTest extends KernelTestBase {
+
+  /**
+   * {@inheritDoc}
+   */
+  protected static $modules = [
+    'system',
+    'user',
+    'stanford_ssp',
+    'simplesamlphp_auth',
+    'externalauth',
+  ];
+
+  /**
+   * {@inheritDoc}
+   */
+  protected function setUp() {
+    parent::setup();
+    \Drupal::configFactory()->getEditable('stanford_ssp.settings')
+      ->set('whitelist_groups', [])
+      ->set('whitelist_users', [])
+      ->save();
+  }
+
+  public function testForm() {
+    $form = \Drupal::formBuilder()
+      ->getForm('\Drupal\stanford_ssp\Form\AuthorizationsForm');
+    $this->assertCount(28, $form);
+    $form_state = new FormState();
+    $form_state->setValues([
+      'restriction' => 'restrict',
+    ]);
+    \Drupal::formBuilder()
+      ->submitForm('\Drupal\stanford_ssp\Form\AuthorizationsForm', $form_state);
+    $this->assertTrue($form_state::hasAnyErrors());
+    $this->assertNotEmpty($form_state->getError(['#parents' => ['restriction']]));
+
+    $form_state->clearErrors();
+    $form_state->setValues([
+      'restriction' => 'restrict',
+      'whitelist_groups' => 'group1,group2',
+      'whitelist_users' => 'user1,user2',
+    ]);
+    \Drupal::formBuilder()
+      ->submitForm('\Drupal\stanford_ssp\Form\AuthorizationsForm', $form_state);
+
+    $this->assertArraySubset([
+      'group1',
+      'group2',
+    ], \Drupal::config('stanford_ssp.settings')->get('whitelist_groups'));
+
+    $this->assertArraySubset([
+      'user1',
+      'user2',
+    ], \Drupal::config('stanford_ssp.settings')->get('whitelist_users'));
+
+  }
+
+}

@@ -2,17 +2,16 @@
 
 namespace Drupal\Tests\stanford_ssp\Unit\Service;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Logger\LoggerChannel;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\Core\Routing\AdminContext;
-use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\simplesamlphp_auth\Exception\SimplesamlphpAttributeException;
-use Drupal\simplesamlphp_auth\Service\SimplesamlphpAuthManager;
+use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\stanford_ssp\Service\StanfordSSPAuthManager;
+use Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth;
+use Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface;
 use Drupal\Tests\UnitTestCase;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Drupal\user\UserInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class StanfordSSPDrupalAuthTest
@@ -23,59 +22,64 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class StanfordSSPDrupalAuthTest extends UnitTestCase {
 
   /**
-   * Tests the user without a mail attribute gets an account created.
+   * @var \Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth
    */
-  public function testNoAttributeError() {
-    $saml_config = [
+  protected $service;
+
+  /**
+   * @var string
+   */
+  protected $removeRole;
+
+  /**
+   * @var string
+   */
+  protected $addRole;
+
+  /**
+   * {@inheritDoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->removeRole = $this->randomMachineName();
+    $this->addRole = $this->randomMachineName();
+
+    $auth = $this->createMock(StanfordSSPAuthManager::class);
+    $auth->method('getAttributes')->willReturn(['eduPersonAffiliation' => ['staff']]);
+
+    $config_factory = $this->getConfigFactoryStub([
       'simplesamlphp_auth.settings' => [
-        'auth_source' => $this->randomMachineName(),
+        'role' => ['eval_every_time' => 1],
+        'debug' => TRUE,
       ],
-    ];
-    $config_factory = $this->getConfigFactoryStub($saml_config);
+      'stanford_ssp.settings' => [
+        'use_workgroup_api' => TRUE,
+      ],
+    ]);
+    $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
+    $logger = $this->createMock(LoggerInterface::class);
+    $external_auth = $this->createMock(ExternalAuthInterface::class);
 
-    $account = $this->createMock(AccountProxyInterface::class);
-    $context = $this->createMock(AdminContext::class);
-    $module_handler = $this->createMock(ModuleHandlerInterface::class);
-    $stack = $this->createMock(RequestStack::class);
+    $account = $this->createMock(UserInterface::class);
+    $account->method('getRoles')->willReturn([$this->removeRole]);
+    $account->method('removeRole')->willReturn(TRUE);
+
+    $external_auth->method('login')->willReturn($account);
     $messenger = $this->createMock(MessengerInterface::class);
+    $module_handler = $this->createMock(ModuleHandlerInterface::class);
+    $workgroup_api = $this->createMock(StanfordSSPWorkgroupApiInterface::class);
+    $workgroup_api->method('getRolesFromAuthName')->willReturn([$this->addRole]);
 
-    $auth_manager = new SimplesamlphpAuthManager($config_factory, $account, $context, $module_handler, $stack, $messenger);
-    $this->expectException(SimplesamlphpAttributeException::class);
-    $auth_manager->getAttribute('mail');
+    $this->service = new StanfordSSPDrupalAuth($auth, $config_factory, $entity_type_manager, $logger, $external_auth, $account, $messenger, $module_handler, $workgroup_api);
   }
 
   /**
-   * Tests the user without a mail attribute gets an account created.
+   * Test role sync.
    */
-  public function testNoAttributeSuccess() {
-    $saml_config = [
-      'simplesamlphp_auth.settings' => [
-        'auth_source' => $this->randomMachineName(),
-      ],
-    ];
-    $config_factory = $this->getConfigFactoryStub($saml_config);
-
-    $account = $this->createMock(AccountProxyInterface::class);
-    $context = $this->createMock(AdminContext::class);
-    $module_handler = $this->createMock(ModuleHandlerInterface::class);
-    $stack = $this->createMock(RequestStack::class);
-    $messenger = $this->createMock(MessengerInterface::class);
-
-    $auth_manager = new StanfordSSPAuthManager($config_factory, $account, $context, $module_handler, $stack, $messenger, $this->getLoggerFactoryStub());
-    $this->assertEquals('@stanford.edu', $auth_manager->getAttribute('mail'));
-  }
-
-  /**
-   * Get a logger factory mock object.
-   *
-   * @return \PHPUnit_Framework_MockObject_MockObject
-   */
-  protected function getLoggerFactoryStub() {
-    $logger_channel = $this->createMock(LoggerChannel::class);
-
-    $logger = $this->createMock(LoggerChannelFactoryInterface::class);
-    $logger->method('get')->willReturn($logger_channel);
-    return $logger;
+  public function testRoleSync() {
+    $user = $this->service->externalLoginRegister($this->randomMachineName());
+    $this->assertInstanceOf(UserInterface::class, $user);
   }
 
 }

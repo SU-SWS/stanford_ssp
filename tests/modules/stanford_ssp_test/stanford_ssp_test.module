@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Contains test_stanford_ssp.module.
+ */
+
+if (!function_exists('dt') && isset($_ENV['SIMPLETEST_DB'])) {
+  /**
+   * Simulates drush translate.
+   */
+  function dt($string, $args = []) {
+    return t($string, $args);
+  }
+}

@@ -148,7 +148,7 @@ class AddUserForm extends FormBase {
 
     // If no email was specified, we use the default ([sunetid]@stanford.edu).
     $default_email = $sunet . '@stanford.edu';
-    $email = strtolower(trim($form_state->getValue('email'))) ?: $default_email;
+    $email = trim($form_state->getValue('email')) ?: $default_email;
     $form_state->setValue('email', $email);
 
     if (!$this->emailValidator->isValid($email)) {
@@ -179,9 +179,9 @@ class AddUserForm extends FormBase {
 
     $this->authmap->save($new_user, 'simplesamlphp_auth', $form_state->getValue('sunetid'));
     $this->messenger()
-      ->addStatus($this->t('Successfully created SSO account for %user', ['%user' => $new_user->getUsername()]));
+      ->addStatus($this->t('Successfully created SSO account for %user', ['%user' => $new_user->getAccountName()]));
     $this->logger('stanford_ssp')
-      ->info('Created User %name', ['%name' => $new_user->getUsername()]);
+      ->info('Created User %name', ['%name' => $new_user->getAccountName()]);
 
     // Was the notify checkbox checked?
     if ($form_state->getValue('notify') && $success) {
