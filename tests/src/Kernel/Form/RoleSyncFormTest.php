@@ -73,6 +73,7 @@ class RoleSyncFormTest extends KernelTestBase {
     $form_state->setUserInput([
       'role_population' => [
         'add' => [
+          'attribute' => '',
           'role_id' => 'role2',
           'workgroup' => $new_workgroup,
         ],
