@@ -98,13 +98,14 @@ class RoleSyncForm extends SyncingSettingsForm {
     $form['user_info']['role_population']['add']['attribute'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Workgroup Attribute'),
-      '#description' => $this->t('Does not work when using the Workgroup API'),
+      '#description' => $this->t('Ensure this attribute is released in by SAML attribute data.'),
       '#attributes' => ['placeholder' => $this->getDefaultSamlAttribute()],
     ];
 
     $form['user_info']['role_population']['add']['workgroup'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Workgroup'),
+      '#description' => $this->t('Or attribute value'),
     ];
     $form['user_info']['role_population']['add']['add_mapping'] = [
       '#type' => 'submit',
@@ -263,9 +264,11 @@ class RoleSyncForm extends SyncingSettingsForm {
 
       $mapping_string = "$role_id:$attribute,=,$workgroup";
       $form_state->set(['mappings', $mapping_string], $mapping_string);
+
+      $this->messenger()
+        ->addWarning($this->t('These settings have not been saved yet.'));
     }
-    $this->messenger()
-      ->addWarning($this->t('These settings have not been saved yet.'));
+
     $form_state->setRebuild();
   }
 
