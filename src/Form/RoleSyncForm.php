@@ -97,15 +97,15 @@ class RoleSyncForm extends SyncingSettingsForm {
 
     $form['user_info']['role_population']['add']['attribute'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Workgroup Attribute'),
-      '#description' => $this->t('Ensure this attribute is released in by SAML attribute data.'),
+      '#title' => $this->t('Attribute Key'),
+      '#description' => $this->t('The value in the SAML data to use as the key for matching. eg: eduPersonEnttitlement'),
       '#attributes' => ['placeholder' => $this->getDefaultSamlAttribute()],
     ];
 
     $form['user_info']['role_population']['add']['workgroup'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Workgroup'),
-      '#description' => $this->t('Or attribute value'),
+      '#title' => $this->t('Attribute Value'),
+      '#description' => $this->t('The value in the SAML data to use as the value for matching. eg: itservices:webservices'),
     ];
     $form['user_info']['role_population']['add']['add_mapping'] = [
       '#type' => 'submit',
