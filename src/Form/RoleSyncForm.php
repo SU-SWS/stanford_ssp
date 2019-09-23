@@ -4,12 +4,12 @@ namespace Drupal\stanford_ssp\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\simplesamlphp_auth\Form\SyncingSettingsForm;
 use Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth;
 use Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface;
-use Drupal\user\Entity\Role;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -34,23 +34,32 @@ class RoleSyncForm extends SyncingSettingsForm {
   protected $workgroupApi;
 
   /**
+   * Entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
       $container->get('module_handler'),
-      $container->get('stanford_ssp.workgroup_api')
+      $container->get('stanford_ssp.workgroup_api'),
+      $container->get('entity_type.manager')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler, StanfordSSPWorkgroupApiInterface $workgroup_api) {
+  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler, StanfordSSPWorkgroupApiInterface $workgroup_api, EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct($config_factory);
     $this->moduleHandler = $module_handler;
     $this->workgroupApi = $workgroup_api;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -86,9 +95,17 @@ class RoleSyncForm extends SyncingSettingsForm {
       '#options' => user_role_names(TRUE),
     ];
 
+    $form['user_info']['role_population']['add']['attribute'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Attribute Key'),
+      '#description' => $this->t('The value in the SAML data to use as the key for matching. eg: eduPersonEnttitlement'),
+      '#attributes' => ['placeholder' => $this->getDefaultSamlAttribute()],
+    ];
+
     $form['user_info']['role_population']['add']['workgroup'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Workgroup'),
+      '#title' => $this->t('Attribute Value'),
+      '#description' => $this->t('The value in the SAML data to use as the value for matching. eg: itservices:webservices'),
     ];
     $form['user_info']['role_population']['add']['add_mapping'] = [
       '#type' => 'submit',
@@ -168,6 +185,7 @@ class RoleSyncForm extends SyncingSettingsForm {
   protected function getRoleHeaders() {
     return [
       $this->t('Role'),
+      $this->t('Attribute'),
       $this->t('Workgroup'),
       $this->t('Actions'),
     ];
@@ -181,31 +199,22 @@ class RoleSyncForm extends SyncingSettingsForm {
    *
    * @return array
    *   Table render array.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function buildRoleRow($role_mapping_string) {
     list($role_id, $comparison) = explode(':', $role_mapping_string, 2);
 
     $exploded_comparison = explode(',', $comparison, 3);
+
     $value = end($exploded_comparison);
-    if ($role = Role::load($role_id)) {
-      return [
-        ['#markup' => $role->label()],
-        ['#markup' => $value],
-        [
-          '#type' => 'submit',
-          '#value' => $this->t('Remove Mapping'),
-          '#name' => $role_mapping_string,
-          '#submit' => ['::removeMappingCallback'],
-          '#mapping' => $role_mapping_string,
-          '#ajax' => [
-            'callback' => '::addMapping',
-            'wrapper' => 'role-mapping-table',
-          ],
-        ],
-      ];
-    }
+    $role = $this->entityTypeManager->getStorage('user_role')
+      ->load($role_id);
+
     return [
-      ['#markup' => $this->t('Broken @id', ['@id' => $role_id])],
+      ['#markup' => $role ? $role->label() : $this->t('Broken: @id', ['@id' => $role_id])],
+      ['#markup' => reset($exploded_comparison)],
       ['#markup' => $value],
       [
         '#type' => 'submit',
@@ -248,13 +257,18 @@ class RoleSyncForm extends SyncingSettingsForm {
     $user_input = $form_state->getUserInput();
     $role_id = $user_input['role_population']['add']['role_id'];
     $workgroup = trim(Html::escape($user_input['role_population']['add']['workgroup']));
+    $attribute = trim(Html::escape($user_input['role_population']['add']['attribute']));
     if ($role_id && $workgroup) {
-      $attribute = $this->config('stanford_ssp.settings')
-        ->get('saml_attribute') ?: 'eduPersonEntitlement';
+      // If the user didn't enter an attribute, use the default one from config.
+      $attribute = $attribute ?: $this->getDefaultSamlAttribute();
 
       $mapping_string = "$role_id:$attribute,=,$workgroup";
       $form_state->set(['mappings', $mapping_string], $mapping_string);
+
+      $this->messenger()
+        ->addWarning($this->t('These settings have not been saved yet.'));
     }
+
     $form_state->setRebuild();
   }
 
@@ -330,6 +344,17 @@ class RoleSyncForm extends SyncingSettingsForm {
       ->set('workgroup_api_cert', $form_state->getValue('workgroup_api_cert'))
       ->set('workgroup_api_key', $form_state->getValue('workgroup_api_key'))
       ->save();
+  }
+
+  /**
+   * Get the default value of the saml attribute from config.
+   *
+   * @return string
+   *   Default attribute.
+   */
+  protected function getDefaultSamlAttribute() {
+    return $this->config('stanford_ssp.settings')
+      ->get('saml_attribute') ?: 'eduPersonEntitlement';
   }
 
 }
