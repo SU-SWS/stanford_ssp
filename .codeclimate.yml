@@ -5,12 +5,6 @@ checks:
   method-complexity:
     config:
       threshold: 10
-  method-lines:
-    config:
-      threshold: 40
-  method-count:
-    config:
-      threshold: 25
 
 plugins:
   # https://docs.codeclimate.com/docs/eslint
@@ -113,15 +107,16 @@ plugins:
     enabled: true
     config:
       strings:
-      - FIXME
-      - BUG
-      - TODO
-      - todo
-      - dpm
-      - dsm
+        - FIXME
+        - BUG
+        - TODO
+        - todo
+        - dpm
+        - dsm
 # exclude these files/paths
 exclude_patterns:
+  - "tests/"
+  - "**.min.*"
+  - "**/Gruntfile.js"
   - "**.min.*"
   - "**/tests/**/*"
-  - "tests/"
-  - "spec/"
