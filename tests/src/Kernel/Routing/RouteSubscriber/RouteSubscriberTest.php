@@ -41,6 +41,10 @@ class RouteSubscriberTest extends KernelTestBase {
 
     $route = $route_provider->getRouteByName('simplesamlphp_auth.admin_settings_local');
     $this->assertEquals('Drupal\stanford_ssp\Form\LocalLoginForm', $route->getDefault('_form'));
+
+    /** covers the redirect from '/sso/login' to '/saml_login' */
+    $route = $route_provider->getRouteByName('stanford_ssp.sso_login');
+    $this->assertEquals('/saml_login', $route->getPath());
   }
 
 }
