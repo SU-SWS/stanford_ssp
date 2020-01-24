@@ -57,15 +57,25 @@ class AuthorizationsFormTest extends KernelTestBase {
     \Drupal::formBuilder()
       ->submitForm('\Drupal\stanford_ssp\Form\AuthorizationsForm', $form_state);
 
-    $this->assertArraySubset([
-      'group1',
-      'group2',
-    ], \Drupal::config('stanford_ssp.settings')->get('whitelist_groups'));
+    /**
+     * assertArraySubset is deprecated
+     * see: https://github.com/sebastianbergmann/phpunit/issues/3494
+     */
+    // $this->assertArraySubset([
+    //  'group1',
+    // 'group2',
+    //], \Drupal::config('stanford_ssp.settings')->get('whitelist_groups'));
 
-    $this->assertArraySubset([
-      'user1',
-      'user2',
-    ], \Drupal::config('stanford_ssp.settings')->get('whitelist_users'));
+    $this->assertTrue(in_array('group1', \Drupal::config('stanford_ssp.settings')->get('whitelist_groups')));
+    $this->assertTrue(in_array('group2', \Drupal::config('stanford_ssp.settings')->get('whitelist_groups')));
+
+    //$this->assertArraySubset([
+    //  'user1',
+    //  'user2',
+    //], \Drupal::config('stanford_ssp.settings')->get('whitelist_users'));
+
+    $this->assertTrue(in_array('user1', \Drupal::config('stanford_ssp.settings')->get('whitelist_users')));
+    $this->assertTrue(in_array('user2', \Drupal::config('stanford_ssp.settings')->get('whitelist_users')));
 
   }
 
