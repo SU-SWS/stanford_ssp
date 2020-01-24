@@ -44,7 +44,7 @@ class RouteSubscriberTest extends KernelTestBase {
 
     /** covers the redirect from '/sso/login' to '/saml_login' */
     $route = $route_provider->getRouteByName('stanford_ssp.sso_login');
-    $this->assertEquals('/saml_login', $route->getPath());
+    $this->assertEquals('/sso/login', $route->getPath());
   }
 
 }
