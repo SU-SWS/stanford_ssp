@@ -73,10 +73,8 @@ class SamlLoginBlockTest extends UnitTestCase {
     $build = $this->block->build();
     $this->assertCount(1, $build);
     $this->assertArrayHasKey('saml_link', $build);
-    $this->assertArraySubset([
-      '#type' => 'link',
-      '#title' => 'SUNetID Login',
-    ], $build['saml_link']);
+    $this->assertTrue($build['saml_link']['#type'] == 'link');
+    $this->assertTrue($build['saml_link']['#title'] == 'SUNetID Login');
     $this->assertInstanceOf('\Drupal\Core\Url', $build['saml_link']['#url']);
   }
 

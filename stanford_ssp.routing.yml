@@ -21,3 +21,13 @@ stanford_ssp.create_user:
     _title: 'Add SAML User'
   requirements:
     _permission: 'administer users'
+
+stanford_ssp.sso_login:
+  path: '/sso/login'
+  defaults:
+    _route: 'simplesamlphp_auth.saml_login'
+  requirements:
+    _user_is_logged_in: 'FALSE'
+  options:
+    _maintenance_access: TRUE
+    no_cache: TRUE
