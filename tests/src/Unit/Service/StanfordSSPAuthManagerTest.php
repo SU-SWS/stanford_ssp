@@ -75,7 +75,7 @@ class StanfordSSPAuthManagerTest extends UnitTestCase {
   /**
    * Get a logger factory mock object.
    *
-   * @return \PHPUnit_Framework_MockObject_MockObject
+   * @return \PHPUnit\Framework\MockObject\MockObject
    */
   protected function getLoggerFactoryStub() {
     $logger_channel = $this->createMock(LoggerChannel::class);
