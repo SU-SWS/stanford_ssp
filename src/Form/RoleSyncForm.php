@@ -309,20 +309,20 @@ class RoleSyncForm extends SyncingSettingsForm {
 
     // When the cert values are overridden by settings.php, we will skip
     // validating the files are accurate.
+    // @codeCoverageIgnoreStart
     if (self::hasOverriddenApiCert()) {
       return;
     }
+    // @codeCoverageIgnoreEnd
 
     // Both cert and Key have to be populated.
     if (!$cert_path || !$key_path) {
       $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert and Key are required if using workgroup API.'));
-      return;
     }
 
     // User error when they put in the same path for both cert and key.
     if ($cert_path == $key_path) {
       $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert and Key must be different.'));
-      return;
     }
 
     if (!is_file($cert_path)) {
@@ -371,6 +371,9 @@ class RoleSyncForm extends SyncingSettingsForm {
    *
    * @return bool
    *   If the cert and key paths are overridden.
+   *
+   * @codeCoverageIgnore
+   *   Ignore so that we can simulate this in the test.
    */
   protected static function hasOverriddenApiCert() {
     $config = \Drupal::config('stanford_ssp.settings');
