@@ -77,7 +77,10 @@ class RoleSyncForm extends SyncingSettingsForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
 
-    if (!$form_state->get('mappings')) {
+    // If the form is newly built, the form state storage will be null. If the
+    // form is being rebuilt from an ajax, the storage will be some type of
+    // array.
+    if (is_null($form_state->get('mappings'))) {
       $mappings = explode('|', $form['user_info']['role_population']['#default_value']);
       $form_state->set('mappings', array_filter(array_combine($mappings, $mappings)));
     }
@@ -204,7 +207,7 @@ class RoleSyncForm extends SyncingSettingsForm {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function buildRoleRow($role_mapping_string) {
-    list($role_id, $comparison) = explode(':', $role_mapping_string, 2);
+    [$role_id, $comparison] = explode(':', $role_mapping_string, 2);
 
     $exploded_comparison = explode(',', $comparison, 3);
 
@@ -304,7 +307,15 @@ class RoleSyncForm extends SyncingSettingsForm {
     $cert_path = $form_state->getValue('workgroup_api_cert');
     $key_path = $form_state->getValue('workgroup_api_key');
 
-    // Both cert and Key have to be selected.
+    // When the cert values are overridden by settings.php, we will skip
+    // validating the files are accurate.
+    // @codeCoverageIgnoreStart
+    if (self::hasOverriddenApiCert()) {
+      return;
+    }
+    // @codeCoverageIgnoreEnd
+
+    // Both cert and Key have to be populated.
     if (!$cert_path || !$key_path) {
       $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert and Key are required if using workgroup API.'));
     }
@@ -323,14 +334,12 @@ class RoleSyncForm extends SyncingSettingsForm {
     }
 
     // Dont bother testing the workgroup api connection if there are any errors.
-    if ($form_state::hasAnyErrors()) {
-      return;
-    }
-
-    $this->workgroupApi->setCert($cert_path);
-    $this->workgroupApi->setKey($key_path);
-    if (!$this->workgroupApi->connectionSuccessful()) {
-      $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert information invalid. See database logs for more information.'));
+    if (!$form_state::hasAnyErrors()) {
+      $this->workgroupApi->setCert($cert_path);
+      $this->workgroupApi->setKey($key_path);
+      if (!$this->workgroupApi->connectionSuccessful()) {
+        $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert information invalid. See database logs for more information.'));
+      }
     }
   }
 
@@ -355,6 +364,20 @@ class RoleSyncForm extends SyncingSettingsForm {
   protected function getDefaultSamlAttribute() {
     return $this->config('stanford_ssp.settings')
       ->get('saml_attribute') ?: 'eduPersonEntitlement';
+  }
+
+  /**
+   * Check if the api cert paths are overridden by some other manner.
+   *
+   * @return bool
+   *   If the cert and key paths are overridden.
+   *
+   * @codeCoverageIgnore
+   *   Ignore so that we can simulate this in the test.
+   */
+  protected static function hasOverriddenApiCert() {
+    $config = \Drupal::config('stanford_ssp.settings');
+    return $config->hasOverrides('workgroup_api_cert') && $config->hasOverrides('workgroup_api_key');
   }
 
 }
