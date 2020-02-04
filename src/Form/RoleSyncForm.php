@@ -334,14 +334,12 @@ class RoleSyncForm extends SyncingSettingsForm {
     }
 
     // Dont bother testing the workgroup api connection if there are any errors.
-    if ($form_state::hasAnyErrors()) {
-      return;
-    }
-
-    $this->workgroupApi->setCert($cert_path);
-    $this->workgroupApi->setKey($key_path);
-    if (!$this->workgroupApi->connectionSuccessful()) {
-      $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert information invalid. See database logs for more information.'));
+    if (!$form_state::hasAnyErrors()) {
+      $this->workgroupApi->setCert($cert_path);
+      $this->workgroupApi->setKey($key_path);
+      if (!$this->workgroupApi->connectionSuccessful()) {
+        $form_state->setError($form['user_info']['workgroup_api_cert'], $this->t('Cert information invalid. See database logs for more information.'));
+      }
     }
   }
 
@@ -368,6 +366,12 @@ class RoleSyncForm extends SyncingSettingsForm {
       ->get('saml_attribute') ?: 'eduPersonEntitlement';
   }
 
+  /**
+   * Check if the api cert paths are overridden by some other manner.
+   *
+   * @return bool
+   *   If the cert and key paths are overridden.
+   */
   protected static function hasOverriddenApiCert() {
     $config = \Drupal::config('stanford_ssp.settings');
     return $config->hasOverrides('workgroup_api_cert') && $config->hasOverrides('workgroup_api_key');
