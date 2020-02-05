@@ -6,9 +6,10 @@
  */
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Link;
+use Drupal\Core\Url;
 use Drupal\stanford_ssp\Form\AuthorizationsForm;
 use Drupal\user\UserInterface;
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 
 /**
  * Implements hook_config_schema_info_alter().
@@ -20,19 +21,49 @@ function stanford_ssp_config_schema_info_alter(&$definitions) {
 }
 
 /**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function stanford_ssp_menu_local_tasks_alter(&$data, $route_name, RefinableCacheableDependencyInterface &$cacheability) {
+  if ($route_name == 'user.login') {
+    $config = \Drupal::config('stanford_ssp.settings');
+    if ($config->get('hide_local_login')) {
+      // Hide local tabs that have the "Recover Password" tab if local login
+      // isn't allowed.
+      unset($data['tabs']);
+    }
+  }
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  */
 function stanford_ssp_form_user_login_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (isset($form['simplesamlphp_auth_login_link'])) {
     $form['simplesamlphp_auth_login_link']['#attributes']['class'][] = 'decanter-button';
+    $form['simplesamlphp_auth_login_link']['#attributes']['class'][] = 'su-button';
+
     $form['simplesamlphp_auth_login_link']['#attributes']['rel'] = 'nofollow';
     $config = \Drupal::config('stanford_ssp.settings');
+
+    $form['login_title'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'h1',
+      '#value' => t('Login'),
+      '#weight' => -999,
+    ];
+    $form['intro_text'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => t('Welcome back!  Login to access your website'),
+      '#weight' => -998,
+    ];
 
     // If configured to disallow local login, hide the local login form parts.
     if ($config->get('hide_local_login')) {
       unset($form['name'], $form['pass'], $form['actions']);
       return;
     }
+
     // Moves the original form elements into a collapsed group.
     $form['simplesamlphp_auth_login_link']['#weight'] = -99;
     $form['manual'] = [
@@ -43,8 +74,11 @@ function stanford_ssp_form_user_login_form_alter(&$form, FormStateInterface $for
     $form['manual']['name'] = $form['name'];
     $form['manual']['pass'] = $form['pass'];
     $form['manual']['actions'] = $form['actions'];
-    $form['manual']['actions']['reset'] = Link::createFromRoute(t('Reset Password'), 'user.pass')
-      ->toRenderable();
+    $form['manual']['actions']['reset'] = [
+      '#type' => 'link',
+      '#url' => Url::fromRoute('user.pass'),
+      '#title' => t('Reset Password'),
+    ];
     unset($form['name'], $form['pass'], $form['actions']);
   }
 }
