@@ -27,6 +27,7 @@ class LocalLoginForm extends LocalSettingsForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     $config = $this->config('simplesamlphp_auth.settings');
+    $stanford_config = $this->config('stanford_ssp.settings');
 
     // Hide the ability to allow default login. We don't want to users to
     // disable this because it can prevent User 1 from being able to log in
@@ -39,7 +40,7 @@ class LocalLoginForm extends LocalSettingsForm {
     $form['authentication']['hide_local_login'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Hide local login form on the user page.'),
-      '#default_value' => $config->get('hide_local_login'),
+      '#default_value' => $stanford_config->get('hide_local_login'),
       '#weight' => '-10',
     ];
     return $form;
