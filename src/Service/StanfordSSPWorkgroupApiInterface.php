@@ -64,7 +64,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * Check if the given name is part of the workgroup provided.
    *
    * @param string $workgroup
-   *   Workgroup name like itservices:webservices.
+   *   Workgroup name like uit:sws.
    * @param string $name
    *   User's sunetid.
    *
@@ -77,7 +77,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * Check if the given name is part of any workgroup provided.
    *
    * @param array $workgroups
-   *   Array of Workgroups name like itservices:webservices.
+   *   Array of Workgroups name like uit:sws.
    * @param string $name
    *   User's sunetid.
    *
@@ -90,7 +90,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * Check if the given name is part of all workgroups provided.
    *
    * @param array $workgroups
-   *   Array of Workgroups name like itservices:webservices.
+   *   Array of Workgroups name like uit:sws.
    * @param string $name
    *   User's sunetid.
    *
