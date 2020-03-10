@@ -25,7 +25,7 @@ stanford_ssp.create_user:
 stanford_ssp.sso_login:
   path: '/sso/login'
   defaults:
-    _route: 'simplesamlphp_auth.saml_login'
+    _controller: '\Drupal\simplesamlphp_auth\Controller\SimplesamlphpAuthController::authenticate'
   requirements:
     _user_is_logged_in: 'FALSE'
   options:
