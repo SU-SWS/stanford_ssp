@@ -113,7 +113,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    * {@inheritdoc}
    */
   public function connectionSuccessful() {
-    $response = $this->getWorkgroupApiResponse('itservices:webservices', $this->cert, $this->key);
+    $response = $this->getWorkgroupApiResponse('uit:sws', $this->cert, $this->key);
     return $response && $response->getStatusCode() == 200;
   }
 
@@ -186,7 +186,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    * Call the workgroup api and get the response for the workgroup.
    *
    * @param string $workgroup
-   *   Workgroup name like itservices:webservices.
+   *   Workgroup name like uit:sws.
    * @param string $cert
    *   Path to cert file.
    * @param string $key
