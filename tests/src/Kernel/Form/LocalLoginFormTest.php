@@ -44,7 +44,6 @@ class LocalLoginFormTest extends KernelTestBase {
   public function testLoginFormConfig() {
     $status = (bool) \Drupal::config('stanford_ssp.settings')
       ->get('hide_local_login');
-
     $this->assertFalse($status);
     $form = \Drupal::formBuilder()
       ->getForm('\Drupal\stanford_ssp\Form\LocalLoginForm');
