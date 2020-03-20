@@ -1,5 +1,5 @@
 # [Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
-##### Version: 8.x-1.2
+##### Version: 8.x-1.3
 
 [![CircleCI](https://circleci.com/gh/SU-SWS/stanford_ssp.svg?style=svg)](https://circleci.com/gh/SU-SWS/stanford_ssp)
 [![Maintainability](https://api.codeclimate.com/v1/badges/d597c026202dc075d677/maintainability)](https://codeclimate.com/github/SU-SWS/stanford_ssp/maintainability)

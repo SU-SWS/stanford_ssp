@@ -1,5 +1,11 @@
 # Stanford SSP
 
+8.x-1.3
+--------------------------------------------------------------------------------
+_Release Date: 2020-03-20_
+
+- D8CORE-1511: Change role mapping for stanford_ssp from itservices:webservices to uit:sws (#86)
+
 8.x-1.2
 --------------------------------------------------------------------------------
 _Release Date: 2020-02-05_
