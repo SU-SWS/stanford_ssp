@@ -99,4 +99,15 @@ interface StanfordSSPWorkgroupApiInterface {
    */
   public function userInAllGroups(array $workgroups, $name);
 
+  /**
+   * Check if the workgroup is valid and is public.
+   *
+   * @param string $workgroup
+   *   Workgroup name to test.
+   *
+   * @return bool
+   *   True if the given workgroup is valid.
+   */
+  public function isWorkgroupValid($workgroup);
+
 }
