@@ -186,7 +186,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    * {@inheritDoc}
    */
   public function isWorkgroupValid($workgroup) {
-    $response = $this->getWorkgroupApiResponse($workgroup, $this->cert, $this->key);
+    $response = $this->getWorkgroupApiResponse($workgroup);
     $dom = new \DOMDocument();
     $dom->loadXML((string) $response->getBody());
     $xpath = new \DOMXPath($dom);
