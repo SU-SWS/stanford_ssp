@@ -59,7 +59,6 @@ class RoleSyncFormTest extends KernelTestBase {
   }
 
   public function guzzleCallback($method, $url, $options) {
-    var_dump($url);
     $response = $this->createMock(ResponseInterface::class);
     $response->method('getBody')->willReturn('
 <?xml version="1.0" encoding="UTF-8"?>
