@@ -6,6 +6,8 @@ use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface;
 use Drupal\user\Entity\Role;
+use GuzzleHttp\ClientInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class RoleSyncFormTest.
@@ -43,6 +45,10 @@ class RoleSyncFormTest extends KernelTestBase {
     $this->installSchema('externalauth', 'authmap');
     $this->installSchema('system', ['key_value_expire', 'sequences']);
 
+    $guzzle = $this->createMock(ClientInterface::class);
+    $guzzle->method('request')->will($this->returnCallback([$this, 'guzzleCallback']));
+    \Drupal::getContainer()->set('http_client', $guzzle);
+
     for ($i = 0; $i < 5; $i++) {
       Role::create(['label' => "Role $i", 'id' => "role$i"])->save();
     }
@@ -50,6 +56,26 @@ class RoleSyncFormTest extends KernelTestBase {
       ->getEditable('simplesamlphp_auth.settings')
       ->set('role.population', $this->randomMachineName() . 'role1:attribute_name,=,value|role2:attribute_name2,=,another_value')
       ->save();
+  }
+
+  public function guzzleCallback($method, $url, $options) {
+    var_dump($url);
+    $response = $this->createMock(ResponseInterface::class);
+    $response->method('getBody')->willReturn('
+<?xml version="1.0" encoding="UTF-8"?>
+<workgroup>
+  <description>Test Workgroup</description>
+  <filter />
+  <visibility>STANFORD</visibility>
+  <reusable>FALSE</reusable>
+  <privgroup>TRUE</privgroup>
+  <members />
+  <administrators>
+    <member id="foo-bar" url="https://workgroupsvc.stanford.edu/v1/users/foo-bar" name="Foo, BAR" />
+  </administrators>
+</workgroup>
+');
+    return $response;
   }
 
   /**

@@ -300,7 +300,11 @@ class RoleSyncForm extends SyncingSettingsForm {
    */
   public function validateWorkgroup(array $element, FormStateInterface $form_state) {
     $workgroup = $form_state->getValue($element['#parents']);
-    if ($this->workgroupApi->connectionSuccessful() && !$this->workgroupApi->isWorkgroupValid($workgroup)) {
+    if (
+      $workgroup &&
+      $this->workgroupApi->connectionSuccessful() &&
+      !$this->workgroupApi->isWorkgroupValid($workgroup)
+    ) {
       $form_state->setError($element, $this->t('Workgroup is not accessible. Please verify permissions are public.'));
     }
   }
