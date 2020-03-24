@@ -186,11 +186,14 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    * {@inheritDoc}
    */
   public function isWorkgroupValid($workgroup) {
+    if (!$this->connectionSuccessful()) {
+      return NULL;
+    }
+
     $response = $this->getWorkgroupApiResponse($workgroup);
     $dom = new \DOMDocument();
     $dom->loadXML((string) $response->getBody());
     $xpath = new \DOMXPath($dom);
-    var_dump((string) $response->getBody());
     if ($xpath->query('//visibility')->item(0)->nodeValue != 'PRIVATE') {
       return TRUE;
     }

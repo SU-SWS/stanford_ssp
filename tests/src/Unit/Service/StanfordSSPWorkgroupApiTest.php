@@ -3,10 +3,13 @@
 namespace Drupal\Tests\stanford_ssp\Unit\Service;
 
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApi;
 use Drupal\Tests\UnitTestCase;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\ClientException;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Class StanfordSSPWorkgroupApi.
@@ -29,6 +32,13 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
    * @var string
    */
   protected $authname;
+
+  /**
+   * If the guzzle callback should throw an error.
+   *
+   * @var bool
+   */
+  protected $throwGuzzleException = FALSE;
 
   /**
    * {@inheritDoc}
@@ -57,11 +67,16 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
       ->will($this->returnCallback([$this, 'guzzleRequestCallback']));
 
     $logger = $this->createMock(LoggerChannelFactoryInterface::class);
-
+    $logger->method('get')->willReturn($this->createMock(LoggerChannelInterface::class));
     $this->service = new StanfordSSPWorkgroupApi($config_factory, $guzzle, $logger);
   }
 
   public function guzzleRequestCallback($method, $url) {
+    if ($this->throwGuzzleException) {
+      $request = $this->createMock(RequestInterface::class);
+      throw new ClientException('It broke', $request);
+    }
+
     $guzzle_response = $this->createMock(ResponseInterface::class);
     $guzzle_response->method('getStatusCode')->willReturn(200);
 
@@ -71,6 +86,13 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
         $body = "<members><member id='{$this->authname}'/></members>";
         break;
 
+      case 'https://workgroupsvc.stanford.edu/v1/workgroups/foo:bar':
+        $body = "<visibility>STANFORD</visibility>";
+        break;
+
+      case 'https://workgroupsvc.stanford.edu/v1/workgroups/bar:foo':
+        $body = "<workgroup><visibility>PRIVATE</visibility></workgroup>";
+        break;
     }
     $guzzle_response->method('getBody')->willReturn($body);
     return $guzzle_response;
@@ -104,6 +126,17 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
       'valid:workgroup',
     ], $this->authname));
     $this->assertTrue($this->service->userInAllGroups(['valid:workgroup'], $this->authname));
+  }
+
+  public function testValidWorkgroup() {
+    $this->assertTrue($this->service->isWorkgroupValid('foo:bar'));
+    $this->assertFalse($this->service->isWorkgroupValid('bar:foo'));
+  }
+
+  public function testGuzzleException() {
+    $this->throwGuzzleException = TRUE;
+    $this->assertFalse($this->service->isWorkgroupValid('foo:bar'));
+    $this->assertFalse($this->service->userInGroup('foo', 'bar'));
   }
 
 }
