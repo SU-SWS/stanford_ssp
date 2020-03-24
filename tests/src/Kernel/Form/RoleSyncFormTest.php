@@ -182,6 +182,31 @@ class RoleSyncFormTest extends KernelTestBase {
   }
 
   /**
+   * Submitting the form with values in the fields should add them to config.
+   */
+  public function testAddingNewWorkgroup() {
+    \Drupal::configFactory()
+      ->getEditable('simplesamlphp_auth.settings')
+      ->set('role.population', '')
+      ->save();
+
+    $form_state = new FormState();
+    $form_state->setValues([
+      'unique_id' => 'uid',
+      'user_name' => 'uid',
+      'role_population' => [
+        'add' => [
+          'role_id' => 'role1',
+          'attribute' => '',
+          'workgroup' => 'foo:bar',
+        ],
+      ],
+    ]);
+    \Drupal::formBuilder()->submitForm($this->formId, $form_state);
+    $this->assertEqual('role1:eduPersonEnttitlement,=,foo:bar', \Drupal::config('simplesamlphp_auth.settings')->get('role.population'));
+  }
+
+  /**
    * Set the workgroup mock object to the drupal container.
    *
    * @param bool $successful_connection

@@ -128,11 +128,17 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
     $this->assertTrue($this->service->userInAllGroups(['valid:workgroup'], $this->authname));
   }
 
+  /**
+   * Valid workgroups are public.
+   */
   public function testValidWorkgroup() {
     $this->assertTrue($this->service->isWorkgroupValid('foo:bar'));
     $this->assertFalse($this->service->isWorkgroupValid('bar:foo'));
   }
 
+  /**
+   * Guzzle exceptions don't break the service.
+   */
   public function testGuzzleException() {
     $this->throwGuzzleException = TRUE;
     $this->assertFalse($this->service->isWorkgroupValid('foo:bar'));

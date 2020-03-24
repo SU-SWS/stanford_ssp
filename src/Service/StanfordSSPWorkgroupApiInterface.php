@@ -105,8 +105,8 @@ interface StanfordSSPWorkgroupApiInterface {
    * @param string $workgroup
    *   Workgroup name to test.
    *
-   * @return bool
-   *   True if the given workgroup is valid.
+   * @return bool|null
+   *   True if the given workgroup is valid, null if unknown.
    */
   public function isWorkgroupValid($workgroup);
 
