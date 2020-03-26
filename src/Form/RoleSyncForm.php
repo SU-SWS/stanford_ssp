@@ -109,11 +109,11 @@ class RoleSyncForm extends SyncingSettingsForm {
       '#type' => 'textfield',
       '#title' => $this->t('Attribute Value'),
       '#description' => $this->t('The value in the SAML data to use as the value for matching. eg: uit:sws'),
+      '#element_validate' => [[$this, 'validateWorkgroup']],
     ];
     $form['user_info']['role_population']['add']['add_mapping'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add Mapping'),
-      '#limit_validation_errors' => [],
       '#submit' => ['::addMappingCallback'],
       '#ajax' => [
         'callback' => '::addMapping',
@@ -291,10 +291,34 @@ class RoleSyncForm extends SyncingSettingsForm {
   }
 
   /**
+   * Validate the workgroup textfield input.
+   *
+   * @param array $element
+   *   Field render array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   Current form state.
+   */
+  public function validateWorkgroup(array $element, FormStateInterface $form_state) {
+    $workgroup = $form_state->getValue($element['#parents']);
+    if ($workgroup && $this->workgroupApi->isWorkgroupValid($workgroup) === FALSE) {
+      $form_state->setError($element, $this->t('Workgroup is not accessible. Please verify permissions are public.'));
+    }
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $form_state->setValue('role_population', implode('|', $form_state->get('mappings')));
+    $mappings = $form_state->get('mappings');
+
+    // Add the role mapping that wasn't added via the ajax callback.
+    if ($workgroup = $form_state->getValue(['role_population', 'add', 'workgroup'])) {
+      $role_id = $form_state->getValue(['role_population', 'add', 'role_id']);
+      $attribute = $form_state->getValue(['role_population', 'add', 'attribute']) ?: 'eduPersonEnttitlement';
+      $mappings[] = "$role_id:$attribute,=,$workgroup";
+    }
+
+    $form_state->setValue('role_population', implode('|', $mappings));
     parent::validateForm($form, $form_state);
 
     // If using SAML attributes, unset api settings.
