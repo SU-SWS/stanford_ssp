@@ -4,7 +4,9 @@
 --------------------------------------------------------------------------------
 _Release Date: 2020-04-16_
 
+* 8.1.4 (d8fec1e)
 * D8CORE-1644: Dev branch workflow (1877202)
+* D8CORE-1545 Added validation to check for public workgroups (#89) (a0acd1d)* D8CORE-1644: Dev branch workflow (1877202)
 * D8CORE-1545 Added validation to check for public workgroups (#89) (a0acd1d)* D8CORE-1644: Dev branch workflow (1877202)
 * D8CORE-1545 Added validation to check for public workgroups (#89) (a0acd1d)
 
