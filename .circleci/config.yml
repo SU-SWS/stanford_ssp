@@ -57,17 +57,44 @@ behat: &behat
     - store_artifacts:
         path: /var/www/html/artifacts
 
+back_to_dev: &back_to_dev
+  <<: *defaults
+  steps:
+    - checkout
+    - run:
+        name: Back to dev
+        command: |
+          composer global require SU-SWS/stanford-caravan:dev-8.x-1.x
+          ~/.composer/vendor/bin/sws-caravan back-to-dev ${CIRCLE_TAG} ${CIRCLE_WORKING_DIRECTORY}
+
 # Declare all of the jobs we should run.
 jobs:
   run-coverage:
     <<: *code_coverage
   run-behat:
     <<: *behat
+  run-back-to-dev:
+    <<: *back_to_dev
 
 # Declare a workflow that runs all of our jobs in parallel.
 workflows:
   version: 2
-  weekly:
+  after_release:
+    jobs:
+      - run-back-to-dev:
+          filters:
+            tags:
+              only:
+                - /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*).*?$/
+            branches:
+              ignore:
+                - /.*/
+  tests:
+    jobs:
+      - run-coverage
+      - run-behat
+  # Re-test every sunday in case this code becomes stale.
+  sundays:
     jobs:
       - run-coverage
       - run-behat
@@ -78,8 +105,3 @@ workflows:
             branches:
               only:
                 - 8.x-1.x
-  tests:
-    jobs:
-      - run-coverage
-      - run-behat
-
