@@ -1,5 +1,13 @@
 # Stanford SSP
 
+8.1.4
+--------------------------------------------------------------------------------
+_Release Date: 2020-04-16_
+
+* D8CORE-1644: Dev branch workflow (1877202)
+* D8CORE-1545 Added validation to check for public workgroups (#89) (a0acd1d)* D8CORE-1644: Dev branch workflow (1877202)
+* D8CORE-1545 Added validation to check for public workgroups (#89) (a0acd1d)
+
 8.x-1.3
 --------------------------------------------------------------------------------
 _Release Date: 2020-03-20_
