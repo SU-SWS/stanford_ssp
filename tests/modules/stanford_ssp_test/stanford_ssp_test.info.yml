@@ -3,4 +3,4 @@ type: module
 core: 8.x
 hidden: true
 package: Testing
-version: VERSION
+version: 8.x-1.5-dev
