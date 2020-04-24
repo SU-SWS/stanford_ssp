@@ -113,7 +113,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    * {@inheritdoc}
    */
   public function connectionSuccessful() {
-    $response = $this->getWorkgroupApiResponse('uit:sws', $this->cert, $this->key);
+    $response = $this->getWorkgroupApiResponse('uit:sws');
     return $response && $response->getStatusCode() == 200;
   }
 
@@ -131,7 +131,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     // Loop through each workgroup mapping and find out if the given user exists
     // within each group.
     foreach ($workgroup_mappings as $workgroup_mapping) {
-      list($role, $mapping) = explode(':', $workgroup_mapping, 2);
+      [$role, $mapping] = explode(':', $workgroup_mapping, 2);
 
       // We ignore the eduEntitlement equation since its only a yes or no if the
       // user is in the group.
@@ -147,7 +147,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    * {@inheritdoc}
    */
   public function userInGroup($workgroup, $name) {
-    if ($response = $this->getWorkgroupApiResponse($workgroup, $this->cert, $this->key)) {
+    if ($response = $this->getWorkgroupApiResponse($workgroup)) {
       $dom = new \DOMDocument();
       $dom->loadXML((string) $response->getBody());
       $xpath = new \DOMXPath($dom);
@@ -183,26 +183,40 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function isWorkgroupValid($workgroup) {
+    if (!$this->connectionSuccessful()) {
+      return NULL;
+    }
+
+    $response = $this->getWorkgroupApiResponse($workgroup);
+    $dom = new \DOMDocument();
+    $dom->loadXML((string) $response->getBody());
+    $xpath = new \DOMXPath($dom);
+    if ($xpath->query('//visibility')->item(0)->nodeValue != 'PRIVATE') {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
    * Call the workgroup api and get the response for the workgroup.
    *
    * @param string $workgroup
    *   Workgroup name like uit:sws.
-   * @param string $cert
-   *   Path to cert file.
-   * @param string $key
-   *   Path to key file.
    *
    * @return bool|\Psr\Http\Message\ResponseInterface
    *   API response or false if fails.
    */
-  protected function getWorkgroupApiResponse($workgroup, $cert, $key) {
+  protected function getWorkgroupApiResponse($workgroup) {
     // We've already called the API for this group, use that result.
     if (isset($this->workgroupResponses[$workgroup])) {
       return $this->workgroupResponses[$workgroup];
     }
     $options = [
-      'cert' => $cert,
-      'ssl_key' => $key,
+      'cert' => $this->getCert(),
+      'ssl_key' => $this->getKey(),
       'verify' => TRUE,
       'timeout' => 5,
     ];
