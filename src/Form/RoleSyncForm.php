@@ -149,7 +149,7 @@ class RoleSyncForm extends SyncingSettingsForm {
     $form['user_info']['use_workgroup_api'] = [
       '#type' => 'radios',
       '#title' => $this->t('Source to validate role mapping groups against.'),
-      '#default_value' => $stanford_config->get('use_workgroup_api') ?: 0,
+      '#default_value' => $stanford_config->get('workgroup_api.enabled') ?: 0,
       '#options' => [
         $this->t('SAML Attribute'),
         $this->t('Workgroup API'),
@@ -166,7 +166,7 @@ class RoleSyncForm extends SyncingSettingsForm {
       '#type' => 'textfield',
       '#title' => $this->t('Path to Workgroup API SSL Certificate.'),
       '#description' => $this->t('For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates.'),
-      '#default_value' => $stanford_config->get('workgroup_api_cert'),
+      '#default_value' => $stanford_config->get('workgroup_api.cert'),
       '#states' => $states,
     ];
 
@@ -174,7 +174,7 @@ class RoleSyncForm extends SyncingSettingsForm {
       '#type' => 'textfield',
       '#title' => $this->t('Key to Workgroup API SSL Key.'),
       '#description' => $this->t('For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates.'),
-      '#default_value' => $stanford_config->get('workgroup_api_key'),
+      '#default_value' => $stanford_config->get('workgroup_api.key'),
       '#states' => $states,
     ];
   }
@@ -373,9 +373,9 @@ class RoleSyncForm extends SyncingSettingsForm {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
     $this->config('stanford_ssp.settings')
-      ->set('use_workgroup_api', $form_state->getValue('use_workgroup_api'))
-      ->set('workgroup_api_cert', $form_state->getValue('workgroup_api_cert'))
-      ->set('workgroup_api_key', $form_state->getValue('workgroup_api_key'))
+      ->set('workgroup_api.enabled', $form_state->getValue('use_workgroup_api'))
+      ->set('workgroup_api.cert', $form_state->getValue('workgroup_api_cert'))
+      ->set('workgroup_api.key', $form_state->getValue('workgroup_api_key'))
       ->save();
   }
 
@@ -401,7 +401,7 @@ class RoleSyncForm extends SyncingSettingsForm {
    */
   protected static function hasOverriddenApiCert() {
     $config = \Drupal::config('stanford_ssp.settings');
-    return $config->hasOverrides('workgroup_api_cert') && $config->hasOverrides('workgroup_api_key');
+    return $config->hasOverrides('workgroup_api.cert') && $config->hasOverrides('workgroup_api.key');
   }
 
 }

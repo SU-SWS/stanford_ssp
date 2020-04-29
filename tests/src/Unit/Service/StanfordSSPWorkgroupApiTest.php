@@ -50,9 +50,11 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
 
     $config_factory = $this->getConfigFactoryStub([
       'stanford_ssp.settings' => [
-        'workgroup_api_cert' => __FILE__,
-        'workgroup_api_key' => __FILE__,
-        'workgroup_api_url' => '',
+        'workgroup_api' => [
+          'cert' => __FILE__,
+          'key' => __FILE__,
+          'url' => '',
+        ],
       ],
       'simplesamlphp_auth.settings' => [
         'role' => [

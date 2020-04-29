@@ -76,7 +76,7 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
         'register_users' => TRUE,
       ],
       'stanford_ssp.settings' => [
-        'use_workgroup_api' => TRUE,
+        'workgroup_api' => ['enabled' => TRUE],
       ],
     ]);
     $account = $this->createMock(UserInterface::class);

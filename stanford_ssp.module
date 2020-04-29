@@ -100,7 +100,7 @@ function stanford_ssp_simplesamlphp_auth_allow_login($attributes) {
     return TRUE;
   }
 
-  if ($config->get('use_workgroup_api')) {
+  if ($config->get('workgroup_api.enabled')) {
     /** @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface $workgroup_api */
     $workgroup_api = \Drupal::service('stanford_ssp.workgroup_api');
     return $workgroup_api->userInAnyGroup($config->get('whitelist_groups'), $authname);

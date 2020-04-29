@@ -75,3 +75,21 @@ function stanford_ssp_update_8001() {
       ->setComponent('su_display_name')->save();
   }
 }
+
+/**
+ * Change config settings for workgroup api.
+ */
+function stanford_ssp_update_8002() {
+  $settings = \Drupal::configFactory()->getEditable('stanford_ssp.settings');
+  $from_to = [
+    'workgroup_api_url' => 'url',
+    'use_workgroup_api' => 'enabled',
+    'workgroup_api_cert' => 'cert',
+    'workgroup_api_key' => 'key',
+  ];
+  foreach ($from_to as $from => $to) {
+    $settings->set("workgroup_api.$to", $settings->get($from));
+    $settings->clear($from);
+  }
+  $settings->save();
+}

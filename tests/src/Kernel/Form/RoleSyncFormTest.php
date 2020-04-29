@@ -137,7 +137,7 @@ class RoleSyncFormTest extends KernelTestBase {
     \Drupal::formBuilder()->submitForm($this->formId, $form_state);
     $this->assertFalse($form_state::hasAnyErrors());
     $this->assertEmpty(\Drupal::config('stanford_ssp.settings')
-      ->get('workgroup_api_cert'));
+      ->get('workgroup_api.cert'));
 
     // Cert set, but key not set.
     $form_state->setValue('use_workgroup_api', TRUE);
@@ -178,7 +178,7 @@ class RoleSyncFormTest extends KernelTestBase {
     $this->assertFalse($form_state::hasAnyErrors());
 
     $this->assertEquals(__DIR__ . '/test.crt', \Drupal::config('stanford_ssp.settings')
-      ->get('workgroup_api_cert'));
+      ->get('workgroup_api.cert'));
   }
 
   /**
