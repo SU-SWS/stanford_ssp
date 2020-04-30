@@ -104,6 +104,13 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function setCheckNestedGroups($check_nested = TRUE) {
+    $this->checkNestedGroups = $check_nested;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getCert() {
