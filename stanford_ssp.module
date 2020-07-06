@@ -424,14 +424,13 @@ function stanford_ssp_user_delete($account) {
  */
 function stanford_ssp_stanford_simplesamlphp_auth_allow_login(array $attributes) {
 
-  // Is the user allowed to log in?
-  $isok = TRUE;
-
   // If the checks are off then just let it pass.
   if (variable_get("stanford_ssp_auth_restrictions", "allow") !== "restrict") {
-    return $isok;
+    return TRUE;
   }
 
+  $isok_sunet = TRUE;
+  $isok_group = TRUE;
   $sunets = variable_get("stanford_ssp_auth_restriction_sunet", FALSE);
   $groups = variable_get("stanford_ssp_auth_restriction_group", FALSE);
 
@@ -439,18 +438,23 @@ function stanford_ssp_stanford_simplesamlphp_auth_allow_login(array $attributes)
   if (!empty($sunets)) {
     $sunets = explode(",", $sunets);
     $sunets = array_map("trim", $sunets);
-    $isok = stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets($sunets, $attributes);
+    $isok_sunet = stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets($sunets, $attributes);
   }
 
-  // If the sunets are not ok we should check the groups.
-  if (!empty($groups) && !$isok) {
+  // Check the groups.
+  if (!empty($groups)) {
     $groups = explode(",", $groups);
     $groups = array_map("trim", $groups);
-    $isok = stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $attributes);
+    $isok_group = stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $attributes);
   }
 
-  // Return true or false.
-  return $isok;
+  // If anything returns back false do so here.
+  if (!$isok_sunet || !$isok_group) {
+    return FALSE;
+  }
+
+  // Default to allowed.
+  return TRUE;
 }
 
 /**
