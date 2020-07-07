@@ -429,18 +429,16 @@ function stanford_ssp_stanford_simplesamlphp_auth_allow_login(array $attributes)
     return TRUE;
   }
 
-  $sunets = variable_get("stanford_ssp_auth_restriction_sunet", '');
-  $sunets = explode(",", $sunets);
-  $sunets = array_map("trim", $sunets);
+  $sunets = variable_get("stanford_ssp_auth_restriction_sunet", FALSE);
+  $groups = variable_get("stanford_ssp_auth_restriction_group", FALSE);
 
-  $groups = variable_get("stanford_ssp_auth_restriction_group", '');
-  $groups = explode(",", $groups);
-  $groups = array_map("trim", $groups);
     
   $isok = TRUE;
     
   // First check list of sunets.
   if (!empty($sunets)) {
+    $sunets = explode(",", $sunets);
+    $sunets = array_map("trim", $sunets);
     $isok = stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets($sunets, $attributes);
     if ($isok) {
       return TRUE;
@@ -449,6 +447,8 @@ function stanford_ssp_stanford_simplesamlphp_auth_allow_login(array $attributes)
   
   // If there was no match in the sunet list, check the groups if config allows.
   if (!empty($groups)) {
+    $groups = explode(",", $groups);
+    $groups = array_map("trim", $groups);
     return stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $attributes);
   }
 
