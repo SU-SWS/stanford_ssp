@@ -1011,21 +1011,10 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
   }
 
   $members = array();
+  
   // If there are members in this group add them to the allowed list.
   if (!empty($values['members']['member'])) {
     foreach ($values['members']['member'] as $member) {
-      try {
-        $members[] = stanford_ssp_get_api_members_from_xml_array($member);
-      }
-      catch (Exception $e) {
-        watchdog('stanford_ssp', $e->getMessage(), array(), WATCHDOG_DEBUG);
-      }
-    }
-  }
-
-  // Add admins to the allowed to log in list.
-  if (!empty($values['administrators']['member'])) {
-    foreach ($values['administrators']['member'] as $member) {
       try {
         $members[] = stanford_ssp_get_api_members_from_xml_array($member);
       }
