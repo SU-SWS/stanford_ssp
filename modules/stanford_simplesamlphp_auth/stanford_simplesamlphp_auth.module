@@ -234,7 +234,7 @@ function stanford_simplesamlphp_auth_form_alter(&$form, $form_state, $form_id) {
     'query' => drupal_get_destination(),
     'attributes' => [
       'rel' => 'nofollow',
-    ]
+    ],
   ];
   $link = l($login_name, $login_path, $options);
 
@@ -327,7 +327,7 @@ function stanford_simplesamlphp_auth_generate_block_text() {
     $options = [
       'attributes' => [
         'rel' => 'nofollow',
-      ]
+      ],
     ];
     $block_content .= '<p>' . l($login_name, $login_path, $options) . '</p>';
   }

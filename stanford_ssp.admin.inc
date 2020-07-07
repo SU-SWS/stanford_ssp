@@ -373,7 +373,6 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
 
   // ROLE MAPPING FORM.
   $table = array();
-  $submitted = !empty($form_state['post']);
 
   // Remove authenticated user has this will be defaulted to true.
   $roles = user_roles(TRUE);
@@ -600,7 +599,7 @@ function stanford_ssp_configuration_form_validate(array $form, array &$form_stat
   // Prevent both ssp and local login options from being disabled.
   if ($values["stanford_simplesamlphp_auth_activate"] === 0 && $values["stanford_simplesamlphp_auth_allowdefaultlogin"] === 0) {
     form_set_error('stanford_simplesamlphp_auth_allowdefaultlogin');
-    form_set_error('stanford_simplesamlphp_auth_activate', "Both SSO and Local log in cannot be disabled or you will lock yourself out of your site. Please enable one.");
+    form_set_error('stanford_simplesamlphp_auth_activate', t("Both SSO and Local log in cannot be disabled or you will lock yourself out of your site. Please enable one."));
   }
 
 }
@@ -625,7 +624,7 @@ function stanford_ssp_add_sso_user_validate(array $form, array &$form_state) {
   $authmaps = user_get_authmaps($authname);
 
   if ((($authmaps) !== 0) && isset($authmaps['authname_stanford_simplesamlphp_auth']) && ($authmaps['authname_stanford_simplesamlphp_auth'] == $authname)) {
-    form_set_error('sunetid', 'Could not create user. Authname ' . $authname . ' already exists. Has the user already been created with a different username but the same SUNetID?');
+    form_set_error('sunetid', t('Could not create user. Authname %s already exists. Has the user already been created with a different username but the same SUNetID?', ["%s" => $authname]));
   }
 
   // If no name is specified, use the default name (sunetid + @stanford.edu).
@@ -636,7 +635,7 @@ function stanford_ssp_add_sso_user_validate(array $form, array &$form_state) {
 
   // Check that there is no user with the same name.
   if (user_load_by_name($name)) {
-    form_set_error('name', 'Could not create user. Username ' . $name . ' already exists.');
+    form_set_error('name', t('Could not create user. Username %s already exists.', ['%s' => $name]));
   }
 
   // If no email was specified, we'll use the default (sunetid + @stanford.edu).
@@ -644,7 +643,7 @@ function stanford_ssp_add_sso_user_validate(array $form, array &$form_state) {
   $email = strtolower(trim($form_state['values']['email']));
 
   if (!empty($email) && !valid_email_address($email)) {
-    form_set_error('email', t('The e-mail address %email is not valid.', array('%email' => $email)));
+    form_set_error('email', t('The e-mail address %email is not valid.', ['%email' => $email]));
   }
 
   if (empty($email)) {
@@ -655,13 +654,13 @@ function stanford_ssp_add_sso_user_validate(array $form, array &$form_state) {
   // Drupal will let us create the user with a duplicate email, but
   // the user will run into issues when making changes to their profile.
   if (user_load_by_mail($email)) {
-    form_set_error('email', 'Could not create user. Email ' . $email . ' already in use.');
+    form_set_error('email', t('Could not create user. Email %email already in use.', ['%email' => $email]));
   }
 
   // Check that the sunet doesn't already exist.
   $suuser = stanford_ssp_user_load_by_sunetid($sunet);
   if ($suuser) {
-    form_set_error("sunetid", "A user with that sunetid already exists.");
+    form_set_error("sunetid", t("A user with that sunetid already exists."));
   }
 
 }

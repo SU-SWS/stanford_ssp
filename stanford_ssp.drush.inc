@@ -47,9 +47,12 @@ function stanford_ssp_drush_command() {
 
 /**
  * Map an entitlement to a role.
- * @param  [type] $entitlement [description]
- * @param  [type] $role        [description]
- * @return [type]              [description]
+ * @param string $entitlement
+ *   Entitlement string..
+ * @param string $role
+ *   Machine name of role.
+ *
+ * @return void
  */
 function drush_stanford_ssp_saml_entitlement_role($entitlement, $role) {
   $entitlement = check_plain($entitlement);
@@ -82,8 +85,9 @@ function drush_stanford_ssp_saml_entitlement_role($entitlement, $role) {
 
 /**
  * Add a SSO user.
- * @param  [type] $sunet [description]
- * @return [type]        [description]
+ *
+ * @param string $sunet
+ *   A sunet id.
  */
 function drush_stanford_ssp_saml_add_user($sunet) {
 
@@ -117,7 +121,6 @@ function drush_stanford_ssp_saml_add_user($sunet) {
     $form_state["values"]["roles"] = $ids;
   }
 
-  // @todo: Make this an option.
   $notify = drush_get_option("notify-user");
   if (!empty($notify) && ($notify == "true" || (int) $notify == 1)) {
     $form_state["values"]["notify"] = TRUE;

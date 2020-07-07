@@ -9,6 +9,8 @@
  * Implements hook_install().
  */
 function stanford_ssp_install() {
+  $t = get_t()
+
   variable_set('stanford_simplesamlphp_auth_activate', TRUE);
   variable_set('stanford_simplesamlphp_auth_allowdefaultlogin', TRUE);
   variable_set('stanford_ssp_automagic_login', TRUE);
@@ -45,7 +47,7 @@ function stanford_ssp_install() {
           'name' => $role,
         ))
         ->execute();
-      drupal_set_message(st('Added Role @role', array('@role' => $role)));
+      drupal_set_message($t('Added Role @role', array('@role' => $role)));
     }
   }
 
@@ -277,7 +279,7 @@ function stanford_ssp_update_7206() {
 }
 
 /**
- * stanford_ssp_update_7207
+ * Update hook stanford_ssp_update_7207.
  *
  * Set the default path for the simplesamlphp library if it hasnt been changed.
  * If is has been changed leave it alone. Also, set the reformatting of the

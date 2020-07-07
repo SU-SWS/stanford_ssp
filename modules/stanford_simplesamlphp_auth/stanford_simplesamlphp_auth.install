@@ -77,8 +77,7 @@ function stanford_simplesamlphp_auth_requirements($phase) {
     }
     // SimpleSAMLphp is installed, lets autoload it.
     elseif (stanford_simplesamlphp_auth_autoload()) {
-      // If autoloading was successful we should have these variables.
-      global $stanford_simplesamlphp_auth_saml_config;
+      // If autoloading was successful we should have this variable.
       global $stanford_simplesamlphp_auth_saml_version;
 
       if (!empty($stanford_simplesamlphp_auth_saml_version)) {

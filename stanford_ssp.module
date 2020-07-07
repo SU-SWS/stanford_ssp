@@ -20,7 +20,7 @@ function stanford_ssp_menu() {
     'options' => [
       'attributes' => [
         'rel' => 'nofollow',
-      ]
+      ],
     ],
   );
 
@@ -149,7 +149,7 @@ function stanford_ssp_access_login_page() {
 }
 
 /**
- * Implement hook_menu_site_status_alter().
+ * Implements hook_menu_site_status_alter().
  *
  * Allow access to log in when site is in maintenance mode.
  */
@@ -414,12 +414,6 @@ function stanford_ssp_user_delete($account) {
 
 /**
  * Implements hook_stanford_simplesamlphp_auth_allow_login().
- *
- * @param array $attributes
- *   SAML Attributes.
- *
- * @return bool
- *   True if ok. False is not allowed to log in.
  */
 function stanford_ssp_stanford_simplesamlphp_auth_allow_login(array $attributes) {
 
@@ -431,9 +425,8 @@ function stanford_ssp_stanford_simplesamlphp_auth_allow_login(array $attributes)
   $sunets = variable_get("stanford_ssp_auth_restriction_sunet", FALSE);
   $groups = variable_get("stanford_ssp_auth_restriction_group", FALSE);
 
-    
   $isok = TRUE;
-    
+
   // First check list of sunets.
   if (!empty($sunets)) {
     $sunets = explode(",", $sunets);
@@ -443,7 +436,7 @@ function stanford_ssp_stanford_simplesamlphp_auth_allow_login(array $attributes)
       return TRUE;
     }
   }
-  
+
   // If there was no match in the sunet list, check the groups if config allows.
   if (!empty($groups)) {
     $groups = explode(",", $groups);
@@ -684,7 +677,7 @@ function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
     $options = [
       'attributes' => [
         'rel' => 'nofollow',
-      ]
+      ],
     ];
     $form['saml_auth']['saml_link'] = array(
       '#prefix' => "<p>",
@@ -949,9 +942,8 @@ function stanford_ssp_get_webauth_role_mappings() {
  * Convert WMD workgroup mappings to SAML mappings.
  */
 function stanford_ssp_convert_webauth_role_mappings() {
-  // TODO: this duplicates some functionality in stanford_ssp_map_entitlement_to_role().
-  // Update stanford_ssp_map_entitlement_to_role() to use this explode/implode,
-  // and then use that function here.
+  // This duplicates some functionality in
+  // stanford_ssp_map_entitlement_to_role().
   $webauth_roles = stanford_ssp_get_webauth_role_mappings();
   $rolepop = variable_get('stanford_simplesamlphp_auth_rolepopulation', '');
   $roles = array();
