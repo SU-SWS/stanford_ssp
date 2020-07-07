@@ -1,6 +1,11 @@
 Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 -------------------------------------------
 
+Stanford SimpleSAML PHP 7.x-2.2-alpha10 2019-07-16
+--------------------------------------------------
+- PHP 7.2: Check if session has started so that PHP 7+ does not print warning.
+- Add rel="nofollow" attribute to all login links
+
 Stanford SimpleSAML PHP 7.x-2.2-alpha9  2018-11-30
 --------------------------------------------------
 - Bug fix: workgroups with underscores in them were not mapping to roles
