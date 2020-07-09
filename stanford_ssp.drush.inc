@@ -48,7 +48,7 @@ function stanford_ssp_drush_command() {
 /**
  * Map an entitlement to a role.
  * @param string $entitlement
- *   Entitlement string..
+ *   Entitlement string.
  * @param string $role
  *   Machine name of role.
  *
