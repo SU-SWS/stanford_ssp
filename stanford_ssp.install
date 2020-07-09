@@ -9,7 +9,7 @@
  * Implements hook_install().
  */
 function stanford_ssp_install() {
-  $t = get_t()
+  $t = get_t();
 
   variable_set('stanford_simplesamlphp_auth_activate', TRUE);
   variable_set('stanford_simplesamlphp_auth_allowdefaultlogin', TRUE);
