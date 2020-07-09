@@ -288,6 +288,15 @@ function stanford_ssp_page_build(array &$page) {
   // header response on the page build.
   $headers = drupal_get_http_header();
 
+  // In order to prevent the redirect loop, we check to see if the referrer was login.stanford.edu. 
+  // Not all servers support HTTP_REFERER but the ones we use do. I suspect if we wanted to support 
+  // more servers we would have to expand on this check but hopefully, this is good enough.
+  // 
+  // https://www.php.net/manual/en/reserved.variables.server.php
+  // 
+  // The address of the page (if any) which referred the user agent to the current page. This is set 
+  // by the user agent. Not all user agents will set this, and some provide the ability to modify 
+  // HTTP_REFERER as a feature. In short, it cannot really be trusted.
   if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden" && !preg_match('/login(-uat)?\.stanford\.edu/', $_SERVER['HTTP_REFERER'])) {
     if (variable_get("stanford_ssp_automagic_login", FALSE)) {
       $dest = drupal_get_destination();
