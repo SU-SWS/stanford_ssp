@@ -36,7 +36,7 @@ function stanford_saml_block_block_configure($delta = '') {
         '#require'       => TRUE,
         '#size'          => 60,
         '#description'   => t('Here you can replace the text of the SimpleSAML PHP link.'),
-        '#default_value' => variable_get('stanford_ssp_link_text', 'SUNetID Login'),
+        '#default_value' => filter_xss(variable_get('stanford_ssp_link_text', 'SUNetID Login')),
       );
   }
   return $form;
@@ -48,7 +48,7 @@ function stanford_saml_block_block_configure($delta = '') {
 function stanford_saml_block_block_save($delta = '', $edit = array()) {
   switch ($delta) {
     case 'stanford_saml_block_login_block':
-      variable_set('stanford_ssp_link_text', filter_xss($edit['stanford_ssp_link_text']));
+      variable_set('stanford_ssp_link_text', $edit['stanford_ssp_link_text']);
   }
 }
 
@@ -63,7 +63,7 @@ function stanford_saml_block_block_view($delta = '') {
       if (user_is_logged_in()) {
         return $block;
       }
-      $stanford_ssp_link_text = variable_get('stanford_ssp_link_text', 'SUNetID Login');
+      $stanford_ssp_link_text = filter_xss(variable_get('stanford_ssp_link_text', 'SUNetID Login'));
       $params = [
         'query' => [
           'destination' => check_plain(current_path()),

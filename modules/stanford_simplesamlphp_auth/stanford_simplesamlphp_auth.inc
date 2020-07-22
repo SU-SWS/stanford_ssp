@@ -36,7 +36,6 @@ function stanford_simplesamlphp_handle_user_login_register() {
   // user was found.
   if (!$ext_user) {
     // Cannot do an access denied here as it creates a redirect loop.
-    // @todo: Handle this moar better.
     drupal_set_message(t("Sorry, but you do not have access to this page."), "error");
     drupal_not_found();
     exit();
@@ -252,7 +251,7 @@ function stanford_simplesamlphp_auth_moderate_local_login() {
       if (drupal_strlen($str_users_allowed_local) || $array_roles_allowed_local) {
 
         // Convert the string into an array.
-        // @todo Perform a test to make sure that only numbers, spaces, or
+        // Perform a test to make sure that only numbers, spaces, or
         // commas are in the string.
         $array_users_allowed_local = explode(',', $str_users_allowed_local);
 

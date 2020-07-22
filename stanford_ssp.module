@@ -20,7 +20,7 @@ function stanford_ssp_menu() {
     'options' => [
       'attributes' => [
         'rel' => 'nofollow',
-      ]
+      ],
     ],
   );
 
@@ -149,7 +149,7 @@ function stanford_ssp_access_login_page() {
 }
 
 /**
- * Implement hook_menu_site_status_alter().
+ * Implements hook_menu_site_status_alter().
  *
  * Allow access to log in when site is in maintenance mode.
  */
@@ -254,7 +254,6 @@ function stanford_ssp_force_https() {
 
   global $is_https;
   // If is https force secure cookies. Mmmmm cookies.
-
   if ($is_https) {
     if (session_status() == PHP_SESSION_NONE) {
       // Mandate secure cookies for sessions.
@@ -288,9 +287,18 @@ function stanford_ssp_page_build(array &$page) {
   // We don't want to mess with the 403 page setting so we should check the
   // header response on the page build.
   $headers = drupal_get_http_header();
-  if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden") {
-    if (variable_get("stanford_ssp_automagic_login", FALSE)) {
 
+  // In order to prevent the redirect loop, we check to see if the referrer was login.stanford.edu. 
+  // Not all servers support HTTP_REFERER but the ones we use do. I suspect if we wanted to support 
+  // more servers we would have to expand on this check but hopefully, this is good enough.
+  // 
+  // https://www.php.net/manual/en/reserved.variables.server.php
+  // 
+  // The address of the page (if any) which referred the user agent to the current page. This is set 
+  // by the user agent. Not all user agents will set this, and some provide the ability to modify 
+  // HTTP_REFERER as a feature. In short, it cannot really be trusted.
+  if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden" && !preg_match('/login(-uat)?\.stanford\.edu/', $_SERVER['HTTP_REFERER'])) {
+    if (variable_get("stanford_ssp_automagic_login", FALSE)) {
       $dest = drupal_get_destination();
 
       // If we don't unset the destination we get a redirect loop.
@@ -415,41 +423,36 @@ function stanford_ssp_user_delete($account) {
 
 /**
  * Implements hook_stanford_simplesamlphp_auth_allow_login().
- *
- * @param array $attributes
- *   SAML Attributes.
- *
- * @return bool
- *   True if ok. False is not allowed to log in.
  */
 function stanford_ssp_stanford_simplesamlphp_auth_allow_login(array $attributes) {
 
-  // Is the user allowed to log in?
-  $isok = TRUE;
-
   // If the checks are off then just let it pass.
   if (variable_get("stanford_ssp_auth_restrictions", "allow") !== "restrict") {
-    return $isok;
+    return TRUE;
   }
 
   $sunets = variable_get("stanford_ssp_auth_restriction_sunet", FALSE);
   $groups = variable_get("stanford_ssp_auth_restriction_group", FALSE);
+
+  $isok = TRUE;
 
   // First check list of sunets.
   if (!empty($sunets)) {
     $sunets = explode(",", $sunets);
     $sunets = array_map("trim", $sunets);
     $isok = stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets($sunets, $attributes);
+    if ($isok) {
+      return TRUE;
+    }
   }
 
-  // If the sunets are not ok we should check the groups.
-  if (!empty($groups) && !$isok) {
+  // If there was no match in the sunet list, check the groups if config allows.
+  if (!empty($groups)) {
     $groups = explode(",", $groups);
     $groups = array_map("trim", $groups);
-    $isok = stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $attributes);
+    return stanford_ssp_simplesamlphp_auth_allow_login_validate_groups($groups, $attributes);
   }
 
-  // Return true or false.
   return $isok;
 }
 
@@ -683,7 +686,7 @@ function stanford_ssp_form_user_login_alter(array &$form, array &$form_state) {
     $options = [
       'attributes' => [
         'rel' => 'nofollow',
-      ]
+      ],
     ];
     $form['saml_auth']['saml_link'] = array(
       '#prefix' => "<p>",
@@ -948,9 +951,8 @@ function stanford_ssp_get_webauth_role_mappings() {
  * Convert WMD workgroup mappings to SAML mappings.
  */
 function stanford_ssp_convert_webauth_role_mappings() {
-  // TODO: this duplicates some functionality in stanford_ssp_map_entitlement_to_role().
-  // Update stanford_ssp_map_entitlement_to_role() to use this explode/implode,
-  // and then use that function here.
+  // This duplicates some functionality in
+  // stanford_ssp_map_entitlement_to_role().
   $webauth_roles = stanford_ssp_get_webauth_role_mappings();
   $rolepop = variable_get('stanford_simplesamlphp_auth_rolepopulation', '');
   $roles = array();
@@ -1017,17 +1019,17 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
     return array();
   }
 
-  if (empty($values['members'])) {
-    return array();
-  }
-
   $members = array();
-  foreach ($values['members']['member'] as $member) {
-    try {
-      $members[] = stanford_ssp_get_api_members_from_xml_array($member);
-    }
-    catch (Exception $e) {
-      watchdog('stanford_ssp', $e->getMessage(), array(), WATCHDOG_DEBUG);
+  
+  // If there are members in this group add them to the allowed list.
+  if (!empty($values['members']['member'])) {
+    foreach ($values['members']['member'] as $member) {
+      try {
+        $members[] = stanford_ssp_get_api_members_from_xml_array($member);
+      }
+      catch (Exception $e) {
+        watchdog('stanford_ssp', $e->getMessage(), array(), WATCHDOG_DEBUG);
+      }
     }
   }
 
