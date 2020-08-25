@@ -35,25 +35,18 @@ code_coverage: &code_coverage
     - store_artifacts:
         path: /var/www/html/artifacts/phpunit/coverage
 
-behat: &behat
+codeception: &codeception
   <<: *defaults
   steps:
-    - restore_cache:
-        keys:
-          - dependencies-
     - checkout:
         path: /var/www/test
     - run:
-        name: Run Behat Tests
+        name: Run Acceptance Tests
         command: |
           composer global require SU-SWS/stanford-caravan:dev-8.x-1.x
-          ~/.composer/vendor/bin/sws-caravan behat /var/www/html --extension-dir=/var/www/test
-    - save_cache:
-        key: dependencies-{{ epoch }}
-        paths:
-          - .
+          ~/.composer/vendor/bin/sws-caravan codeception /var/www/html --extension-dir=/var/www/test
     - store_test_results:
-        path: /var/www/html/artifacts/behat
+        path: /var/www/html/artifacts
     - store_artifacts:
         path: /var/www/html/artifacts
 
@@ -71,8 +64,8 @@ back_to_dev: &back_to_dev
 jobs:
   run-coverage:
     <<: *code_coverage
-  run-behat:
-    <<: *behat
+  run-codeception:
+    <<: *codeception
   run-back-to-dev:
     <<: *back_to_dev
 
@@ -89,15 +82,10 @@ workflows:
             branches:
               ignore:
                 - /.*/
-  tests:
+  weekly:
     jobs:
       - run-coverage
-      - run-behat
-  # Re-test every sunday in case this code becomes stale.
-  sundays:
-    jobs:
-      - run-coverage
-      - run-behat
+      - run-codeception
     triggers:
       - schedule:
           cron: "0 0 * * 0"
@@ -105,3 +93,7 @@ workflows:
             branches:
               only:
                 - 8.x-1.x
+  tests:
+    jobs:
+      - run-coverage
+      - run-codeception
