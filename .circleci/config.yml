@@ -64,8 +64,8 @@ back_to_dev: &back_to_dev
 jobs:
   run-coverage:
     <<: *code_coverage
-  run-codeception:
-    <<: *codeception
+#  run-codeception:
+#    <<: *codeception
   run-back-to-dev:
     <<: *back_to_dev
 
@@ -85,7 +85,7 @@ workflows:
   weekly:
     jobs:
       - run-coverage
-      - run-codeception
+#      - run-codeception
     triggers:
       - schedule:
           cron: "0 0 * * 0"
@@ -96,4 +96,4 @@ workflows:
   tests:
     jobs:
       - run-coverage
-      - run-codeception
+  #    - run-codeception
