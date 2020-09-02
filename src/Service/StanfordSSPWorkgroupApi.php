@@ -57,6 +57,13 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   protected $key;
 
   /**
+   * If the API should also check nested workgroups.
+   *
+   * @var bool
+   */
+  protected $checkNestedGroups;
+
+  /**
    * StanfordSSPWorkgroupApi constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -72,8 +79,9 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     $this->logger = $logger->get('stanford_ssp');
 
     $config = $this->configFactory->get('stanford_ssp.settings');
-    $cert_path = $config->get('workgroup_api_cert');
-    $key_path = $config->get('workgroup_api_key');
+    $cert_path = $config->get('workgroup_api.cert');
+    $key_path = $config->get('workgroup_api.key');
+    $this->checkNestedGroups = $config->get('workgroup_api.nested');
 
     if ($cert_path && is_file($cert_path) && $key_path && is_file($key_path)) {
       $this->setCert($cert_path);
@@ -93,6 +101,13 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    */
   public function setKey($key_path) {
     $this->key = $key_path;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setCheckNestedGroups($check_nested = TRUE) {
+    $this->checkNestedGroups = $check_nested;
   }
 
   /**
@@ -153,7 +168,19 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
       $xpath = new \DOMXPath($dom);
 
       // Use xpath to find if the sunetid is one of the members.
-      return $xpath->query("//members/member[@id='$name']")->length > 0;
+      if ($xpath->query("//members/member[@id='$name']")->length > 0) {
+        return TRUE;
+      }
+
+      if ($this->checkNestedGroups) {
+        // Loop through the nested workgroups and check its data from the API.
+        foreach ($xpath->query('//members/workgroup/@name') as $attr_node) {
+          /** @var \DOMAttr $attr_node */
+          if ($this->userInGroup($attr_node->value, $name)) {
+            return TRUE;
+          }
+        }
+      }
     }
     return FALSE;
   }
@@ -222,7 +249,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     ];
 
     $base_url = $this->configFactory->get('stanford_ssp.settings')
-      ->get('workgroup_api_url');
+      ->get('workgroup_api.url');
     $base_url = trim($base_url, '/') ?: 'https://workgroupsvc.stanford.edu/v1/workgroups';
 
     try {

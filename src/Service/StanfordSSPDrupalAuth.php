@@ -148,7 +148,7 @@ class StanfordSSPDrupalAuth extends SimplesamlphpDrupalAuth {
   public function getMatchingRoles() {
     $roles = parent::getMatchingRoles();
     if ($this->configFactory->get('stanford_ssp.settings')
-      ->get('use_workgroup_api')) {
+      ->get('workgroup_api.enabled')) {
       $roles = $this->workgroupAPI->getRolesFromAuthname($this->authname);
     }
 

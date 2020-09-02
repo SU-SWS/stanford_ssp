@@ -50,9 +50,11 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
 
     $config_factory = $this->getConfigFactoryStub([
       'stanford_ssp.settings' => [
-        'workgroup_api_cert' => __FILE__,
-        'workgroup_api_key' => __FILE__,
-        'workgroup_api_url' => '',
+        'workgroup_api' => [
+          'cert' => __FILE__,
+          'key' => __FILE__,
+          'url' => '',
+        ],
       ],
       'simplesamlphp_auth.settings' => [
         'role' => [
@@ -67,7 +69,8 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
       ->will($this->returnCallback([$this, 'guzzleRequestCallback']));
 
     $logger = $this->createMock(LoggerChannelFactoryInterface::class);
-    $logger->method('get')->willReturn($this->createMock(LoggerChannelInterface::class));
+    $logger->method('get')
+      ->willReturn($this->createMock(LoggerChannelInterface::class));
     $this->service = new StanfordSSPWorkgroupApi($config_factory, $guzzle, $logger);
   }
 
@@ -92,6 +95,10 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
 
       case 'https://workgroupsvc.stanford.edu/v1/workgroups/bar:foo':
         $body = "<workgroup><visibility>PRIVATE</visibility></workgroup>";
+        break;
+
+      case 'https://workgroupsvc.stanford.edu/v1/workgroups/nested:group':
+        $body = "<members><workgroup name='valid:workgroup'/></members>";
         break;
     }
     $guzzle_response->method('getBody')->willReturn($body);
@@ -143,6 +150,14 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
     $this->throwGuzzleException = TRUE;
     $this->assertFalse($this->service->isWorkgroupValid('foo:bar'));
     $this->assertFalse($this->service->userInGroup('foo', 'bar'));
+  }
+
+  /**
+   * When enabled to test nested workgroups, it should query the api twice.
+   */
+  public function testNestedWorkgroups() {
+    $this->service->setCheckNestedGroups();
+    $this->assertTrue($this->service->userInGroup('nested:group', $this->authname));
   }
 
 }

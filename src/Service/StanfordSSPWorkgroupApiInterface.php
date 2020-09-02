@@ -34,6 +34,14 @@ interface StanfordSSPWorkgroupApiInterface {
   public function setKey($key_path);
 
   /**
+   * Set the service to check nested workgroups or not.
+   *
+   * @param bool $check_nested
+   *   If the service should check nested groups.
+   */
+  public function setCheckNestedGroups($check_nested = TRUE);
+
+  /**
    * Get the current cert key path.
    *
    * @return string|null
