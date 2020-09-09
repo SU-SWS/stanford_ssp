@@ -2,7 +2,7 @@
   "name": "su-sws/stanford_ssp",
   "description": "A Drupal Authentication Module.",
   "type": "drupal-custom-module",
-  "license": "GPL-2.0+",
+  "license": "GPL-2.0-or-later",
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.0.0",
