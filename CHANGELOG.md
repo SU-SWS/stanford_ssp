@@ -1,5 +1,12 @@
 # Stanford SSP
 
+8.x-1.5
+--------------------------------------------------------------------------------
+_Release Date: 2020-09-09_
+
+- D8CORE-2499: Updated composer license (#96) (beda642)
+- D8CORE-000: Removed behat tests in favor of codeception.
+
 8.1.4
 --------------------------------------------------------------------------------
 _Release Date: 2020-04-16_
