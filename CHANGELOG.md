@@ -4,7 +4,8 @@
 --------------------------------------------------------------------------------
 _Release Date: 2020-09-09_
 
-- D8CORE-2499 Updated composer license (#96) (beda642)
+- D8CORE-2499: Updated composer license (#96) (beda642)
+- D8CORE-000: Removed behat tests in favor of codeception.
 
 8.1.4
 --------------------------------------------------------------------------------
