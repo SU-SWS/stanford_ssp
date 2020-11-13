@@ -1,6 +1,5 @@
 name: 'Test Stanford SSP'
 type: module
-core: 8.x
 hidden: true
 package: Testing
 version: 8.x-1.6-dev
