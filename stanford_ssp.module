@@ -124,7 +124,7 @@ function stanford_ssp_simplesamlphp_auth_existing_user($attributes) {
 
   if (!empty($saml_mail)) {
     $saml_mail = is_array($saml_mail) ? reset($saml_mail) : $saml_mail;
-    $existing_users = \Drupal::service('entity.manager')
+    $existing_users = \Drupal::service('entity_type.manager')
       ->getStorage('user')
       ->loadByProperties(['mail' => $saml_mail]);
     return is_array($existing_users) && !empty($existing_users) ? reset($existing_users) : FALSE;
