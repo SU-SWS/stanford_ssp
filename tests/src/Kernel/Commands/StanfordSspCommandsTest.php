@@ -37,7 +37,7 @@ class StanfordSspCommandsTest extends KernelTestBase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setup();
 
     $this->installEntitySchema('user');

@@ -43,7 +43,7 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->authname = $this->randomMachineName();

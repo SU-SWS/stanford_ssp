@@ -27,7 +27,7 @@ class AuthorizationsFormTest extends KernelTestBase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setup();
     \Drupal::configFactory()->getEditable('stanford_ssp.settings')
       ->set('whitelist_groups', [])
