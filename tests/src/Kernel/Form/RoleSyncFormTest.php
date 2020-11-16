@@ -46,7 +46,10 @@ class RoleSyncFormTest extends KernelTestBase {
     $this->installSchema('system', ['key_value_expire', 'sequences']);
 
     $guzzle = $this->createMock(ClientInterface::class);
-    $guzzle->method('request')->will($this->returnCallback([$this, 'guzzleCallback']));
+    $guzzle->method('request')->will($this->returnCallback([
+      $this,
+      'guzzleCallback',
+    ]));
     \Drupal::getContainer()->set('http_client', $guzzle);
 
     for ($i = 0; $i < 5; $i++) {
@@ -78,49 +81,49 @@ class RoleSyncFormTest extends KernelTestBase {
     return $response;
   }
 
-//  /**
-//   * Run tests against the form structure, callbacks, and submit.
-//   *
-//   * @throws \Drupal\Core\Form\EnforcedResponseException
-//   * @throws \Drupal\Core\Form\FormAjaxException
-//   */
-//  public function testFormBuild() {
-//    $form = \Drupal::formBuilder()
-//      ->getForm($this->formId);
-//    $this->assertCount(26, $form);
-//
-//    $form_state = new FormState();
-//    $form = \Drupal::formBuilder()
-//      ->buildForm($this->formId, $form_state);
-//    $this->assertNotEmpty($form_state->getFormObject()
-//      ->addMapping($form, $form_state));
-//
-//    $new_workgroup = strtolower($this->randomMachineName());
-//    $form_state->setUserInput([
-//      'role_population' => [
-//        'add' => [
-//          'attribute' => '',
-//          'role_id' => 'role2',
-//          'workgroup' => $new_workgroup,
-//        ],
-//      ],
-//    ]);
-//    $form_state->getFormObject()->addMappingCallback($form, $form_state);
-//    $form_state->setMethod('GET');
-//    $form = \Drupal::formBuilder()
-//      ->rebuildForm($this->formId, $form_state);
-//
-//    $this->assertArrayHasKey("role2:eduPersonEntitlement,=,$new_workgroup", $form['user_info']['role_population']);
-//
-//    $form_state->setTriggeringElement(['#mapping' => "role2:eduPersonEntitlement,=,$new_workgroup"]);
-//    $form_state->getFormObject()->removeMappingCallback($form, $form_state);
-//    $form = \Drupal::formBuilder()
-//      ->rebuildForm($this->formId, $form_state);
-//
-//    $this->assertArrayNotHasKey("role2:eduPersonEntitlement,=,$new_workgroup", $form['user_info']['role_population']);
-//
-//    $this->runFormSubmit();
-//  }
+  /**
+   * Run tests against the form structure, callbacks, and submit.
+   *
+   * @throws \Drupal\Core\Form\EnforcedResponseException
+   * @throws \Drupal\Core\Form\FormAjaxException
+   */
+  public function testFormBuild() {
+    $form = \Drupal::formBuilder()
+      ->getForm($this->formId);
+    $this->assertCount(26, $form);
+
+    $form_state = new FormState();
+    $form = \Drupal::formBuilder()
+      ->buildForm($this->formId, $form_state);
+    $this->assertNotEmpty($form_state->getFormObject()
+      ->addMapping($form, $form_state));
+
+    $new_workgroup = strtolower($this->randomMachineName());
+    $form_state->setUserInput([
+      'role_population' => [
+        'add' => [
+          'attribute' => '',
+          'role_id' => 'role2',
+          'workgroup' => $new_workgroup,
+        ],
+      ],
+    ]);
+    $form_state->getFormObject()->addMappingCallback($form, $form_state);
+    $form_state->setMethod('GET');
+    $form = \Drupal::formBuilder()
+      ->rebuildForm($this->formId, $form_state);
+
+    $this->assertArrayHasKey("role2:eduPersonEntitlement,=,$new_workgroup", $form['user_info']['role_population']);
+
+    $form_state->setTriggeringElement(['#mapping' => "role2:eduPersonEntitlement,=,$new_workgroup"]);
+    $form_state->getFormObject()->removeMappingCallback($form, $form_state);
+    $form = \Drupal::formBuilder()
+      ->rebuildForm($this->formId, $form_state);
+
+    $this->assertArrayNotHasKey("role2:eduPersonEntitlement,=,$new_workgroup", $form['user_info']['role_population']);
+
+    $this->runFormSubmit();
+  }
 
   /**
    * Run tests on the form validation and submit.
@@ -204,7 +207,8 @@ class RoleSyncFormTest extends KernelTestBase {
       ],
     ]);
     \Drupal::formBuilder()->submitForm($this->formId, $form_state);
-    $this->assertEqual(\Drupal::config('simplesamlphp_auth.settings')->get('role.population'), 'role1:eduPersonEnttitlement,=,foo:bar');
+    $this->assertEqual(\Drupal::config('simplesamlphp_auth.settings')
+      ->get('role.population'), 'role1:eduPersonEnttitlement,=,foo:bar');
   }
 
   /**
