@@ -17,6 +17,7 @@ class LocalLoginFormTest extends KernelTestBase {
     'stanford_ssp',
     'simplesamlphp_auth',
     'externalauth',
+    'field',
   ];
 
   /**
@@ -28,6 +29,7 @@ class LocalLoginFormTest extends KernelTestBase {
     $this->installEntitySchema('user_role');
     $this->installSchema('externalauth', 'authmap');
     $this->installSchema('system', ['key_value_expire', 'sequences']);
+    $this->installConfig('stanford_ssp');
 
     for ($i = 0; $i < 5; $i++) {
       Role::create(['label' => "Role $i", 'id' => "role$i"])->save();
@@ -42,6 +44,8 @@ class LocalLoginFormTest extends KernelTestBase {
    * Make sure the form saves the config.
    */
   public function testLoginFormConfig() {
+    \Drupal::configFactory()->getEditable('stanford_ssp.settings')
+      ->set('hide_local_login', FALSE)->save();
     $this->assertFalse(\Drupal::config('stanford_ssp.settings')
       ->get('hide_local_login'));
     $form = \Drupal::formBuilder()

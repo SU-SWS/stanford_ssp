@@ -372,6 +372,7 @@ class RoleSyncForm extends SyncingSettingsForm {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
+
     $this->config('stanford_ssp.settings')
       ->set('use_workgroup_api', $form_state->getValue('use_workgroup_api'))
       ->set('workgroup_api_cert', $form_state->getValue('workgroup_api_cert'))
