@@ -143,7 +143,7 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
   public function testGuzzleException() {
     $this->throwGuzzleException = TRUE;
     $this->assertFalse($this->service->isWorkgroupValid('foo:bar'));
-//    $this->assertFalse($this->service->userInGroup('foo', 'bar'));
+    $this->assertFalse($this->service->userInGroup('foo', 'bar'));
   }
 
 }
