@@ -1025,11 +1025,9 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
   // only contains one member. This logic restructures the array from the api
   // to work with only one member.
   $member_count = count($values['members']['member']);
+  $members_api = $values['members']['member'];
   if ($member_count == 1) {
     $members_api = [0 => $values['members']['member']];
-  }
-  else {
-    $members_api = $values['members']['member'];
   }
 
   // If there are members in this group add them to the allowed list.
