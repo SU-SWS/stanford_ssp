@@ -288,14 +288,14 @@ function stanford_ssp_page_build(array &$page) {
   // header response on the page build.
   $headers = drupal_get_http_header();
 
-  // In order to prevent the redirect loop, we check to see if the referrer was login.stanford.edu. 
-  // Not all servers support HTTP_REFERER but the ones we use do. I suspect if we wanted to support 
+  // In order to prevent the redirect loop, we check to see if the referrer was login.stanford.edu.
+  // Not all servers support HTTP_REFERER but the ones we use do. I suspect if we wanted to support
   // more servers we would have to expand on this check but hopefully, this is good enough.
-  // 
+  //
   // https://www.php.net/manual/en/reserved.variables.server.php
-  // 
-  // The address of the page (if any) which referred the user agent to the current page. This is set 
-  // by the user agent. Not all user agents will set this, and some provide the ability to modify 
+  //
+  // The address of the page (if any) which referred the user agent to the current page. This is set
+  // by the user agent. Not all user agents will set this, and some provide the ability to modify
   // HTTP_REFERER as a feature. In short, it cannot really be trusted.
   if (user_is_anonymous() && isset($headers["status"]) && $headers["status"] == "403 Forbidden" && !preg_match('/login(-uat)?\.stanford\.edu/', $_SERVER['HTTP_REFERER'])) {
     if (variable_get("stanford_ssp_automagic_login", FALSE)) {
@@ -1020,10 +1020,19 @@ function stanford_ssp_get_workgroup_members_by_api($group) {
   }
 
   $members = array();
-  
+
+  // The workgroup api returns a different array structure if a workgroup
+  // only contains one member. This logic restructures the array from the api
+  // to work with only one member.
+  $member_count = count($values['members']['member']);
+  $members_api = $values['members']['member'];
+  if ($member_count == 1) {
+    $members_api = [0 => $values['members']['member']];
+  }
+
   // If there are members in this group add them to the allowed list.
-  if (!empty($values['members']['member'])) {
-    foreach ($values['members']['member'] as $member) {
+  if (!empty($members_api)) {
+    foreach ($members_api as $member) {
       try {
         $members[] = stanford_ssp_get_api_members_from_xml_array($member);
       }
