@@ -328,13 +328,13 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
     // Add the SSL certificate paths.
     $openssl_defaults = openssl_get_cert_locations();
     $default_path = $openssl_defaults['default_cert_dir'];;
-    $cert_filename = variable_get('stanford_ssp_workgroup_api_cert', $default_path . "/stanford-ssp.cert");
-    $key_filename = variable_get('stanford_ssp_workgroup_api_key', $default_path . "/stanford-ssp.key");
+    $cert_filename = variable_get('stanford_ssp_workgroup_api_cert', $default_path . "/stanford_ssp.cert");
+    $key_filename = variable_get('stanford_ssp_workgroup_api_key', $default_path . "/stanford_ssp.key");
 
     $form['stanford_ssp_workgroup_api_cert'] = array(
       '#type' => 'textfield',
       '#title' => 'Path to Workgroup API SSL Certificate.',
-      '#default_value' => !empty($cert_filename) ? $cert_filename : $default_path . "/stanford-ssp.cert",
+      '#default_value' => !empty($cert_filename) ? $cert_filename : $default_path . "/stanford_ssp.cert",
       '#description' => t('For more information on how to get a certificate please see: https://uit.stanford.edu/service/registry/certificates'),
       '#states' => array(
         'visible' => array(
@@ -346,7 +346,7 @@ function stanford_ssp_role_mappings_form(array $form, array &$form_state) {
     $form['stanford_ssp_workgroup_api_key'] = array(
       '#type' => 'textfield',
       '#title' => 'Path to Workgroup API SSL Key.',
-      '#default_value' => !empty($key_filename) ? $key_filename : $default_path . "/stanford-ssp.key",
+      '#default_value' => !empty($key_filename) ? $key_filename : $default_path . "/stanford_ssp.key",
       '#description' => t('For more information on how to get a key please see: https://uit.stanford.edu/service/registry/certificates'),
       '#states' => array(
         'visible' => array(
