@@ -187,7 +187,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    */
   public function isWorkgroupValid($workgroup) {
     if (!$this->connectionSuccessful()) {
-      return NULL;
+      return FALSE;
     }
 
     $response = $this->getWorkgroupApiResponse($workgroup);

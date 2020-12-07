@@ -38,7 +38,7 @@ class RoleSyncFormTest extends KernelTestBase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installEntitySchema('user_role');
@@ -46,7 +46,10 @@ class RoleSyncFormTest extends KernelTestBase {
     $this->installSchema('system', ['key_value_expire', 'sequences']);
 
     $guzzle = $this->createMock(ClientInterface::class);
-    $guzzle->method('request')->will($this->returnCallback([$this, 'guzzleCallback']));
+    $guzzle->method('request')->will($this->returnCallback([
+      $this,
+      'guzzleCallback',
+    ]));
     \Drupal::getContainer()->set('http_client', $guzzle);
 
     for ($i = 0; $i < 5; $i++) {
@@ -60,8 +63,8 @@ class RoleSyncFormTest extends KernelTestBase {
 
   public function guzzleCallback($method, $url, $options) {
     $response = $this->createMock(ResponseInterface::class);
-    $response->method('getBody')->willReturn('
-<?xml version="1.0" encoding="UTF-8"?>
+
+    $response->method('getBody')->willReturn('<?xml version="1.0" encoding="UTF-8"?>
 <workgroup>
   <description>Test Workgroup</description>
   <filter />
@@ -74,6 +77,7 @@ class RoleSyncFormTest extends KernelTestBase {
   </administrators>
 </workgroup>
 ');
+    $response->method('getStatusCode')->willReturn(200);
     return $response;
   }
 
@@ -203,7 +207,8 @@ class RoleSyncFormTest extends KernelTestBase {
       ],
     ]);
     \Drupal::formBuilder()->submitForm($this->formId, $form_state);
-    $this->assertEqual('role1:eduPersonEnttitlement,=,foo:bar', \Drupal::config('simplesamlphp_auth.settings')->get('role.population'));
+    $this->assertEqual(\Drupal::config('simplesamlphp_auth.settings')
+      ->get('role.population'), 'role1:eduPersonEnttitlement,=,foo:bar');
   }
 
   /**

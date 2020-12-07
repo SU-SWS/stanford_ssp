@@ -1,5 +1,14 @@
 # Stanford SSP
 
+8.x-1.6
+--------------------------------------------------------------------------------
+_Release Date: 2020-12-04_
+
+- Adjusted tests to pass on D9 (#99) (a9f5a8a)
+- removed core version for test module (dab9222)
+- phpunit void return annoation (bd0c5e6)
+- D9 Ready (#98) (2dbf7b6)
+
 8.x-1.5
 --------------------------------------------------------------------------------
 _Release Date: 2020-09-09_

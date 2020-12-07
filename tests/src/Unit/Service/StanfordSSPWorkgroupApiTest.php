@@ -43,7 +43,7 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->authname = $this->randomMachineName();
@@ -74,7 +74,8 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
   public function guzzleRequestCallback($method, $url) {
     if ($this->throwGuzzleException) {
       $request = $this->createMock(RequestInterface::class);
-      throw new ClientException('It broke', $request);
+      $response = $this->createMock(ResponseInterface::class);
+      throw new ClientException('It broke', $request, $response);
     }
 
     $guzzle_response = $this->createMock(ResponseInterface::class);

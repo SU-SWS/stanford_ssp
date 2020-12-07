@@ -33,7 +33,7 @@ class StanfordSSPEventSubscriberTest extends KernelTestBase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setup();
     \Drupal::configFactory()
       ->getEditable('simplesamlphp_auth.settings')

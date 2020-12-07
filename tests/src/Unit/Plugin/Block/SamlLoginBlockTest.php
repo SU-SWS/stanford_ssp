@@ -26,7 +26,7 @@ class SamlLoginBlockTest extends UnitTestCase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $container = new ContainerBuilder();
