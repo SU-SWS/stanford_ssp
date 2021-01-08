@@ -249,12 +249,15 @@ function stanford_ssp_sso_auth() {
  *
  * Checks to ensure user is on https and will force redirect if option is on.
  * Also enforces secure cookies on https.
+ *
+ * Update: The cookie appears to be set in webauth module.
+ * Leaving the ini_set in just in case. However, it now checks for the cookie session just in case there are times it is not set.
  */
 function stanford_ssp_force_https() {
 
   global $is_https;
   // If is https force secure cookies. Mmmmm cookies.
-  if ($is_https) {
+  if ($is_https && !ini_get('session.cookie_secure')) {
     if (session_status() == PHP_SESSION_NONE) {
       // Mandate secure cookies for sessions.
       ini_set('session.cookie_secure', 1);
