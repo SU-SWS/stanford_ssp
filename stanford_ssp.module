@@ -251,7 +251,7 @@ function stanford_ssp_sso_auth() {
  * Also enforces secure cookies on https.
  *
  * Update: The cookie appears to be set in webauth module.
- * Leavning the ini_set in just in case. However, it now checks for the cookie session just in case there are times it is not set. 
+ * Leaving the ini_set in just in case. However, it now checks for the cookie session just in case there are times it is not set.
  */
 function stanford_ssp_force_https() {
 
