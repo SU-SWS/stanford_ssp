@@ -1,6 +1,10 @@
 Stanford SimpleSAML PHP x.x-x.x, xxxx-xx-xx
 -------------------------------------------
 
+Stanford SimpleSAML PHP 7.x-2.2-alpha11 2021-01-08
+--------------------------------------------------
+- Bug fix: Added conditional to prevent PHP warning from filling up watchdog with PHP warnings.
+
 Stanford SimpleSAML PHP 7.x-2.2-alpha10 2019-07-16
 --------------------------------------------------
 - PHP 7.2: Check if session has started so that PHP 7+ does not print warning.
