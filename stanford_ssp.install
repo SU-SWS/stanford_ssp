@@ -296,3 +296,28 @@ function stanford_ssp_update_7207() {
   // Preserve the old settings about reformatting but allow new ones to decide.
   variable_set('stanford_ssp_format_entitlements', TRUE);
 }
+
+/**
+ * Remove sunetid mappings with empty sunet.
+ */
+function stanford_ssp_update_7208() {
+  $query = db_select('stanford_ssp_sunetid', 's')
+    ->fields('s', ['uid'])
+    ->condition('sunet', '');
+  /** @var \DatabaseStatementBase $result */
+  $result = $query->execute();
+  array_map(function ($r) {
+    $query = db_select('authmap', 'a')
+      ->fields('a', ['authname']);
+    $query->condition('a.module', 'stanford_simplesamlphp_auth');
+    $query->condition('a.uid', $r->uid);
+    $sunet_id = $query->execute()->fetchCol();
+    if ($sunet_id) {
+      $sunet_id = reset($sunet_id);
+      drupal_set_message("Drupal user $r->uid may be mapped to the wrong SUNET account $sunet_id.", 'warning');
+    }
+  }, $result->fetchAll());
+  db_delete('stanford_ssp_sunetid')
+    ->condition('sunet', '')
+    ->execute();
+}

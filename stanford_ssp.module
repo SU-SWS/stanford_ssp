@@ -335,7 +335,7 @@ function stanford_ssp_saml_ext_user_alter(&$ext_user, array $attributes, $auth_f
 
   // If still no user try sunet id.
   if (!$ext_user) {
-    $sunet = $attributes["uid"];
+    $sunet = $attributes[variable_get('stanford_simplesamlphp_auth_unique_id', 'eduPersonPrincipalName')];
     if (is_array($sunet)) {
       $sunet = array_pop($sunet);
     }
@@ -396,17 +396,19 @@ function stanford_ssp_user_insert(&$edit, $account, $category) {
     watchdog('stanford_ssp_user_insert', 'Could not load SAML information', array(), WATCHDOG_DEBUG);
   }
 
+  $key = variable_get('stanford_simplesamlphp_auth_unique_id', 'eduPersonPrincipalName');
+
   // Some SPs and users do not provide mail or email attributes. Use something
   // else to try and validate that the created user is not the current user. The
   // best thing we can try to use is the sunet id.
-  if (isset($attributes['uid'][0]) && ($attributes['uid'][0] !== str_replace("@stanford.edu", "", $account->init))) {
+  if (isset($attributes[$key][0]) && ($attributes[$key][0] !== str_replace("@stanford.edu", "", $account->init))) {
     return FALSE;
   }
 
   // Act on the current user.
   if (!empty($attributes)) {
     $record = array(
-      'sunet' => array_pop($attributes['uid']),
+      'sunet' => array_pop($attributes[$key]),
       'uid' => $account->uid,
     );
     drupal_write_record("stanford_ssp_sunetid", $record);
@@ -471,7 +473,7 @@ function stanford_ssp_stanford_simplesamlphp_auth_allow_login(array $attributes)
  *   True if sunet is in attributes;
  */
 function stanford_ssp_simplesamlphp_auth_allow_login_validate_sunets(array $sunets, array $attributes) {
-  $sunetid = array_pop($attributes['uid']);
+  $sunetid = array_pop($attributes[variable_get('stanford_simplesamlphp_auth_unique_id', 'eduPersonPrincipalName')]);
   return in_array($sunetid, $sunets);
 }
 
