@@ -3,7 +3,7 @@ description: Configures SimpleSAML PHP auth to work in Stanford web environment
 core: 8.x
 core_version_requirement: ^8 || ^9
 type: module
-version: 8.x-1.7-dev
+version: 8.x-1.7
 package: Stanford
 dependencies:
   - simplesamlphp_auth:simplesamlphp_auth
