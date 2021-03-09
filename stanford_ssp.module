@@ -54,7 +54,7 @@ function stanford_ssp_form_user_login_form_alter(&$form, FormStateInterface $for
     $form['intro_text'] = [
       '#type' => 'html_tag',
       '#tag' => 'p',
-      '#value' => t('Welcome back!  Login to access your website'),
+      '#value' => t('Welcome back! Log in to access your website'),
       '#weight' => -998,
     ];
 
