@@ -75,3 +75,15 @@ function stanford_ssp_update_8001() {
       ->setComponent('su_display_name')->save();
   }
 }
+
+/**
+ * Migrate stanford_ssp.settings config to the new key values.
+ */
+function stanford_ssp_update_8107() {
+  $config = \Drupal::configFactory()->getEditable('stanford_ssp.settings');
+  $config->set('allowed_groups', $config->get('whitelist_groups'))
+    ->set('allowed_users', $config->get('whitelist_users'))
+    ->clear('whitelist_groups')
+    ->clear('whitelist_users')
+    ->save();
+}

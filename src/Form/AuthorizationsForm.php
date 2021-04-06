@@ -52,19 +52,19 @@ class AuthorizationsForm extends ConfigFormBase {
       ],
     ];
 
-    $form['whitelist_groups'] = [
+    $form['allowed_groups'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Allowed Workgroups'),
       '#description' => $this->t('A comma-separated list of Workgroups that should be allowed to login with simpleSAMLphp. If left blank, any workgroup can login.'),
-      '#default_value' => implode(',', $config->get('whitelist_groups')),
+      '#default_value' => implode(',', $config->get('allowed_groups')),
       '#states' => $states,
     ];
 
-    $form['whitelist_users'] = [
+    $form['allowed_users'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Allowed Users'),
       '#description' => $this->t('A comma-separated list of SUNet IDs that should be allowed to login with simpleSAMLphp. If left blank, any valid SUNet ID user can login.'),
-      '#default_value' => implode(',', $config->get('whitelist_users')),
+      '#default_value' => implode(',', $config->get('allowed_users')),
       '#states' => $states,
     ];
     return $form;
@@ -76,7 +76,7 @@ class AuthorizationsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
     if ($form_state->getValue('restriction') == self::RESTRICT) {
-      if (empty($form_state->getValue('whitelist_groups')) && empty($form_state->getValue('whitelist_users'))) {
+      if (empty($form_state->getValue('allowed_groups')) && empty($form_state->getValue('allowed_users'))) {
         $form_state->setError($form['restriction'], $this->t('If restricting to users or groups, you must provided the allowed information'));
       }
     }
@@ -89,8 +89,8 @@ class AuthorizationsForm extends ConfigFormBase {
     parent::submitForm($form, $form_state);
     $this->config('stanford_ssp.settings')
       ->set('restriction', $form_state->getValue('restriction'))
-      ->set('whitelist_groups', explode(',', $form_state->getValue('whitelist_groups')))
-      ->set('whitelist_users', explode(',', $form_state->getValue('whitelist_users')))
+      ->set('allowed_groups', explode(',', $form_state->getValue('allowed_groups')))
+      ->set('allowed_users', explode(',', $form_state->getValue('allowed_users')))
       ->save();
   }
 

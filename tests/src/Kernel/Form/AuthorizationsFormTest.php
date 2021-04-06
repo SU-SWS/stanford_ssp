@@ -30,8 +30,8 @@ class AuthorizationsFormTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setup();
     \Drupal::configFactory()->getEditable('stanford_ssp.settings')
-      ->set('whitelist_groups', [])
-      ->set('whitelist_users', [])
+      ->set('allowed_groups', [])
+      ->set('allowed_users', [])
       ->save();
   }
 
@@ -51,16 +51,16 @@ class AuthorizationsFormTest extends KernelTestBase {
     $form_state->clearErrors();
     $form_state->setValues([
       'restriction' => 'restrict',
-      'whitelist_groups' => 'group1,group2',
-      'whitelist_users' => 'user1,user2',
+      'allowed_groups' => 'group1,group2',
+      'allowed_users' => 'user1,user2',
     ]);
     \Drupal::formBuilder()
       ->submitForm('\Drupal\stanford_ssp\Form\AuthorizationsForm', $form_state);
 
-    $this->assertTrue(in_array('group1', \Drupal::config('stanford_ssp.settings')->get('whitelist_groups')));
-    $this->assertTrue(in_array('group2', \Drupal::config('stanford_ssp.settings')->get('whitelist_groups')));
-    $this->assertTrue(in_array('user1', \Drupal::config('stanford_ssp.settings')->get('whitelist_users')));
-    $this->assertTrue(in_array('user2', \Drupal::config('stanford_ssp.settings')->get('whitelist_users')));
+    $this->assertTrue(in_array('group1', \Drupal::config('stanford_ssp.settings')->get('allowed_groups')));
+    $this->assertTrue(in_array('group2', \Drupal::config('stanford_ssp.settings')->get('allowed_groups')));
+    $this->assertTrue(in_array('user1', \Drupal::config('stanford_ssp.settings')->get('allowed_users')));
+    $this->assertTrue(in_array('user2', \Drupal::config('stanford_ssp.settings')->get('allowed_users')));
   }
 
 }
