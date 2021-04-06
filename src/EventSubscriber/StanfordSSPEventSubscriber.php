@@ -78,11 +78,12 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
     ) {
       $origin = $event->getRequest()->getPathInfo();
       $query = $event->getRequest()->getQueryString();
+      $destination = trim("$origin?$query", '/?');
 
       // Redirect anonymous users to login portal.
-      $url = Url::fromRoute('user.login', [], ['query' => ['destination' => "$origin?$query"]]);
+      $url = Url::fromRoute('user.login', [], ['query' => ['destination' => $destination]]);
       if ($this->samlConfig->get('activate') && $this->stanfordConfig->get('hide_local_login')) {
-        $url = Url::fromRoute('simplesamlphp_auth.saml_login', [], ['query' => ['destination' => trim("$origin?$query", '/')]]);
+        $url = Url::fromRoute('simplesamlphp_auth.saml_login', [], ['query' => ['destination' => $destination]]);
       }
 
       $response = new RedirectResponse($url->toString());
