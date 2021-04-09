@@ -27,13 +27,13 @@ stanford_ssp.settings:
     restriction:
       type: string
       label: 'Login restrictions'
-    whitelist_groups:
+    allowed_groups:
       type: sequence
       label: 'Allowed Groups'
       sequence:
         type: string
         label: 'Allowed Group'
-    whitelist_users:
+    allowed_users:
       type: sequence
       label: 'Allowed Users'
       sequence:

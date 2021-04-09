@@ -136,7 +136,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
       // We ignore the eduEntitlement equation since its only a yes or no if the
       // user is in the group.
       $workgroup = substr($mapping, strrpos($mapping, ',') + 1);
-      if ($this->userInGroup($workgroup, $authname)) {
+      if (!in_array($role, $roles) && $this->userInGroup($workgroup, $authname)) {
         $roles[] = $role;
       }
     }
@@ -194,10 +194,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     $dom = new \DOMDocument();
     $dom->loadXML((string) $response->getBody());
     $xpath = new \DOMXPath($dom);
-    if ($xpath->query('//visibility')->item(0)->nodeValue != 'PRIVATE') {
-      return TRUE;
-    }
-    return FALSE;
+    return $xpath->query('//visibility')->item(0)->nodeValue != 'PRIVATE';
   }
 
   /**

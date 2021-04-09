@@ -5,5 +5,5 @@ hide_local_login: true
 workgroup_api_cert: ''
 workgroup_api_key: ''
 restriction: all
-whitelist_groups: {  }
-whitelist_users: {  }
+allowed_groups: {  }
+allowed_users: {  }
