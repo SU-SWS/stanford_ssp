@@ -3,4 +3,4 @@ type: module
 core_version_requirement: ^8.8 || ^9
 hidden: true
 package: Testing
-version: 8.x-1.7-dev
+version: 8.x-1.8-dev
