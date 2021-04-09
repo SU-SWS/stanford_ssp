@@ -1,5 +1,13 @@
 # Stanford SSP
 
+8.x-1.7
+--------------------------------------------------------------------------------
+_Release Date: 2021-04-09_
+
+- Removed random unwanted space character (#107)
+- D8CORE-3953 Refactor to replace "whitelist" with "allowed" in config
+- HSD8-1027 Pass query parameters after loggin in via saml
+
 8.x-1.6
 --------------------------------------------------------------------------------
 _Release Date: 2020-12-04_
@@ -48,7 +56,7 @@ _Release Date: 2019-10-30_
 - Fixed core requirements info.yml
 
 8.x-1.0
---------------------------------------------------------------------------------  
+--------------------------------------------------------------------------------
 _Release Date: 2019-10-30_
 
 - Initial Release
