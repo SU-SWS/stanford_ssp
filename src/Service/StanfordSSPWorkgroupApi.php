@@ -176,8 +176,10 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   /**
    * Call the workgroup api and get the response for the workgroup.
    *
-   * @param string $workgroup
+   * @param string|null $workgroup
    *   Workgroup name like uit:sws.
+   * @param string|null $sunet
+   *   User sunetid.
    *
    * @return bool|\Psr\Http\Message\ResponseInterface
    *   API response or false if fails.
