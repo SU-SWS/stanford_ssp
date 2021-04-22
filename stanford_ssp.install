@@ -91,8 +91,12 @@ function stanford_ssp_update_8107() {
 /**
  * Remove workgroup api from configs since it is hardcoded.
  */
-function stanford_ssp_update_8108(){
-  \Drupal::configFactory()->getEditable('stanford_ssp.settings')
-    ->clear('workgroup_api_url')
-    ->save();
+function stanford_ssp_update_8108() {
+  $config = \Drupal::configFactory()->getEditable('stanford_ssp.settings');
+  /** @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface $api */
+  $api = \Drupal::service('stanford_ssp.workgroup_api');
+  if ($config->get('use_workgroup_api') && !$api->connectionSuccessful()) {
+    throw new \Exception('Workgroup API connection is enabled but is unable to connect to the API. Please check your certificate credentials or disable the workgroup API.');
+  }
+  $config->clear('workgroup_api_url')->save();
 }
