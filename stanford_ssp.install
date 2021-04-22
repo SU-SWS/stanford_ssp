@@ -87,3 +87,12 @@ function stanford_ssp_update_8107() {
     ->clear('whitelist_users')
     ->save();
 }
+
+/**
+ * Remove workgroup api from configs since it is hardcoded.
+ */
+function stanford_ssp_update_8108(){
+  \Drupal::configFactory()->getEditable('stanford_ssp.settings')
+    ->clear('workgroup_api_url')
+    ->save();
+}
