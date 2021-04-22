@@ -53,7 +53,6 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
       'stanford_ssp.settings' => [
         'workgroup_api_cert' => __FILE__,
         'workgroup_api_key' => __FILE__,
-        'workgroup_api_url' => '',
       ],
       'simplesamlphp_auth.settings' => [
         'role' => [
