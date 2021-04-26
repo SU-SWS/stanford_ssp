@@ -4,6 +4,7 @@ namespace Drupal\stanford_ssp\Service;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Site\Settings;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -195,9 +196,9 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
         'id' => $workgroup ?: $sunet,
       ],
     ];
-
+    $api_url = Settings::get('stanford_ssp.workgroup_api', self::WORKGROUP_API);
     try {
-      $result = $this->guzzle->request('GET', self::WORKGROUP_API, $options);
+      $result = $this->guzzle->request('GET', $api_url, $options);
       return json_decode($result->getBody(), TRUE);
     }
     catch (GuzzleException $e) {
