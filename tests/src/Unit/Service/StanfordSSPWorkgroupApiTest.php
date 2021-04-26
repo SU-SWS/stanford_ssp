@@ -83,7 +83,7 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
     $guzzle_response->method('getStatusCode')->willReturn(200);
 
     $body = [];
-    //var_dump($options['query']);
+    
     switch ($options['query']['id']) {
       case 'uit:sws':
         $body = [
