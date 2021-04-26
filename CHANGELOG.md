@@ -1,5 +1,12 @@
 # Stanford SSP
 
+8.x-2.x
+--------------------------------------------------------------------------------
+- Replaced Workgroup API from V1 to V2
+  - V1 used XML, V2 uses JSON
+  - Workgroup API url has been removed from the config. It can now be configured in settings.php files with `$settings['stanford_ssp.workgroup_api'] = 'http://foo.bar';'`
+  - Workgoup API certificates for V1 do not automatically work for V2. Database updates check for a successful connection and will error out if the certificates are not valid.
+
 8.x-1.7
 --------------------------------------------------------------------------------
 _Release Date: 2021-04-09_
