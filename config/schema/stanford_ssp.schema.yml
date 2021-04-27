@@ -9,9 +9,6 @@ stanford_ssp.settings:
     saml_attribute:
       type: string
       label: 'Attribute in SAML that contains the role mapping values'
-    workgroup_api_url:
-      type: string
-      label: 'Workgroup API Base URL'
     hide_local_login:
       type: boolean
       label: 'Hide core local login form on user page'

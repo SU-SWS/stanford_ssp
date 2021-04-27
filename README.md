@@ -1,5 +1,5 @@
 # [Stanford Simple SAML PHP](https://github.com/SU-SWS/stanford_ssp)
-##### Version: 8.x-1.3
+##### Version: 8.x-2.x
 
 [![CircleCI](https://circleci.com/gh/SU-SWS/stanford_ssp.svg?style=svg)](https://circleci.com/gh/SU-SWS/stanford_ssp)
 [![Maintainability](https://api.codeclimate.com/v1/badges/d597c026202dc075d677/maintainability)](https://codeclimate.com/github/SU-SWS/stanford_ssp/maintainability)
@@ -28,6 +28,9 @@ Configuration
 
 The main configuration page can be found at: `/admin/config/people/simplesamlphp_auth`
 
+To use the workgroup API, you must work with the MAIS team to get a valid certificate. V1 API certificates do not automatically
+work with the V2 API.
+
 Troubleshooting
 ---
 
@@ -45,7 +48,7 @@ Releases
 ---
 
 Steps to build a new release:
-- Checkout the latest commit from the `8.x-1.x` branch.
+- Checkout the latest commit from the `8.x-2.x` branch.
 - Create a new branch for the release.
 - Commit any necessary changes to the release branch.
   -  These may include, but are not necessarily limited to:
