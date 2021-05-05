@@ -104,7 +104,7 @@ class AddUserForm extends FormBase {
 
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Add SSO User'),
+      '#value' => $this->t('Add SUNetID User'),
     ];
     return $form;
   }

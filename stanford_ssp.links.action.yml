@@ -1,5 +1,5 @@
 stanford_ssp.create_user:
   route_name: stanford_ssp.create_user
-  title: 'Add SSO User'
+  title: 'Add SUNetID User'
   appears_on:
     - user.admin_create
