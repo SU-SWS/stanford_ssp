@@ -63,20 +63,8 @@ class RoleSyncFormTest extends KernelTestBase {
 
   public function guzzleCallback($method, $url, $options) {
     $response = $this->createMock(ResponseInterface::class);
+    $response->method('getBody')->willReturn(json_encode(['results' => []]));
 
-    $response->method('getBody')->willReturn('<?xml version="1.0" encoding="UTF-8"?>
-<workgroup>
-  <description>Test Workgroup</description>
-  <filter />
-  <visibility>STANFORD</visibility>
-  <reusable>FALSE</reusable>
-  <privgroup>TRUE</privgroup>
-  <members />
-  <administrators>
-    <member id="foo-bar" url="https://workgroupsvc.stanford.edu/v1/users/foo-bar" name="Foo, BAR" />
-  </administrators>
-</workgroup>
-');
     $response->method('getStatusCode')->willReturn(200);
     return $response;
   }
@@ -207,8 +195,8 @@ class RoleSyncFormTest extends KernelTestBase {
       ],
     ]);
     \Drupal::formBuilder()->submitForm($this->formId, $form_state);
-    $this->assertEqual(\Drupal::config('simplesamlphp_auth.settings')
-      ->get('role.population'), 'role1:eduPersonEnttitlement,=,foo:bar');
+    $this->assertEquals('role1:eduPersonEnttitlement,=,foo:bar', \Drupal::config('simplesamlphp_auth.settings')
+      ->get('role.population'));
   }
 
   /**

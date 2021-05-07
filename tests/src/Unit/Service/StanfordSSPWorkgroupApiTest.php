@@ -7,6 +7,7 @@ use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApi;
 use Drupal\Tests\UnitTestCase;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;
@@ -52,7 +53,6 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
       'stanford_ssp.settings' => [
         'workgroup_api_cert' => __FILE__,
         'workgroup_api_key' => __FILE__,
-        'workgroup_api_url' => '',
       ],
       'simplesamlphp_auth.settings' => [
         'role' => [
@@ -67,35 +67,41 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
       ->will($this->returnCallback([$this, 'guzzleRequestCallback']));
 
     $logger = $this->createMock(LoggerChannelFactoryInterface::class);
-    $logger->method('get')->willReturn($this->createMock(LoggerChannelInterface::class));
+    $logger->method('get')
+      ->willReturn($this->createMock(LoggerChannelInterface::class));
     $this->service = new StanfordSSPWorkgroupApi($config_factory, $guzzle, $logger);
   }
 
-  public function guzzleRequestCallback($method, $url) {
+  public function guzzleRequestCallback($method, $url, $options) {
+    $request = $this->createMock(RequestInterface::class);
+    $guzzle_response = $this->createMock(ResponseInterface::class);
+
     if ($this->throwGuzzleException) {
-      $request = $this->createMock(RequestInterface::class);
-      $response = $this->createMock(ResponseInterface::class);
-      throw new ClientException('It broke', $request, $response);
+      throw new ClientException('It broke', $request, $guzzle_response);
     }
 
-    $guzzle_response = $this->createMock(ResponseInterface::class);
     $guzzle_response->method('getStatusCode')->willReturn(200);
 
-    $body = "<members></members>";
-    switch ($url) {
-      case 'https://workgroupsvc.stanford.edu/v1/workgroups/valid:workgroup':
-        $body = "<members><member id='{$this->authname}'/></members>";
+    $body = [];
+    
+    switch ($options['query']['id']) {
+      case 'uit:sws':
+        $body = [
+          'results' => [],
+        ];
         break;
 
-      case 'https://workgroupsvc.stanford.edu/v1/workgroups/foo:bar':
-        $body = "<visibility>STANFORD</visibility>";
+      case $this->authname:
+        $body = [
+          'results' => [['name' => 'valid:workgroup']],
+        ];
         break;
 
-      case 'https://workgroupsvc.stanford.edu/v1/workgroups/bar:foo':
-        $body = "<workgroup><visibility>PRIVATE</visibility></workgroup>";
+      case 'bar:foo':
+        throw new ClientException('It broke', $request, $guzzle_response);
         break;
     }
-    $guzzle_response->method('getBody')->willReturn($body);
+    $guzzle_response->method('getBody')->willReturn(json_encode($body));
     return $guzzle_response;
   }
 
@@ -110,12 +116,11 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
   }
 
   public function testConnection() {
-    $this->assertEquals(200, $this->service->connectionSuccessful());
-    $this->assertEquals(200, $this->service->connectionSuccessful());
+    $this->assertTrue($this->service->connectionSuccessful());
   }
 
   public function testRoles() {
-    $this->assertArrayEquals(['valid_role'], $this->service->getRolesFromAuthname($this->authname));
+    $this->assertEquals(['valid_role'], $this->service->getRolesFromAuthname($this->authname));
   }
 
   public function testUserGroups() {
@@ -133,7 +138,7 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
    * Valid workgroups are public.
    */
   public function testValidWorkgroup() {
-    $this->assertTrue($this->service->isWorkgroupValid('foo:bar'));
+    $this->assertTrue($this->service->isWorkgroupValid('uit:sws'));
     $this->assertFalse($this->service->isWorkgroupValid('bar:foo'));
   }
 

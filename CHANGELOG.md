@@ -1,5 +1,21 @@
 # Stanford SSP
 
+8.x-2.0
+--------------------------------------------------------------------------------
+_Release Date: 2021-05-07_
+
+- D8CORE-4129: changed labels for new sso user buttons (#115) (a66f0a8)
+- D8CORE-000: Check for attribute existence on user login (#114) (979ff4d)
+- D8CORE-4083 Use API V2 for the new workgroup API (#111) (6465c96)
+- 2.x (0305353)
+
+8.x-2.x
+--------------------------------------------------------------------------------
+- Replaced Workgroup API from V1 to V2
+  - V1 used XML, V2 uses JSON
+  - Workgroup API url has been removed from the config. It can now be configured in settings.php files with `$settings['stanford_ssp.workgroup_api'] = 'http://foo.bar';'`
+  - Workgoup API certificates for V1 do not automatically work for V2. Database updates check for a successful connection and will error out if the certificates are not valid.
+
 8.x-1.7
 --------------------------------------------------------------------------------
 _Release Date: 2021-04-09_

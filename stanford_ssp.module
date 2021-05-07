@@ -120,9 +120,8 @@ function stanford_ssp_simplesamlphp_auth_allow_login($attributes) {
  * Implements hook_simplesamlphp_auth_existing_user().
  */
 function stanford_ssp_simplesamlphp_auth_existing_user($attributes) {
-  $saml_mail = $attributes['eduPersonPrincipalName'];
-
-  if (!empty($saml_mail)) {
+  if (!empty($attributes['eduPersonPrincipalName'])) {
+    $saml_mail = $attributes['eduPersonPrincipalName'];
     $saml_mail = is_array($saml_mail) ? reset($saml_mail) : $saml_mail;
     $existing_users = \Drupal::service('entity_type.manager')
       ->getStorage('user')
