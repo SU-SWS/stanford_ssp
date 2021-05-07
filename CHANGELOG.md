@@ -1,5 +1,14 @@
 # Stanford SSP
 
+8.x-2.0
+--------------------------------------------------------------------------------
+_Release Date: 2021-05-07_
+
+- D8CORE-4129: changed labels for new sso user buttons (#115) (a66f0a8)
+- D8CORE-000: Check for attribute existence on user login (#114) (979ff4d)
+- D8CORE-4083 Use API V2 for the new workgroup API (#111) (6465c96)
+- 2.x (0305353)
+
 8.x-2.x
 --------------------------------------------------------------------------------
 - Replaced Workgroup API from V1 to V2
