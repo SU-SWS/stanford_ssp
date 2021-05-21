@@ -38,7 +38,7 @@ class AuthorizationsFormTest extends KernelTestBase {
   public function testForm() {
     $form = \Drupal::formBuilder()
       ->getForm('\Drupal\stanford_ssp\Form\AuthorizationsForm');
-    $this->assertCount(28, $form);
+    $this->assertCount(29, $form);
     $form_state = new FormState();
     $form_state->setValues([
       'restriction' => 'restrict',
