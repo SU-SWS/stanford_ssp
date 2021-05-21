@@ -104,7 +104,7 @@ function stanford_ssp_update_8108() {
 /**
  * Adjust configs to the new schema.
  */
-function stanford_ssp_update_8200(){
+function stanford_ssp_update_8200() {
   $config = \Drupal::configFactory()->getEditable('stanford_ssp.settings');
   $original_data = $config->getRawData();
   $allowed = [
@@ -112,5 +112,5 @@ function stanford_ssp_update_8200(){
     'users' => $original_data['allowed_users'],
     'groups' => $original_data['allowed_groups'],
   ];
-  $config->set('allowed' , $allowed)->save();
+  $config->set('allowed', $allowed)->save();
 }

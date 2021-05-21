@@ -60,7 +60,7 @@ class AuthorizationsForm extends ConfigFormBase {
     $form['allowed_affiliations'] = [
       '#type' => 'select',
       '#title' => $this->t('Affiliation'),
-      '#description' => $this->t('Restrict to the user\'s affiliation to the Stanford. View what these affiliations entail at @link', ['@link' => $affiliation_link]),
+      '#description' => $this->t("Restrict to the user's affiliation to the Stanford. View what these affiliations entail at @link.", ['@link' => $affiliation_link]),
       '#multiple' => TRUE,
       '#states' => $states,
       '#options' => [
