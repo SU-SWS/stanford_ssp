@@ -30,8 +30,8 @@ class AuthorizationsFormTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setup();
     \Drupal::configFactory()->getEditable('stanford_ssp.settings')
-      ->set('allowed_groups', [])
-      ->set('allowed_users', [])
+      ->set('allowed.groups', [])
+      ->set('allowed.users', [])
       ->save();
   }
 
@@ -57,10 +57,10 @@ class AuthorizationsFormTest extends KernelTestBase {
     \Drupal::formBuilder()
       ->submitForm('\Drupal\stanford_ssp\Form\AuthorizationsForm', $form_state);
 
-    $this->assertTrue(in_array('group1', \Drupal::config('stanford_ssp.settings')->get('allowed_groups')));
-    $this->assertTrue(in_array('group2', \Drupal::config('stanford_ssp.settings')->get('allowed_groups')));
-    $this->assertTrue(in_array('user1', \Drupal::config('stanford_ssp.settings')->get('allowed_users')));
-    $this->assertTrue(in_array('user2', \Drupal::config('stanford_ssp.settings')->get('allowed_users')));
+    $this->assertTrue(in_array('group1', \Drupal::config('stanford_ssp.settings')->get('allowed.groups')));
+    $this->assertTrue(in_array('group2', \Drupal::config('stanford_ssp.settings')->get('allowed.groups')));
+    $this->assertTrue(in_array('user1', \Drupal::config('stanford_ssp.settings')->get('allowed.users')));
+    $this->assertTrue(in_array('user2', \Drupal::config('stanford_ssp.settings')->get('allowed.users')));
   }
 
 }
