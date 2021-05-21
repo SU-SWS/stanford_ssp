@@ -4,6 +4,8 @@ namespace Drupal\stanford_ssp\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 
 /**
  * Class AuthorizationsForm to configure workgroup/user restrictions..
@@ -52,16 +54,21 @@ class AuthorizationsForm extends ConfigFormBase {
       ],
     ];
 
+    $url = Url::fromUri('https://uit.stanford.edu/service/saml/arp/edupa');
+    $affiliation_link = Link::fromTextAndUrl('SAML Affiliation Information', $url)
+      ->toString();
     $form['allowed_affiliations'] = [
       '#type' => 'select',
       '#title' => $this->t('Affiliation'),
-      '#description' => $this->t('Restrict to the user\'s affiliation to the Stanford.'),
+      '#description' => $this->t('Restrict to the user\'s affiliation to the Stanford. View what these affiliations entail at @link', ['@link' => $affiliation_link]),
       '#multiple' => TRUE,
       '#states' => $states,
       '#options' => [
+        'affiliate' => $this->t('Affiliate'),
         'staff' => $this->t('Staff'),
         'student' => $this->t('Students'),
         'faculty' => $this->t('Faculty'),
+        'member' => $this->t('Member'),
       ],
       '#default_value' => $config->get('allowed.affiliations') ?? [],
     ];
