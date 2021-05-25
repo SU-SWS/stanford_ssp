@@ -30,7 +30,7 @@ stanford_ssp.settings:
       mapping:
         affiliations:
           type: sequence
-          label: 'Allowed Groups'
+          label: 'Allowed Affiliations'
           sequence:
             type: string
             label: 'Allowed Group'
