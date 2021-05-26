@@ -32,6 +32,7 @@ class AuthorizationsFormTest extends KernelTestBase {
     \Drupal::configFactory()->getEditable('stanford_ssp.settings')
       ->set('allowed.groups', [])
       ->set('allowed.users', [])
+      ->set('allowed.affiliations', [])
       ->save();
   }
 
@@ -50,6 +51,7 @@ class AuthorizationsFormTest extends KernelTestBase {
 
     $form_state->clearErrors();
     $form_state->setValues([
+      'allowed_affiliations' => ['student', 'staff'],
       'restriction' => 'restrict',
       'allowed_groups' => 'group1,group2',
       'allowed_users' => 'user1,user2',
@@ -61,6 +63,7 @@ class AuthorizationsFormTest extends KernelTestBase {
     $this->assertTrue(in_array('group2', \Drupal::config('stanford_ssp.settings')->get('allowed.groups')));
     $this->assertTrue(in_array('user1', \Drupal::config('stanford_ssp.settings')->get('allowed.users')));
     $this->assertTrue(in_array('user2', \Drupal::config('stanford_ssp.settings')->get('allowed.users')));
+    $this->assertTrue(in_array('student', \Drupal::config('stanford_ssp.settings')->get('allowed.affiliations')));
   }
 
 }
