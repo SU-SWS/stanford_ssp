@@ -96,18 +96,28 @@ function stanford_ssp_simplesamlphp_auth_allow_login($attributes) {
   $auth_manager = \Drupal::service('simplesamlphp_auth.manager');
   $authname = $auth_manager->getAuthname();
 
-  if (in_array($authname, $config->get('allowed_users'))) {
+  // Check if the user name is allowed.
+  if (in_array($authname, $config->get('allowed.users'))) {
     return TRUE;
   }
 
+  // Check if the user is an allowed affiliation.
+  if (!empty($attributes['eduPersonAffiliation']) && array_intersect($config->get('allowed.affiliations'), $attributes['eduPersonAffiliation'])) {
+    return TRUE;
+  }
+
+  // If using the workgroup API, check if the user is a member of any allowed
+  // workgroups.
   if ($config->get('use_workgroup_api')) {
     /** @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface $workgroup_api */
     $workgroup_api = \Drupal::service('stanford_ssp.workgroup_api');
-    return $workgroup_api->userInAnyGroup($config->get('allowed_groups'), $authname);
+    return $workgroup_api->userInAnyGroup($config->get('allowed.groups'), $authname);
   }
 
+  // If not using the workgroup API, check if the user's attribute matches
+  // the configured value.
   $saml_attribute = $config->get('saml_attribute') ?: 'eduPersonEntitlement';
-  foreach ($config->get('allowed_groups') as $group) {
+  foreach ($config->get('allowed.groups') as $group) {
     if (!empty($attributes[$saml_attribute]) && in_array($group, $attributes[$saml_attribute])) {
       return TRUE;
     }

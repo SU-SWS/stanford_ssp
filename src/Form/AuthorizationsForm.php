@@ -4,6 +4,8 @@ namespace Drupal\stanford_ssp\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 
 /**
  * Class AuthorizationsForm to configure workgroup/user restrictions..
@@ -52,11 +54,30 @@ class AuthorizationsForm extends ConfigFormBase {
       ],
     ];
 
+    $url = Url::fromUri('https://uit.stanford.edu/service/saml/arp/edupa');
+    $affiliation_link = Link::fromTextAndUrl('SAML Affiliation Information', $url)
+      ->toString();
+    $form['allowed_affiliations'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Affiliation'),
+      '#description' => $this->t("Restrict to the user's affiliation to Stanford. View what these affiliations entail at @link.", ['@link' => $affiliation_link]),
+      '#multiple' => TRUE,
+      '#states' => $states,
+      '#options' => [
+        'affiliate' => $this->t('Affiliate'),
+        'staff' => $this->t('Staff'),
+        'student' => $this->t('Students'),
+        'faculty' => $this->t('Faculty'),
+        'member' => $this->t('Member'),
+      ],
+      '#default_value' => $config->get('allowed.affiliations') ?? [],
+    ];
+
     $form['allowed_groups'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Allowed Workgroups'),
       '#description' => $this->t('A comma-separated list of Workgroups that should be allowed to login with simpleSAMLphp. If left blank, any workgroup can login.'),
-      '#default_value' => implode(',', $config->get('allowed_groups')),
+      '#default_value' => implode(',', $config->get('allowed.groups') ?? []),
       '#states' => $states,
     ];
 
@@ -64,7 +85,7 @@ class AuthorizationsForm extends ConfigFormBase {
       '#type' => 'textfield',
       '#title' => $this->t('Allowed Users'),
       '#description' => $this->t('A comma-separated list of SUNet IDs that should be allowed to login with simpleSAMLphp. If left blank, any valid SUNet ID user can login.'),
-      '#default_value' => implode(',', $config->get('allowed_users')),
+      '#default_value' => implode(',', $config->get('allowed.users') ?? []),
       '#states' => $states,
     ];
     return $form;
@@ -76,7 +97,7 @@ class AuthorizationsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
     if ($form_state->getValue('restriction') == self::RESTRICT) {
-      if (empty($form_state->getValue('allowed_groups')) && empty($form_state->getValue('allowed_users'))) {
+      if (empty($form_state->getValue('allowed_groups')) && empty($form_state->getValue('allowed_users')) && empty($form_state->getValue('allowed_affiliations'))) {
         $form_state->setError($form['restriction'], $this->t('If restricting to users or groups, you must provided the allowed information'));
       }
     }
@@ -89,8 +110,9 @@ class AuthorizationsForm extends ConfigFormBase {
     parent::submitForm($form, $form_state);
     $this->config('stanford_ssp.settings')
       ->set('restriction', $form_state->getValue('restriction'))
-      ->set('allowed_groups', explode(',', $form_state->getValue('allowed_groups')))
-      ->set('allowed_users', explode(',', $form_state->getValue('allowed_users')))
+      ->set('allowed.affiliations', array_values($form_state->getValue('allowed_affiliations')))
+      ->set('allowed.groups', explode(',', $form_state->getValue('allowed_groups')))
+      ->set('allowed.users', explode(',', $form_state->getValue('allowed_users')))
       ->save();
   }
 

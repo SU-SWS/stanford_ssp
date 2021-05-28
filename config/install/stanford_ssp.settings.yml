@@ -1,9 +1,10 @@
 saml_attribute: eduPersonEntitlement
-
 use_workgroup_api: false
 hide_local_login: true
 workgroup_api_cert: ''
 workgroup_api_key: ''
 restriction: all
-allowed_groups: {  }
-allowed_users: {  }
+allowed:
+  affiliations: {  }
+  groups: {  }
+  users: {  }
