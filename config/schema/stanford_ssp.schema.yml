@@ -24,15 +24,25 @@ stanford_ssp.settings:
     restriction:
       type: string
       label: 'Login restrictions'
-    allowed_groups:
-      type: sequence
-      label: 'Allowed Groups'
-      sequence:
-        type: string
-        label: 'Allowed Group'
-    allowed_users:
-      type: sequence
-      label: 'Allowed Users'
-      sequence:
-        type: string
-        label: 'Allowed User'
+    allowed:
+      type: mapping
+      label: 'Allowed Authorizations'
+      mapping:
+        affiliations:
+          type: sequence
+          label: 'Allowed Affiliations'
+          sequence:
+            type: string
+            label: 'Allowed Affiliation'
+        groups:
+          type: sequence
+          label: 'Allowed Groups'
+          sequence:
+            type: string
+            label: 'Allowed Group'
+        users:
+          type: sequence
+          label: 'Allowed Users'
+          sequence:
+            type: string
+            label: 'Allowed User'

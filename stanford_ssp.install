@@ -100,3 +100,17 @@ function stanford_ssp_update_8108() {
   }
   $config->clear('workgroup_api_url')->save();
 }
+
+/**
+ * Adjust configs to the new schema.
+ */
+function stanford_ssp_update_8200() {
+  $config = \Drupal::configFactory()->getEditable('stanford_ssp.settings');
+  $original_data = $config->getRawData();
+  $allowed = [
+    'affiliations' => [],
+    'users' => $original_data['allowed_users'],
+    'groups' => $original_data['allowed_groups'],
+  ];
+  $config->set('allowed', $allowed)->save();
+}
