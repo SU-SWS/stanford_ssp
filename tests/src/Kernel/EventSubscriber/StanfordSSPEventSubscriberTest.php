@@ -7,7 +7,7 @@ use Drupal\stanford_ssp\EventSubscriber\StanfordSSPEventSubscriber;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -62,11 +62,11 @@ class StanfordSSPEventSubscriberTest extends KernelTestBase {
 
     $response = new Response('', Response::HTTP_FORBIDDEN);
     $kernel = $this->createMock('Symfony\\Component\\HttpKernel\\HttpKernelInterface');
-    $event = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
+    $event = new ResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
     $dispatcher->dispatch(KernelEvents::RESPONSE, $event);
 
     $target_url = $event->getResponse()->getTargetUrl();
-    $this->assertEquals('/saml_login?destination=', $target_url);
+    $this->assertStringContainsString('/saml_login?ReturnTo=http', $target_url);
   }
 
 }
