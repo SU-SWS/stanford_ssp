@@ -8,7 +8,7 @@ use Drupal\Core\Url;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -66,10 +66,10 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
   /**
    * Upon getting the kernel response, redirect 403 pages appropriately.
    *
-   * @param \Symfony\Component\HttpKernel\Event\FilterResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
    *   Response event object..
    */
-  public function responseHandler(FilterResponseEvent $event) {
+  public function responseHandler(ResponseEvent $event) {
 
     if (
       $event->getResponse()->getStatusCode() == Response::HTTP_FORBIDDEN &&
@@ -83,7 +83,9 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
       // Redirect anonymous users to login portal.
       $url = Url::fromRoute('user.login', [], ['query' => ['destination' => $destination]]);
       if ($this->samlConfig->get('activate') && $this->stanfordConfig->get('hide_local_login')) {
-        $url = Url::fromRoute('simplesamlphp_auth.saml_login', [], ['query' => ['destination' => $destination]]);
+        global $base_url;
+        $destination = "$base_url/$destination";;
+        $url = Url::fromRoute('simplesamlphp_auth.saml_login', [], ['query' => ['ReturnTo' => $destination]]);
       }
 
       $response = new RedirectResponse($url->toString());
