@@ -7,7 +7,6 @@
 
 use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\stanford_ssp\Form\AuthorizationsForm;
 use Drupal\user\UserInterface;
@@ -164,13 +163,4 @@ function stanford_ssp_simplesamlphp_auth_user_attributes(UserInterface $account,
     }
   }
   return FALSE;
-}
-
-/**
- * Implements hook_user_format_name_alter().
- */
-function stanford_ssp_user_format_name_alter(&$name, AccountInterface $account) {
-  if ($account instanceof UserInterface && $account->hasField('su_display_name')) {
-    $name = $account->get('su_display_name')->getString() ?? $name;
-  }
 }
