@@ -4,7 +4,7 @@ version: 2
 ## Defines images and working directory.
 defaults: &defaults
   docker:
-    - image: pookmish/drupal8ci:pcov
+    - image: pookmish/drupal8ci:latest
     - image: selenium/standalone-chrome:latest
     - image: mariadb:10.3
       environment:
@@ -44,21 +44,6 @@ back_to_dev: &back_to_dev
           composer global require SU-SWS/stanford-caravan:dev-8.x-2.x
           ~/.composer/vendor/bin/sws-caravan back-to-dev ${CIRCLE_TAG} ${CIRCLE_WORKING_DIRECTORY}
 
-d8_codeception: &d8_codeception
-  <<: *defaults
-  steps:
-    - checkout:
-        path: /var/www/test
-    - run:
-        name: Run Codeception Tests
-        command: |
-          composer global require SU-SWS/stanford-caravan:dev-8.x-1.x
-          ~/.composer/vendor/bin/sws-caravan codeception /var/www/html --extension-dir=/var/www/test
-    - store_test_results:
-        path: /var/www/html/artifacts/behat
-    - store_artifacts:
-        path: /var/www/html/artifacts
-
 d9_codeception: &d9_codeception
   <<: *defaults
   steps:
@@ -80,8 +65,6 @@ jobs:
     <<: *code_coverage
   run-back-to-dev:
     <<: *back_to_dev
-  run-d8-codeception:
-    <<: *d8_codeception
   run-d9-codeception:
     <<: *d9_codeception
 
@@ -101,7 +84,6 @@ workflows:
   tests:
     jobs:
       - run-coverage
-      - run-d8-codeception
       - run-d9-codeception
   # Re-test every sunday in case this code becomes stale.
   sundays:
