@@ -5,6 +5,7 @@ namespace Drupal\stanford_ssp\Form;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Password\PasswordGeneratorInterface;
 use Drupal\externalauth\AuthmapInterface;
 use Drupal\user\Entity\User;
 use Drupal\Component\Utility\EmailValidatorInterface;
@@ -27,9 +28,16 @@ class AddUserForm extends FormBase {
   /**
    * Email Validator service.
    *
-   * @var \Egulias\EmailValidator\EmailValidatorInterface
+   * @var \Drupal\Component\Utility\EmailValidatorInterface
    */
   protected $emailValidator;
+
+  /**
+   * Core password generator service.
+   *
+   * @var \Drupal\Core\Password\PasswordGeneratorInterface
+   */
+  protected $passwordGenerator;
 
   /**
    * {@inheritdoc}
@@ -37,16 +45,18 @@ class AddUserForm extends FormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('externalauth.authmap'),
-      $container->get('email.validator')
+      $container->get('email.validator'),
+      $container->get('password_generator')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(AuthmapInterface $authmap, EmailValidatorInterface $email_validator) {
+  public function __construct(AuthmapInterface $authmap, EmailValidatorInterface $email_validator, PasswordGeneratorInterface $password_generator) {
     $this->authmap = $authmap;
     $this->emailValidator = $email_validator;
+    $this->passwordGenerator = $password_generator;
   }
 
   /**
@@ -170,7 +180,7 @@ class AddUserForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $new_user = User::create([
       'name' => $form_state->getValue('name'),
-      'pass' => $form_state->getValue('pass', user_password()),
+      'pass' => $form_state->getValue('pass', $this->passwordGenerator->generate()),
       'mail' => $form_state->getValue('email'),
       'roles' => array_values($form_state->getValue('roles')),
       'status' => 1,

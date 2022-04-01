@@ -48,7 +48,7 @@ class AddUserFormTest extends KernelTestBase {
     }
     $this->existingUser = User::create([
       'name' => $this->randomMachineName(),
-      'pass' => user_password(),
+      'pass' => \Drupal::service('password_generator')->generate(),
       'mail' => $this->randomMachineName() . '@' . $this->randomMachineName() . '.com',
     ]);
     $this->existingUser->save();
