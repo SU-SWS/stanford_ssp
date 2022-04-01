@@ -1,22 +1,26 @@
 {
-  "name": "su-sws/stanford_ssp",
-  "description": "A Drupal Authentication Module.",
-  "type": "drupal-custom-module",
-  "license": "GPL-2.0-or-later",
-  "minimum-stability": "dev",
-  "require": {
-    "php": ">=7.0.0",
-    "composer/installers": "^1.2",
-    "drupal/simplesamlphp_auth": "~3.1"
-  },
-  "require-dev": {
-    "su-sws/drupal-patches": "^8.0"
-  },
-  "extra": {
-    "drush": {
-      "services": {
-        "drush.services.yml": "^9"
-      }
+    "name": "su-sws/stanford_ssp",
+    "description": "A Drupal Authentication Module.",
+    "type": "drupal-custom-module",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.0.0",
+        "composer/installers": "^1.2",
+        "drupal/simplesamlphp_auth": "^3.1",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "su-sws/drupal-patches": "^8.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "drush": {
+            "services": {
+                "drush.services.yml": "^9"
+            }
+        }
     }
-  }
 }

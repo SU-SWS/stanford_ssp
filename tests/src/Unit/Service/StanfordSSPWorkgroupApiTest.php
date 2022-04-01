@@ -83,7 +83,7 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
     $guzzle_response->method('getStatusCode')->willReturn(200);
 
     $body = [];
-    
+
     switch ($options['query']['id']) {
       case 'uit:sws':
         $body = [
@@ -99,7 +99,6 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
 
       case 'bar:foo':
         throw new ClientException('It broke', $request, $guzzle_response);
-        break;
     }
     $guzzle_response->method('getBody')->willReturn(json_encode($body));
     return $guzzle_response;
