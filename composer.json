@@ -6,12 +6,10 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=7.0.0",
+        "ext-json": "*",
         "composer/installers": "^1.2",
         "drupal/simplesamlphp_auth": "^3.1",
-        "ext-json": "*"
-    },
-    "require-dev": {
-        "su-sws/drupal-patches": "^8.0"
+        "su-sws/drupal-patches": "dev-main"
     },
     "config": {
         "sort-packages": true
