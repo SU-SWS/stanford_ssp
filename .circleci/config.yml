@@ -23,7 +23,7 @@ code_coverage: &code_coverage
     - run:
         name: Run PHP Unit Coverage Tests
         command: |
-          composer global require SU-SWS/stanford-caravan:dev-8.x-2.x
+          composer global require su-sws/stanford-caravan:dev-8.x-2.x
           ~/.composer/vendor/bin/sws-caravan phpunit /var/www/html --extension-dir=/var/www/test --with-coverage
     - save_cache:
         key: dependencies-v1-{{ epoch }}
@@ -41,7 +41,7 @@ back_to_dev: &back_to_dev
     - run:
         name: Back to dev
         command: |
-          composer global require SU-SWS/stanford-caravan:dev-8.x-2.x
+          composer global require su-sws/stanford-caravan:dev-8.x-2.x
           ~/.composer/vendor/bin/sws-caravan back-to-dev ${CIRCLE_TAG} ${CIRCLE_WORKING_DIRECTORY}
 
 d9_codeception: &d9_codeception
@@ -52,7 +52,7 @@ d9_codeception: &d9_codeception
     - run:
         name: Run Codeception Tests
         command: |
-          composer global require SU-SWS/stanford-caravan:dev-8.x-2.x
+          composer global require su-sws/stanford-caravan:dev-8.x-2.x
           ~/.composer/vendor/bin/sws-caravan codeception /var/www/html --extension-dir=/var/www/test
     - store_test_results:
         path: /var/www/html/artifacts/behat
