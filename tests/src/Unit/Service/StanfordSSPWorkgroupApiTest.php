@@ -75,6 +75,7 @@ class StanfordSSPWorkgroupApiTest extends UnitTestCase {
   public function guzzleRequestCallback($method, $url, $options) {
     $request = $this->createMock(RequestInterface::class);
     $guzzle_response = $this->createMock(ResponseInterface::class);
+    $guzzle_response->method('getStatusCode')->willReturn(500);
 
     if ($this->throwGuzzleException) {
       throw new ClientException('It broke', $request, $guzzle_response);
