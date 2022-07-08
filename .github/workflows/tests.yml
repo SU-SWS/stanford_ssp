@@ -1,0 +1,59 @@
+name: PHPUnit and Acceptance Tests
+on: [push]
+jobs:
+  phpunit:
+    name: PHPUnit Coverage Tests
+    runs-on: ubuntu-latest
+    container:
+      image: pookmish/drupal8ci:php8
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_DATABASE: drupal
+          MYSQL_USER: drupal
+          MYSQL_PASSWORD: drupal
+          MYSQL_ROOT_PASSWORD: drupal
+        ports:
+          - 33306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: project
+      - name: Build project
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+        run: |
+          composer global require su-sws/stanford-caravan:dev-8.x-2.x
+          ~/.composer/vendor/bin/sws-caravan phpunit /var/www/html --extension-dir=$GITHUB_WORKSPACE/project --with-coverage
+
+  acceptance:
+    name: Codeception Acceptance Tests
+    runs-on: ubuntu-latest
+    env:
+      DRUPAL_DATABASE_NAME: drupal
+      DRUPAL_DATABASE_USERNAME: drupal
+      DRUPAL_DATABASE_PASSWORD: drupal
+      DRUPAL_DATABASE_HOST: mysql
+    container:
+      image: pookmish/drupal8ci:php8
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_DATABASE: drupal
+          MYSQL_USER: drupal
+          MYSQL_PASSWORD: drupal
+          MYSQL_ROOT_PASSWORD: drupal
+        ports:
+          - 33306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: project
+      - name: Run tests
+        run: |
+          composer global require su-sws/stanford-caravan:dev-8.x-2.x
+          ~/.composer/vendor/bin/sws-caravan codeception /var/www/html --extension-dir=$GITHUB_WORKSPACE/project --suites=acceptance

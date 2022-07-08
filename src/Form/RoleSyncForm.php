@@ -10,6 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\simplesamlphp_auth\Form\SyncingSettingsForm;
 use Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth;
 use Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface;
+use Drupal\user\RoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -97,6 +98,8 @@ class RoleSyncForm extends SyncingSettingsForm {
       '#title' => $this->t('Add Role'),
       '#options' => user_role_names(TRUE),
     ];
+    unset($form['user_info']['role_population']['add']['role_id']['#options'][RoleInterface::AUTHENTICATED_ID]);
+    unset($form['user_info']['role_population']['add']['role_id']['#options'][RoleInterface::ANONYMOUS_ID]);
 
     $form['user_info']['role_population']['add']['attribute'] = [
       '#type' => 'textfield',

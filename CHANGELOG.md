@@ -1,6 +1,17 @@
 # Stanford SSP
 
 
+8.2.5
+--------------------------------------------------------------------------------
+_Release Date: 2022-07-08_
+
+- Adjust test to eliminate deprecation message
+- fixed composer namespace to lowercase
+- Dont allow role mapping to authenticated role
+- Replace deprecated functions (#128)
+- Removed D8 Tests
+
+
 8.x-2.4
 --------------------------------------------------------------------------------
 _Release Date: 2021-12-08_

@@ -40,7 +40,7 @@ class SamlLoginBlockTest extends UnitTestCase {
    * Test configuration and form methods.
    */
   public function testBlock() {
-    $this->assertArrayEquals(['link_text' => 'SUNetID Login'], $this->block->defaultConfiguration());
+    $this->assertEquals(['link_text' => 'SUNetID Login'], $this->block->defaultConfiguration());
     $form_state = new FormState();
     $form = $this->block->blockForm([], $form_state);
     $this->assertCount(1, $form);
