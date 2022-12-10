@@ -1,6 +1,8 @@
 saml_attribute: eduPersonEntitlement
 use_workgroup_api: false
 hide_local_login: true
+local_login_fieldset_label: 'Drupal Login'
+local_login_fieldset_open: false
 workgroup_api_cert: ''
 workgroup_api_key: ''
 restriction: all

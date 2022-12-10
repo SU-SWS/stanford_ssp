@@ -68,8 +68,8 @@ function stanford_ssp_form_user_login_form_alter(&$form, FormStateInterface $for
     $form['simplesamlphp_auth_login_link']['#weight'] = -99;
     $form['manual'] = [
       '#type' => 'details',
-      '#title' => t('Drupal Login'),
-      '#open' => FALSE,
+      '#title' => $config->get('local_login_fieldset_label') ?: t('Drupal Login'),
+      '#open' => $config->get('local_login_fieldset_open') ?: FALSE,
     ];
     $form['manual']['name'] = $form['name'];
     $form['manual']['pass'] = $form['pass'];
@@ -96,7 +96,7 @@ function stanford_ssp_simplesamlphp_auth_allow_login($attributes) {
   $auth_manager = \Drupal::service('simplesamlphp_auth.manager');
   $authname = $auth_manager->getAuthname();
 
-  // Check if the user name is allowed.
+  // Check if the username is allowed.
   if (in_array($authname, $config->get('allowed.users'))) {
     return TRUE;
   }
@@ -126,17 +126,63 @@ function stanford_ssp_simplesamlphp_auth_allow_login($attributes) {
   return FALSE;
 }
 
+function mikes(){
+//  /** @var \Drupal\user\UserStorageInterface $user_storage */
+//  $user_storage = \Drupal::service('entity_type.manager')
+//    ->getStorage('user');
+//  dpm($user_storage->loadByProperties(['mail' => ['foobar@gmail.com', 'mike.decker@stanford.edu']]));
+  $a = [
+    'foobar@stnaford.edu',
+  ];
+  $b = [
+    'mike.decker@stanford.edu',
+  ];
+  dpm([...$a, ...$b]);
+}
+
+/**
+ * Default attribute values.
+ *
+ * @return array[]
+ *   Default keyed values.
+ */
+function _stanford_ssp_default_attributes(){
+  return [
+    'displayName' => [],
+    'eduPersonPrincipalName' => [],
+    'mail' => [],
+  ];
+}
+
 /**
  * Implements hook_simplesamlphp_auth_existing_user().
  */
 function stanford_ssp_simplesamlphp_auth_existing_user($attributes) {
-  if (!empty($attributes['eduPersonPrincipalName'])) {
-    $saml_mail = $attributes['eduPersonPrincipalName'];
-    $saml_mail = is_array($saml_mail) ? reset($saml_mail) : $saml_mail;
-    $existing_users = \Drupal::service('entity_type.manager')
-      ->getStorage('user')
-      ->loadByProperties(['mail' => $saml_mail]);
-    return is_array($existing_users) && !empty($existing_users) ? reset($existing_users) : FALSE;
+  /** @var \Drupal\user\UserStorageInterface $user_storage */
+  $user_storage = \Drupal::service('entity_type.manager')
+    ->getStorage('user');
+  $attributes = $attributes + _stanford_ssp_default_attributes();
+
+  $email_values = array_filter([
+    ...$attributes['eduPersonPrincipalName'],
+    ...$attributes['mail'],
+  ]);
+  // Search for an existing email that matches the `eduPersonPrincipalName`
+  // email value.
+  if (count($email_values)) {
+    $existing_users = $user_storage->loadByProperties(['mail' => $email_values]);
+    if ($existing_users) {
+      return reset($existing_users);
+    }
+  }
+
+  // Look at the authmap table. See if a user was previously created using the
+  // display name. This is rare, but it happens on occasion. If this succeeds,
+  // the `authname` will be converted to the sunetID properly for future logins.
+  /** @var \Drupal\externalauth\AuthmapInterface $authmap */
+  $authmap = \Drupal::service('externalauth.authmap');
+  if ($uid = $authmap->getUid(reset($attributes['displayName']), 'simplesamlphp_auth')) {
+    return $user_storage->load($uid);
   }
   return FALSE;
 }
@@ -158,7 +204,7 @@ function stanford_ssp_simplesamlphp_auth_user_attributes(UserInterface $account,
     // Only set the display name if configured to sync the username every time
     // or if the display name is empty.
     if ($always_sync_name || !$account->get('su_display_name')->count()) {
-      $account->set('su_display_name', $attributes['displayName']);
+      $account->set('su_display_name', reset($attributes['displayName']));
       return $account;
     }
   }
