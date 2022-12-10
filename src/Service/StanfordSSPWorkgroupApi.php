@@ -150,7 +150,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   /**
    * {@inheritdoc}
    */
-  public function userInGroup(array $workgroup, string $name): bool {
+  public function userInGroup(string $workgroup, string $name): bool {
     return in_array($workgroup, $this->getAllUserWorkgroups($name));
   }
 
