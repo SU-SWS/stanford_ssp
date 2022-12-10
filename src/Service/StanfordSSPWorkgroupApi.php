@@ -205,7 +205,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     catch (GuzzleException $e) {
       $this->logger->error('Unable to connect to workgroup api. @message', ['@message' => $e->getMessage()]);
     }
-    return FALSE;
+    return NULL;
   }
 
   /**
