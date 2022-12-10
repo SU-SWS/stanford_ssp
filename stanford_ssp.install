@@ -69,7 +69,7 @@ function stanford_ssp_update_8001() {
 
   if ($set_form) {
     EntityFormDisplay::load('user.user.default')
-      ->set('su_display_name')->save();
+      ->setComponent('su_display_name')->save();
 
     EntityViewDisplay::load('user.user.default')
       ->setComponent('su_display_name')->save();

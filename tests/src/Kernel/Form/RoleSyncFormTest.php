@@ -205,7 +205,7 @@ class RoleSyncFormTest extends KernelTestBase {
    * @param bool $successful_connection
    *   If the connection should be successful.
    */
-  protected function setWorkgroupApiMock($successful_connection = FALSE) {
+  protected function setWorkgroupApiMock(bool $successful_connection = FALSE) {
     $workgroup_api = $this->createMock(StanfordSSPWorkgroupApiInterface::class);
     $workgroup_api->method('connectionSuccessful')
       ->willReturn($successful_connection);

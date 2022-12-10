@@ -84,7 +84,7 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
       $url = Url::fromRoute('user.login', [], ['query' => ['destination' => $destination]]);
       if ($this->samlConfig->get('activate') && $this->stanfordConfig->get('hide_local_login')) {
         global $base_url;
-        $destination = "$base_url/$destination";;
+        $destination = "$base_url/$destination";
         $url = Url::fromRoute('simplesamlphp_auth.saml_login', [], ['query' => ['ReturnTo' => $destination]]);
       }
 
