@@ -126,20 +126,6 @@ function stanford_ssp_simplesamlphp_auth_allow_login($attributes) {
   return FALSE;
 }
 
-function mikes(){
-//  /** @var \Drupal\user\UserStorageInterface $user_storage */
-//  $user_storage = \Drupal::service('entity_type.manager')
-//    ->getStorage('user');
-//  dpm($user_storage->loadByProperties(['mail' => ['foobar@gmail.com', 'mike.decker@stanford.edu']]));
-  $a = [
-    'foobar@stnaford.edu',
-  ];
-  $b = [
-    'mike.decker@stanford.edu',
-  ];
-  dpm([...$a, ...$b]);
-}
-
 /**
  * Default attribute values.
  *
