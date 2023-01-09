@@ -77,50 +77,51 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     }
   }
 
+
   /**
    * {@inheritdoc}
    */
-  public function setCert($cert_path) {
+  public function setCert(string $cert_path): void {
     $this->cert = $cert_path;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setKey($key_path) {
+  public function setKey(string $key_path): void {
     $this->key = $key_path;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getCert() {
+  public function getCert(): ?string {
     return $this->cert;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getKey() {
+  public function getKey(): ?string {
     return $this->key;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function connectionSuccessful() {
+  public function connectionSuccessful(): bool {
     return !empty($this->callApi('uit:sws'));
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getRolesFromAuthname($authname) {
+  public function getRolesFromAuthname($authname): array {
     $roles = [];
     if (!$this->cert || !$this->key) {
       return $roles;
     }
-    $config = $this->configFactory->get('simplesamlphp_auth.settings');;
+    $config = $this->configFactory->get('simplesamlphp_auth.settings');
     $role_population = array_filter(explode('|', $config->get('role.population') ?: ''));
     $workgroup_mappings = [];
 
@@ -149,28 +150,28 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   /**
    * {@inheritdoc}
    */
-  public function userInGroup($workgroup, $name) {
+  public function userInGroup(string $workgroup, string $name): bool {
     return in_array($workgroup, $this->getAllUserWorkgroups($name));
   }
 
   /**
    * {@inheritdoc}
    */
-  public function userInAnyGroup(array $workgroups, $name) {
+  public function userInAnyGroup(array $workgroups, string $name): bool {
     return !empty(array_intersect($workgroups, $this->getAllUserWorkgroups($name)));
   }
 
   /**
    * {@inheritdoc}
    */
-  public function userInAllGroups(array $workgroups, $name) {
+  public function userInAllGroups(array $workgroups, string $name): bool {
     return count(array_intersect($workgroups, $this->getAllUserWorkgroups($name))) == count($workgroups);
   }
 
   /**
    * {@inheritDoc}
    */
-  public function isWorkgroupValid($workgroup) {
+  public function isWorkgroupValid(string $workgroup): bool {
     return !empty($this->callApi($workgroup));
   }
 
@@ -182,10 +183,10 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    * @param string|null $sunet
    *   User sunetid.
    *
-   * @return bool|\Psr\Http\Message\ResponseInterface
+   * @return bool|array
    *   API response or false if fails.
    */
-  protected function callApi($workgroup = NULL, $sunet = NULL) {
+  protected function callApi(string $workgroup = NULL, string $sunet = NULL): ?array {
     $options = [
       'cert' => $this->getCert(),
       'ssl_key' => $this->getKey(),
@@ -204,7 +205,7 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
     catch (GuzzleException $e) {
       $this->logger->error('Unable to connect to workgroup api. @message', ['@message' => $e->getMessage()]);
     }
-    return FALSE;
+    return NULL;
   }
 
   /**
@@ -213,10 +214,10 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
    * @param string $authname
    *   Sunet id.
    *
-   * @return array
+   * @return string[]
    *   Array of the user's workgroups.
    */
-  protected function getAllUserWorkgroups($authname) {
+  protected function getAllUserWorkgroups(string $authname): array {
     $workgroup_names = [];
     if ($user_data = $this->callApi(NULL, $authname)) {
       foreach ($user_data['results'] as $user_member) {

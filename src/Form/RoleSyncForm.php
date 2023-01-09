@@ -124,7 +124,7 @@ class RoleSyncForm extends SyncingSettingsForm {
       ],
     ];
 
-    foreach ($form_state->get('mappings', []) as $role_mapping) {
+    foreach ($form_state->get('mappings') as $role_mapping) {
       $form['user_info']['role_population'][$role_mapping] = $this->buildRoleRow($role_mapping);
     }
 
@@ -209,7 +209,7 @@ class RoleSyncForm extends SyncingSettingsForm {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function buildRoleRow($role_mapping_string) {
+  protected function buildRoleRow(string $role_mapping_string): array {
     [$role_id, $comparison] = explode(':', $role_mapping_string, 2);
 
     $exploded_comparison = explode(',', $comparison, 3);
@@ -287,7 +287,7 @@ class RoleSyncForm extends SyncingSettingsForm {
    *   Current form state.
    */
   public function removeMappingCallback(array $form, FormStateInterface $form_state) {
-    $mappings = $form_state->get('mappings', []);
+    $mappings = $form_state->get('mappings');
     unset($mappings[$form_state->getTriggeringElement()['#mapping']]);
     $form_state->set('mappings', $mappings);
     $form_state->setRebuild();

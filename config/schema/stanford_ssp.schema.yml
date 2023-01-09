@@ -12,6 +12,12 @@ stanford_ssp.settings:
     hide_local_login:
       type: boolean
       label: 'Hide core local login form on user page'
+    local_login_fieldset_label:
+      type: string
+      label: 'Local login fieldset label'
+    local_login_fieldset_open:
+      type: boolean
+      label: Default open state for local login fieldset
     use_workgroup_api:
       type: boolean
       label: 'Use workgroup mapping instead of saml attributes'
