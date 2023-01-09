@@ -71,7 +71,7 @@ class StanfordSspCommands extends DrushCommands {
    * @command saml:entitlement-role
    * @aliases ssp-ser,saml-entitlement-role
    */
-  public function entitlementRole($entitlement, $role_id) {
+  public function entitlementRole(string $entitlement, string $role_id) {
     $role_id = Html::escape($role_id);
     $existing_roles = user_roles(TRUE);
     if (!isset($existing_roles[$role_id])) {
@@ -120,7 +120,7 @@ class StanfordSspCommands extends DrushCommands {
    * @command saml:add-user
    * @aliases ssp-au,saml-add-user
    */
-  public function addUser($sunetid, array $options = [
+  public function addUser(string $sunetid, array $options = [
     'name' => NULL,
     'email' => NULL,
     'roles' => NULL,

@@ -15,7 +15,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * @param string $cert_path
    *   Path to file.
    */
-  public function setCert($cert_path);
+  public function setCert(string $cert_path): void;
 
   /**
    * Get the current cert path.
@@ -23,7 +23,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * @return string|null
    *   Absolute cert path.
    */
-  public function getCert();
+  public function getCert(): ?string;
 
   /**
    * Set the key file path.
@@ -31,7 +31,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * @param string $key_path
    *   Path to file.
    */
-  public function setKey($key_path);
+  public function setKey(string $key_path): void;
 
   /**
    * Get the current cert key path.
@@ -39,7 +39,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * @return string|null
    *   Absolute key path.
    */
-  public function getKey();
+  public function getKey(): ?string;
 
   /**
    * Check if a given cert and key will connect to the workgroup api.
@@ -47,7 +47,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * @return bool
    *   If the connection was successful.
    */
-  public function connectionSuccessful();
+  public function connectionSuccessful(): bool;
 
   /**
    * Get an array of roles for the user based on the saml role mapping.
@@ -55,10 +55,10 @@ interface StanfordSSPWorkgroupApiInterface {
    * @param string $authname
    *   User sunetid.
    *
-   * @return array
+   * @return string[]
    *   Array of role ids.
    */
-  public function getRolesFromAuthname($authname);
+  public function getRolesFromAuthname($authname): array;
 
   /**
    * Check if the given name is part of the workgroup provided.
@@ -71,7 +71,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * @return bool
    *   If the user is part of the group.
    */
-  public function userInGroup($workgroup, $name);
+  public function userInGroup(string $workgroup, string $name): bool;
 
   /**
    * Check if the given name is part of any workgroup provided.
@@ -84,7 +84,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * @return bool
    *   If the user is part of any group.
    */
-  public function userInAnyGroup(array $workgroups, $name);
+  public function userInAnyGroup(array $workgroups, string $name): bool;
 
   /**
    * Check if the given name is part of all workgroups provided.
@@ -97,7 +97,7 @@ interface StanfordSSPWorkgroupApiInterface {
    * @return bool
    *   If the user is part of all groups.
    */
-  public function userInAllGroups(array $workgroups, $name);
+  public function userInAllGroups(array $workgroups, string $name): bool;
 
   /**
    * Check if the workgroup is valid and is public.
@@ -105,9 +105,9 @@ interface StanfordSSPWorkgroupApiInterface {
    * @param string $workgroup
    *   Workgroup name to test.
    *
-   * @return bool|null
-   *   True if the given workgroup is valid, null if unknown.
+   * @return bool
+   *   True if the given workgroup is valid, false if unknown.
    */
-  public function isWorkgroupValid($workgroup);
+  public function isWorkgroupValid(string $workgroup): bool;
 
 }

@@ -61,7 +61,7 @@ class StanfordSSPDrupalAuthTest extends UnitTestCase {
    * @return \Drupal\stanford_ssp\Service\StanfordSSPDrupalAuth
    *   Constructed service.
    */
-  protected function getService($return_account = TRUE, $role_setting = 1, $return_attributes = TRUE) {
+  protected function getService(bool $return_account = TRUE, int $role_setting = 1, bool $return_attributes = TRUE): StanfordSSPDrupalAuth {
     $this->removeRole = $this->randomMachineName();
     $this->addRole = $this->randomMachineName();
 

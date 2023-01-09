@@ -7,7 +7,6 @@ use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApi;
 use Drupal\Tests\UnitTestCase;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;

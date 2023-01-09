@@ -3,16 +3,27 @@ name: Release
 
 on:
   pull_request:
-    types: closed
+    types: [closed]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged
     steps:
       - name: Tag
+        id: tag
         uses: K-Phoen/semver-release-action@master
         with:
-          release_branch: master
+          release_branch: main
           tag_format: "%major%.%minor%.%patch%"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+        with:
+          ref: 'main'
+          fetch-depth: 0
+      - name: Back to Dev
+        if: ${{ steps.tag.outputs.tag }}
+        run: |
+          composer global require su-sws/stanford-caravan:dev-8.x-2.x
+          ~/.composer/vendor/bin/sws-caravan back-to-dev ${{ steps.tag.outputs.tag }} $GITHUB_WORKSPACE main

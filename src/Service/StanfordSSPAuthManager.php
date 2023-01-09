@@ -55,6 +55,7 @@ class StanfordSSPAuthManager extends SimplesamlphpAuthManager {
         return $this->getAuthname() . '@stanford.edu';
       }
     }
+    return FALSE;
   }
 
 }
