@@ -6,3 +6,4 @@ version: 8.2.7-dev
 package: Stanford
 dependencies:
   - simplesamlphp_auth:simplesamlphp_auth
+  - drupal/path_alias

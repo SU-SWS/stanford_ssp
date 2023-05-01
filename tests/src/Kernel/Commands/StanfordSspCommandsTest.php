@@ -25,6 +25,7 @@ class StanfordSspCommandsTest extends KernelTestBase {
     'externalauth',
     'user',
     'stanford_ssp_test',
+    'path_alias',
   ];
 
   /**

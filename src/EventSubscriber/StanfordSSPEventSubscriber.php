@@ -42,16 +42,16 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   Config factory service.
-   * @param \Drupal\Core\Session\AccountProxyInterface $user_account
+   * @param \Drupal\Core\Session\AccountProxyInterface $userAccount
    *   Current user object.
-   * @param \Drupal\Core\Path\PathMatcherInterface $path_matcher
+   * @param \Drupal\Core\Path\PathMatcherInterface $pathMatcher
    *   Path matcher service.
-   * @param \Drupal\Core\Path\CurrentPathStack $current_path
+   * @param \Drupal\Core\Path\CurrentPathStack $currentPath
    *   Current path service.
-   * @param \Drupal\path_alias\AliasManagerInterface $alias_manager
+   * @param \Drupal\path_alias\AliasManagerInterface $aliasManager
    *   Alias manager service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, protected AccountProxyInterface $user_account, protected PathMatcherInterface $path_matcher, protected CurrentPathStack $current_path, protected AliasManagerInterface $alias_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, protected AccountProxyInterface $userAccount, protected PathMatcherInterface $pathMatcher, protected CurrentPathStack $currentPath, protected AliasManagerInterface $aliasManager) {
     $this->samlConfig = $config_factory->get('simplesamlphp_auth.settings');
     $this->stanfordConfig = $config_factory->get('stanford_ssp.settings');
   }
@@ -115,6 +115,7 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
     }
     // Compare the lowercase path alias (if any) and internal path.
     $path = $this->currentPath->getPath($request);
+
     // Do not trim a trailing slash if that is the complete path.
     $path = $path === '/' ? $path : rtrim($path, '/');
     $path_alias = mb_strtolower($this->aliasManager->getAliasByPath($path));

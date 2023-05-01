@@ -18,6 +18,7 @@ class LocalLoginFormTest extends KernelTestBase {
     'simplesamlphp_auth',
     'externalauth',
     'field',
+    'path_alias',
   ];
 
   /**
