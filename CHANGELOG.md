@@ -1,5 +1,11 @@
 # Stanford SSP
 
+8.3.0
+--------------------------------------------------------------------------------
+_Release Date: 2023-05-03_
+
+- Added ability to exclude specific path patterns from redirecting, such as JSON API Endpoints.
+
 8.2.6
 --------------------------------------------------------------------------------
 _Release Date: 2023-01-09_
