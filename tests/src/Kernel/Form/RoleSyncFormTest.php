@@ -33,6 +33,7 @@ class RoleSyncFormTest extends KernelTestBase {
     'stanford_ssp',
     'simplesamlphp_auth',
     'externalauth',
+    'path_alias',
   ];
 
   /**

@@ -52,3 +52,9 @@ stanford_ssp.settings:
           sequence:
             type: string
             label: 'Allowed User'
+    exclude_redirect:
+      type: sequence
+      label: 'Exclude Redirect'
+      sequence:
+        type: string
+        label: 'Exclude Redirect Path'
