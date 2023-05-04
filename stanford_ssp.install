@@ -114,3 +114,11 @@ function stanford_ssp_update_8200() {
   ];
   $config->set('allowed', $allowed)->save();
 }
+
+/**
+ * Update settings to exclude jsonapi paths from 403 redirect.
+ */
+function stanford_ssp_update_8201() {
+  $config = \Drupal::configFactory()->getEditable('stanford_ssp.settings');
+  $config->set('exclude_redirect', ['/jsonapi', '/jsonapi/*'])->save();
+}

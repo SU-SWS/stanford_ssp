@@ -20,6 +20,7 @@ class RouteSubscriberTest extends KernelTestBase {
     'simplesamlphp_auth',
     'stanford_ssp',
     'system',
+    'path_alias',
   ];
 
   /**

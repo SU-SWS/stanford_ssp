@@ -26,6 +26,7 @@ class AddUserFormTest extends KernelTestBase {
     'stanford_ssp',
     'simplesamlphp_auth',
     'externalauth',
+    'path_alias',
   ];
 
   /**
