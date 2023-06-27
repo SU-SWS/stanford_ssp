@@ -12,6 +12,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -61,8 +62,28 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents() {
     $events = [];
+    $events[KernelEvents::REQUEST][] = ['requestHandler'];
     $events[KernelEvents::RESPONSE][] = ['responseHandler'];
     return $events;
+  }
+
+  /**
+   * Redirect user create page if local login is disabled.
+   */
+  public function requestHandler(RequestEvent $event) {
+    $request = $event->getRequest();
+    try {
+      if (
+        $request->attributes->get('_route') == 'user.admin_create' &&
+        $this->stanfordConfig->get('hide_local_login')
+      ) {
+        $destination = Url::fromRoute('stanford_ssp.add_user')->toString();
+        $event->setResponse(new RedirectResponse($destination));
+      }
+    }
+    catch (\Throwable $e) {
+      // Safety catch to avoid errors.
+    }
   }
 
   /**
