@@ -8,22 +8,36 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions: write-all
     if: github.event.pull_request.merged
     steps:
-      - name: Tag
+      - name: Get Next Release
         id: tag
         uses: K-Phoen/semver-release-action@master
         with:
+          release_strategy: none
           release_branch: main
           tag_format: "%major%.%minor%.%patch%"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: echo 'Creating new release for ' ${{ steps.tag.outputs.tag }}
+      - name: Create Release
+        if: ${{ steps.tag.outputs.tag }}
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: ${{ steps.tag.outputs.tag }}
+          tag: ${{ steps.tag.outputs.tag }}
+          commit: ${{ github.sha }}
+          generateReleaseNotes: true
+          makeLatest: true
       - uses: actions/checkout@v3
         with:
-          ref: 'main'
+          ref: '9.x'
           fetch-depth: 0
       - name: Back to Dev
         if: ${{ steps.tag.outputs.tag }}
         run: |
-          composer global require su-sws/stanford-caravan:dev-8.x-2.x
-          ~/.composer/vendor/bin/sws-caravan back-to-dev ${{ steps.tag.outputs.tag }} $GITHUB_WORKSPACE main
+          composer global require su-sws/stanford-caravan:dev-8.x-3.x
+          ~/.composer/vendor/bin/sws-caravan back-to-dev ${{ steps.tag.outputs.tag }} ${{ github.workspace }} main
