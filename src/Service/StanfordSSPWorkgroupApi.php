@@ -176,6 +176,13 @@ class StanfordSSPWorkgroupApi implements StanfordSSPWorkgroupApiInterface {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function isSunetValid(string $sunet): bool {
+    return !!$this->callApi(null, $sunet);
+  }
+
+  /**
    * Call the workgroup api and get the response for the workgroup.
    *
    * @param string|null $workgroup

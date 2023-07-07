@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Password\PasswordGeneratorInterface;
 use Drupal\externalauth\AuthmapInterface;
+use Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface;
 use Drupal\user\Entity\User;
 use Drupal\Component\Utility\EmailValidatorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -77,6 +78,7 @@ class AddUserForm extends FormBase {
       '#title' => $this->t('SUNetID'),
       '#description' => $this->t('Enter the SUNetID of the user you wish to add.'),
       '#required' => TRUE,
+      '#element_validate' => [[static::class, 'validateSunetId']],
     ];
 
     $form['name'] = [
@@ -117,6 +119,29 @@ class AddUserForm extends FormBase {
       '#value' => $this->t('Add SUNetID User'),
     ];
     return $form;
+  }
+
+  /**
+   * SunetID input validation.
+   *
+   * @param array $element
+   *   Field element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   Submitted form state.
+   * @param array $complete_form
+   *   Complete form.
+   */
+  public static function validateSunetId(array &$element, FormStateInterface $form_state, array &$complete_form){
+    $value = $element['#value'];
+    if(!preg_match('/^[a-z0-9]*$/', $value)) {
+      $form_state->setError($element, t('Invalid SunetID'));
+    }
+
+    /** @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface $workgroup_api */
+    $workgroup_api = \Drupal::service('stanford_ssp.workgroup_api');
+    if ($workgroup_api->connectionSuccessful() && !$workgroup_api->isSunetValid($value)) {
+      $form_state->setError($element, t('Invalid SunetID'));
+    }
   }
 
   /**
