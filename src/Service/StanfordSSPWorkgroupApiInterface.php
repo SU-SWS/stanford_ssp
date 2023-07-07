@@ -110,4 +110,15 @@ interface StanfordSSPWorkgroupApiInterface {
    */
   public function isWorkgroupValid(string $workgroup): bool;
 
+  /**
+   * Check if the provided sunet exists.
+   *
+   * @param string $sunet
+   *   Sunet String to check.
+   *
+   * @return bool
+   *   If the user exists.
+   */
+  public function isSunetValid(string $sunet): bool;
+
 }
