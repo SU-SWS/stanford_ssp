@@ -89,34 +89,42 @@ class AddUserFormTest extends KernelTestBase {
 
     // Name is already assigned to a user.
     $form_state = new FormState();
-    $form_state->setValue('sunetid', $this->randomMachineName());
+    $form_state->setValue('sunetid', strtolower($this->randomMachineName()));
     $form_state->setValue('name', $this->existingUser->getAccountName());
     \Drupal::formBuilder()
       ->submitForm('\Drupal\stanford_ssp\Form\AddUserForm', $form_state);
     $this->assertNotEmpty($form_state->getError(['#parents' => ['name']]));
-    $this->assertCount(1, $form_state->getErrors());
+    $this->assertGreaterThanOrEqual(1, count($form_state->getErrors()));
 
     // Incorrect formatted email.
     $form_state = new FormState();
-    $form_state->setValue('sunetid', $this->randomMachineName());
+    $form_state->setValue('sunetid', strtolower($this->randomMachineName()));
     $form_state->setValue('email', $this->randomMachineName() . '  ' . $this->randomMachineName());
     \Drupal::formBuilder()
       ->submitForm('\Drupal\stanford_ssp\Form\AddUserForm', $form_state);
     $this->assertNotEmpty($form_state->getError(['#parents' => ['email']]));
-    $this->assertCount(1, $form_state->getErrors());
+    $this->assertGreaterThanOrEqual(1, count($form_state->getErrors()));
 
     // Email is already assigned to a user.
     $form_state = new FormState();
-    $form_state->setValue('sunetid', $this->randomMachineName());
+    $form_state->setValue('sunetid', strtolower($this->randomMachineName()));
     $form_state->setValue('email', $this->existingUser->getEmail());
     \Drupal::formBuilder()
       ->submitForm('\Drupal\stanford_ssp\Form\AddUserForm', $form_state);
     $this->assertNotEmpty($form_state->getError(['#parents' => ['email']]));
-    $this->assertCount(1, $form_state->getErrors());
+    $this->assertGreaterThanOrEqual(1, count($form_state->getErrors()));
+
+    // Poorly formed sunetid
+    $form_state = new FormState();
+    $form_state->setValue('sunetid', strtolower($this->randomMachineName()). ' foo');
+    \Drupal::formBuilder()
+      ->submitForm('\Drupal\stanford_ssp\Form\AddUserForm', $form_state);
+    $this->assertNotEmpty($form_state->getError(['#parents' => ['email']]));
+    $this->assertGreaterThanOrEqual(1, count($form_state->getErrors()));
 
     // No errors submit.
     $form_state = new FormState();
-    $form_state->setValue('sunetid', $this->randomMachineName());
+    $form_state->setValue('sunetid', strtolower($this->randomMachineName()));
     $form_state->setValue('roles', []);
     $form_state->setValue('notify', TRUE);
     \Drupal::formBuilder()

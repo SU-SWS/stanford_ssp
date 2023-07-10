@@ -133,8 +133,9 @@ class AddUserForm extends FormBase {
    */
   public static function validateSunetId(array &$element, FormStateInterface $form_state, array &$complete_form){
     $value = $element['#value'];
-    if(!preg_match('/^[a-z0-9]*$/', $value)) {
+    if (!preg_match('/^[a-z0-9]*$/', $value)) {
       $form_state->setError($element, t('Invalid SunetID'));
+      return;
     }
 
     /** @var \Drupal\stanford_ssp\Service\StanfordSSPWorkgroupApiInterface $workgroup_api */
