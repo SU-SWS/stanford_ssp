@@ -77,7 +77,7 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
         $request->attributes->get('_route') == 'user.admin_create' &&
         $this->stanfordConfig->get('hide_local_login')
       ) {
-        $destination = Url::fromRoute('stanford_ssp.add_user')->toString();
+        $destination = Url::fromRoute('stanford_ssp.create_user')->toString();
         $event->setResponse(new RedirectResponse($destination));
       }
     }
