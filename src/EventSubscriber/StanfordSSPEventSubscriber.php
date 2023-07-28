@@ -60,7 +60,7 @@ class StanfordSSPEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events = [];
     $events[KernelEvents::REQUEST][] = ['requestHandler'];
     $events[KernelEvents::RESPONSE][] = ['responseHandler'];
