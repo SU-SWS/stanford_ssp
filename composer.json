@@ -8,7 +8,8 @@
         "php": ">=8.1",
         "ext-json": "*",
         "drupal/core": "^9.4 || ^10.0",
-        "drupal/simplesamlphp_auth": "^3.1"
+        "drupal/simplesamlphp_auth": "^3.1",
+        "simplesamlphp/simplesamlphp": " ^1.19"
     },
     "require-dev": {
         "su-sws/drupal-patches": "^8.0"
